@@ -1,1 +1,40 @@
-
+{
+  "accounts": {
+    "bank": [
+      {
+        "id": "checking",
+        "name": "Checking"
+      },
+      {
+        "id": "savings",
+        "name": "Savings"
+      },
+      {
+        "id": "usbank_ef",
+        "name": "US Bank EF"
+      },
+      {
+        "id": "ally_ef",
+        "name": "Ally Bank EF"
+      }
+    ],
+    "credit": [
+      {
+        "id": "usbank_cc",
+        "name": "US Bank"
+      },
+      {
+        "id": "target_cc",
+        "name": "Target"
+      },
+      {
+        "id": "scheels_cc",
+        "name": "Scheels"
+      }
+    ]
+  },
+  "months": {},
+  "recurring": [],
+  "bills": [],
+  "savedAt": "2026-09-06T01:16:57.009Z"
+}
