@@ -335,7 +335,8 @@
       "department": "CVRU",
       "role": "ACRC",
       "basePay": 24.07,
-      "myHourly": 24.72
+      "myHourly": 24.72,
+      "compRatio": "8"
     },
     {
       "id": "n2tq861",
