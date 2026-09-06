@@ -33,8 +33,21 @@
       }
     ]
   },
-  "months": {},
+  "months": {
+    "2026-09": {
+      "balances": {
+        "checking": 0,
+        "savings": 0,
+        "usbank_ef": 0,
+        "ally_ef": 0,
+        "usbank_cc": 0,
+        "target_cc": 0,
+        "scheels_cc": 0
+      },
+      "notes": ""
+    }
+  },
   "recurring": [],
   "bills": [],
-  "savedAt": "2026-09-06T01:16:57.009Z"
+  "savedAt": "2026-09-06T01:20:21.161Z"
 }
