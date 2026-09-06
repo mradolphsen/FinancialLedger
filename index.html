@@ -304,13 +304,10 @@ footer a{ color:var(--ink-faint); }
       <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
     </div>
     <div class="block-body">
-      <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
-        <button class="btn primary" id="addMonthBtn">+ Add month</button>
-      </div>
-      <div class="table-scroll">
+      <div class="table-scroll" style="margin-top:12px;">
         <table class="data" id="monthTable"></table>
       </div>
-      <p class="hint">Net worth = total bank account balances minus total credit card balances for that month. The change column compares to the prior month row.</p>
+      <p class="hint">Net worth = total bank account balances minus total credit card balances for that month. Months are automatically added as time progresses.</p>
     </div>
   </section>
 
@@ -456,7 +453,6 @@ const DEFAULT_STATE = {
     ]
   },
   months:{},
-  monthOrder:[],
   recurring:[],
   bills:[]
 };
@@ -494,6 +490,20 @@ function markDirty(){
   if(ghConfigured()){
     clearTimeout(saveTimer);
     saveTimer = setTimeout(saveToGitHub, 1500);
+  }
+}
+
+/* ============================================================
+   AUTOMATIC MONTH MANAGEMENT
+   ============================================================ */
+
+function ensureCurrentMonthExists(){
+  const now = new Date();
+  const curKey = now.getFullYear() + "-" + String(now.getMonth()+1).padStart(2,"0");
+
+  if(!state.months[curKey]){
+    state.months[curKey] = { balances: {}, notes: "" };
+    markDirty();
   }
 }
 
@@ -548,7 +558,7 @@ function renderHero(){
 
   if(months.length === 0){
     hero.innerHTML = `
-      <div class="stat"><div class="label">Current net worth</div><div class="value">—</div><div class="foot">Add a month to get started</div></div>
+      <div class="stat"><div class="label">Current net worth</div><div class="value">—</div></div>
       <div class="stat"><div class="label">Change vs last month</div><div class="value">—</div></div>
       <div class="stat"><div class="label">Total credit card debt</div><div class="value">—</div></div>
     `;
@@ -603,7 +613,6 @@ function renderMonthTable(){
       <th rowspan="2" class="col-end">Net Worth</th>
       <th rowspan="2" class="col-end">Change</th>
       <th rowspan="2" class="notes-col">Notes</th>
-      <th rowspan="2"></th>
     </tr>
     <tr>
       ${bankAccts.map((a,i) => `<th class="${i === bankAccts.length-1 ? "col-end" : ""}">${escapeHtml(a.name)}</th>`).join("")}
@@ -612,8 +621,8 @@ function renderMonthTable(){
 
   let rows = "";
   if(months.length === 0){
-    const colCount = 5 + bankAccts.length + creditAccts.length;
-    rows = `<tr class="empty-row"><td colspan="${colCount}">No months added yet. Click "+ Add month" to start tracking.</td></tr>`;
+    const colCount = 4 + bankAccts.length + creditAccts.length;
+    rows = `<tr class="empty-row"><td colspan="${colCount}">No months tracked yet.</td></tr>`;
   }else{
     const thisMonth = currentMonthKey();
     months.forEach((key, idx) => {
@@ -631,7 +640,6 @@ function renderMonthTable(){
         <td class="total-cell col-end">${fmtMoney(totals.net)}</td>
         <td class="diff-cell col-end ${diffClass}">${diffText}</td>
         <td class="notes-col"><textarea data-kind="notes" data-month="${key}" placeholder="Notes…">${escapeHtml(entry.notes || "")}</textarea></td>
-        <td class="actions-cell"><button class="btn small danger" data-action="delete-month" data-month="${key}" title="Delete month">✕</button></td>
       </tr>`;
     });
   }
@@ -747,6 +755,7 @@ function renderAccountLists(){
    ============================================================ */
 
 function render(){
+  ensureCurrentMonthExists();
   document.getElementById("subline").textContent =
     sortedMonths().length
       ? `Tracking ${sortedMonths().length} month${sortedMonths().length === 1 ? "" : "s"} · last updated locally`
@@ -914,17 +923,6 @@ document.addEventListener("DOMContentLoaded", () => {
     modal.classList.remove("open");
   });
 
-  // Add Month Button
-  document.getElementById("addMonthBtn").addEventListener("click", () => {
-    const key = prompt("Enter year and month (YYYY-MM):", currentMonthKey());
-    if(!key || !/^\d{4}-\d{2}$/.test(key)) return;
-    if(!state.months[key]){
-      state.months[key] = { balances: {}, notes: "" };
-      markDirty();
-      render();
-    }
-  });
-
   // Add Recurring Expense
   document.getElementById("addRecurBtn").addEventListener("click", () => {
     state.recurring.push({ id: uid(), name: "", dueEstimate: "", amount: 0 });
@@ -1019,14 +1017,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if(!btn) return;
     const action = btn.getAttribute("data-action");
 
-    if(action === "delete-month"){
-      const key = btn.getAttribute("data-month");
-      if(confirm(`Delete ${monthLabel(key)}?`)){
-        delete state.months[key];
-        markDirty();
-        render();
-      }
-    } else if(action === "delete-recur"){
+    if(action === "delete-recur"){
       const id = btn.getAttribute("data-id");
       state.recurring = state.recurring.filter(r => r.id !== id);
       markDirty();
