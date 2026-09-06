@@ -348,7 +348,8 @@
       "role": "CRC",
       "basePay": 27.44,
       "myHourly": 28.3,
-      "compRatio": "82.51"
+      "compRatio": "82.51",
+      "positionInfo": "CRC"
     },
     {
       "id": "l57teoe",
