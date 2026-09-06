@@ -19,7 +19,7 @@
 <style>
 
 /* ============================================================
-   DESIGN SYSTEM (carried over from the original ledger)
+   DESIGN SYSTEM
    ============================================================ */
 
 :root{
@@ -363,7 +363,7 @@ footer a{ color:var(--ink-faint); }
         </p>
         <div class="field mono">
           <label for="ghTokenInput">Personal access token</label>
-          <input type="text" id="ghTokenInput" value="_pat_11CNGQIII0rj2oF9C9gcFJ_ntdWjkLNnjezNGkrG7puHjYk09xQTMwG561DVjj0FfD42RYFMO2z6E54cTz" autocomplete="off" spellcheck="false">
+          <input type="text" id="ghTokenInput" value="" autocomplete="off" spellcheck="false">
         </div>
         <div class="btn-row">
           <button class="btn primary" id="saveGhBtn">Save & sync now</button>
@@ -410,10 +410,10 @@ function uid(){ return Math.random().toString(36).slice(2,9); }
 const DEFAULT_STATE = {
   accounts:{
     bank:[
-      {id:"checking",  name:"Checking"},
-      {id:"savings",   name:"Savings"},
+      {id:"checking",   name:"Checking"},
+      {id:"savings",    name:"Savings"},
       {id:"usbank_ef", name:"US Bank Emergency Fund"},
-      {id:"ally_ef",   name:"Ally Bank Emergency Fund"}
+      {id:"ally_ef",    name:"Ally Bank Emergency Fund"}
     ],
     credit:[
       {id:"usbank_cc", name:"US Bank"},
@@ -517,9 +517,10 @@ function renderHero(){
     return;
   }
 
-  const latestKey = months[months.length-1];
+  // Reversed array: Index 0 is the newest month, Index 1 is the previous month
+  const latestKey = months[0];
   const latest = monthTotals(latestKey);
-  const prevKey = months.length > 1 ? months[months.length-2] : null;
+  const prevKey = months.length > 1 ? months[1] : null;
   const prev = prevKey ? monthTotals(prevKey) : null;
   const diff = prev ? latest.net - prev.net : null;
 
@@ -581,6 +582,7 @@ function renderMonthTable(){
     months.forEach((key, idx) => {
       const entry = state.months[key];
       const totals = monthTotals(key);
+      // Reversed order: Compare against the older month below it (idx + 1)
       const prevTotals = idx < months.length - 1 ? monthTotals(months[idx+1]) : null;
       const diff = prevTotals ? totals.net - prevTotals.net : null;
       const diffClass = diff === null ? "" : (diff > 0 ? "pos" : (diff < 0 ? "neg" : ""));
@@ -730,6 +732,20 @@ function escapeHtml(value){
 }
 
 /* ============================================================
+   MUTATIONS & HELPERS
+   ============================================================ */
+
+function updateRecur(id, field, value){
+  const item = state.recurring.find(r => r.id === id);
+  if(item){ item[field] = value; markDirty(); }
+}
+
+function updateBill(id, field, value){
+  const item = state.bills.find(b => b.id === id);
+  if(item){ item[field] = value; markDirty(); }
+}
+
+/* ============================================================
    EVENT DELEGATION — DATA ENTRY
    ============================================================ */
 
@@ -757,7 +773,6 @@ document.addEventListener("change", e => {
     case "recur-name": updateRecur(el.getAttribute("data-id"), "name", el.value); break;
     case "recur-due":  updateRecur(el.getAttribute("data-id"), "dueEstimate", el.value); break;
     case "recur-amount": updateRecur(el.getAttribute("data-id"), "amount", el.value === "" ? null : Number(el.value)); break;
-    case "recur-notes": updateRecur(el.getAttribute("data-id"), "notes", el.value); break;
 
     case "bill-name": updateBill(el.getAttribute("data-id"), "name", el.value); break;
     case "bill-amount": updateBill(el.getAttribute("data-id"), "amount", el.value === "" ? null : Number(el.value)); break;
@@ -769,341 +784,234 @@ document.addEventListener("change", e => {
     case "acct-name":{
       const group = el.getAttribute("data-group");
       const id = el.getAttribute("data-id");
-      const list = group === "bank" ? state.accounts.bank : state.accounts.credit;
-      const acct = list.find(a => a.id === id);
-      if(acct){ acct.name = el.value; markDirty(); renderMonthTable(); }
+      const acct = state.accounts[group].find(a => a.id === id);
+      if(acct){
+        acct.name = el.value;
+        markDirty();
+        renderMonthTable();
+      }
       break;
     }
   }
 });
 
-function updateRecur(id, field, value){
-  const item = state.recurring.find(r => r.id === id);
-  if(item){ item[field] = value; markDirty(); }
-}
-
-function updateBill(id, field, value){
-  const item = state.bills.find(b => b.id === id);
-  if(item){ item[field] = value; markDirty(); }
-}
+/* ============================================================
+   CLICK ACTIONS
+   ============================================================ */
 
 document.addEventListener("click", e => {
-  const btn = e.target.closest("button[data-action]");
+  const btn = e.target.closest("[data-action], [id]");
   if(!btn) return;
+
   const action = btn.getAttribute("data-action");
+  const id = btn.id;
 
   if(action === "delete-month"){
     const month = btn.getAttribute("data-month");
-    if(confirm(`Delete ${monthLabel(month)}? This cannot be undone.`)){
+    if(confirm(`Delete record for ${monthLabel(month)}?`)){
       delete state.months[month];
       markDirty();
       render();
     }
-  }
-  if(action === "delete-recur"){
-    state.recurring = state.recurring.filter(r => r.id !== btn.getAttribute("data-id"));
+  }else if(action === "delete-recur"){
+    const id = btn.getAttribute("data-id");
+    state.recurring = state.recurring.filter(r => r.id !== id);
     markDirty();
     renderRecurTable();
-  }
-  if(action === "delete-bill"){
-    state.bills = state.bills.filter(b => b.id !== btn.getAttribute("data-id"));
+  }else if(action === "delete-bill"){
+    const id = btn.getAttribute("data-id");
+    state.bills = state.bills.filter(b => b.id !== id);
     markDirty();
     renderBillTable();
-  }
-  if(action === "delete-acct"){
+  }else if(action === "delete-acct"){
     const group = btn.getAttribute("data-group");
-    const id = btn.getAttribute("data-id");
-    if(!confirm("Remove this account? Its balances will be deleted from every month.")) return;
-    if(group === "bank"){
-      state.accounts.bank = state.accounts.bank.filter(a => a.id !== id);
-    }else{
-      state.accounts.credit = state.accounts.credit.filter(a => a.id !== id);
+    const acctId = btn.getAttribute("data-id");
+    if(confirm("Delete this account? Stored values for it across all months will be removed.")){
+      state.accounts[group] = state.accounts[group].filter(a => a.id !== acctId);
+      Object.values(state.months).forEach(m => { delete m.balances[acctId]; });
+      markDirty();
+      render();
     }
-    Object.values(state.months).forEach(m => delete m.balances[id]);
+  }
+
+  // BUTTON HANDLERS
+  if(id === "addMonthBtn"){
+    const key = prompt("Enter month (YYYY-MM):", currentMonthKey());
+    if(key && /^\d{4}-\d{2}$/.test(key)){
+      if(!state.months[key]){
+        state.months[key] = { balances:{}, notes:"" };
+        markDirty();
+        render();
+      }
+    }
+  }else if(id === "addRecurBtn"){
+    state.recurring.push({ id: uid(), name:"", dueEstimate:"", amount: null, notes:"" });
     markDirty();
-    renderAccountLists();
-    render();
+    renderRecurTable();
+  }else if(id === "addBillBtn"){
+    state.bills.push({ id: uid(), name:"", amount: null, dueDate:"", payDate:"", paid:false, notes:"" });
+    markDirty();
+    renderBillTable();
+  }else if(id === "addBankAccountBtn"){
+    const name = prompt("Bank Account Name:");
+    if(name){
+      state.accounts.bank.push({ id: uid(), name });
+      markDirty();
+      render();
+    }
+  }else if(id === "addCreditAccountBtn"){
+    const name = prompt("Credit Card Name:");
+    if(name){
+      state.accounts.credit.push({ id: uid(), name });
+      markDirty();
+      render();
+    }
+  }else if(id === "settingsToggleBtn"){
+    document.getElementById("settingsOverlay").classList.add("open");
+  }else if(id === "closeSettingsBtn"){
+    document.getElementById("settingsOverlay").classList.remove("open");
+  }else if(id === "saveGhBtn"){
+    ghToken = document.getElementById("ghTokenInput").value.trim();
+    localStorage.setItem(LS_TOKEN, ghToken);
+    saveToGitHub();
+  }else if(id === "loadGhBtn"){
+    ghToken = document.getElementById("ghTokenInput").value.trim();
+    localStorage.setItem(LS_TOKEN, ghToken);
+    loadFromGitHub();
+  }else if(id === "exportBtn"){
+    const blob = new Blob([JSON.stringify(state, null, 2)], {type: "application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `networth-backup-${new Date().toISOString().slice(0,10)}.json`;
+    a.click();
+  }else if(id === "importBtn"){
+    document.getElementById("importFile").click();
+  }else if(id === "scrollTop"){
+    e.preventDefault();
+    window.scrollTo({top:0, behavior:"smooth"});
   }
 });
 
-/* ============================================================
-   ADD ROW / MONTH / ACCOUNT ACTIONS
-   ============================================================ */
-
-document.getElementById("addMonthBtn").addEventListener("click", () => {
-  const months = sortedMonths();
-  let next;
-  if(months.length === 0){
-    next = currentMonthKey();
-  }else{
-    const [y,m] = months[months.length-1].split("-").map(Number);
-    const d = new Date(Date.UTC(y, m, 1));
-    next = d.getUTCFullYear() + "-" + String(d.getUTCMonth()+1).padStart(2,"0");
-  }
-  if(state.months[next]){
-    alert(`${monthLabel(next)} already exists.`);
-    return;
-  }
-  const balances = {};
-  state.accounts.bank.forEach(a => balances[a.id] = 0);
-  state.accounts.credit.forEach(a => balances[a.id] = 0);
-  state.months[next] = { balances, notes:"" };
-  markDirty();
-  render();
-});
-
-document.getElementById("addRecurBtn").addEventListener("click", () => {
-  state.recurring.push({ id: uid(), name:"", dueEstimate:"", amount:null, notes:"" });
-  markDirty();
-  renderRecurTable();
-});
-
-document.getElementById("addBillBtn").addEventListener("click", () => {
-  state.bills.push({ id: uid(), name:"", amount:null, dueDate:"", payDate:"", paid:false, notes:"" });
-  markDirty();
-  renderBillTable();
-});
-
-document.getElementById("addBankAccountBtn").addEventListener("click", () => {
-  const id = "bank_" + uid();
-  state.accounts.bank.push({ id, name:"New account" });
-  Object.values(state.months).forEach(m => m.balances[id] = 0);
-  markDirty();
-  renderAccountLists();
-  renderMonthTable();
-});
-
-document.getElementById("addCreditAccountBtn").addEventListener("click", () => {
-  const id = "credit_" + uid();
-  state.accounts.credit.push({ id, name:"New card" });
-  Object.values(state.months).forEach(m => m.balances[id] = 0);
-  markDirty();
-  renderAccountLists();
-  renderMonthTable();
-});
-
-/* ============================================================
-   COLLAPSIBLE SECTIONS
-   ============================================================ */
-
+// ACCORDIONS
 document.querySelectorAll(".block-head").forEach(head => {
   head.addEventListener("click", () => {
-    document.getElementById(head.getAttribute("data-toggle")).classList.toggle("open");
+    head.parentElement.classList.toggle("open");
   });
 });
 
-document.getElementById("scrollTop").addEventListener("click", e => {
-  e.preventDefault();
-  window.scrollTo({top:0, behavior:"smooth"});
-});
-
-/* ============================================================
-   SETTINGS MODAL
-   ============================================================ */
-
-const settingsOverlay = document.getElementById("settingsOverlay");
-
-document.getElementById("settingsToggleBtn").addEventListener("click", () => {
-  document.getElementById("ghTokenInput").value = ghToken;
-  settingsOverlay.classList.add("open");
-});
-
-document.getElementById("closeSettingsBtn").addEventListener("click", () => {
-  settingsOverlay.classList.remove("open");
-});
-
-settingsOverlay.addEventListener("click", e => {
-  if(e.target === settingsOverlay) settingsOverlay.classList.remove("open");
-});
-
-/* ============================================================
-   GITHUB SYNC
-   ============================================================ */
-
-function ghConfigured(){
-  return !!ghToken;
-}
-
-function ghUrl(){
-  const { owner, repo, path } = GITHUB_REPO;
-  return `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
-}
-
-function b64EncodeUnicode(str){
-  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m,p1) => String.fromCharCode("0x" + p1)));
-}
-function b64DecodeUnicode(str){
-  return decodeURIComponent(atob(str).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
-}
-
-function setSyncStatus(kind, text){
-  const pill = document.getElementById("syncPill");
-  pill.className = "sync-pill " + (kind === "ok" ? "ok" : kind === "busy" ? "busy" : kind === "err" ? "err" : "");
-  document.getElementById("syncText").textContent = text;
-}
-
-document.getElementById("saveGhBtn").addEventListener("click", async () => {
-  ghToken = document.getElementById("ghTokenInput").value.trim();
-  localStorage.setItem(LS_TOKEN, ghToken);
-  await saveToGitHub();
-});
-
-document.getElementById("loadGhBtn").addEventListener("click", async () => {
-  ghToken = document.getElementById("ghTokenInput").value.trim();
-  localStorage.setItem(LS_TOKEN, ghToken);
-  await loadFromGitHub(false);
-});
-
-async function saveToGitHub(){
-  if(!ghConfigured()){
-    document.getElementById("ghStatus").textContent = "Fill in the repo owner, name, path, and token first.";
-    setSyncStatus("err", "Not connected");
-    return;
-  }
-  setSyncStatus("busy", "Saving…");
-  try{
-  if(!ghSha){
-    const checkRes = await fetch(ghUrl() + `?ref=${GITHUB_REPO.branch}`, {
-      headers:{ "Authorization": `Bearer ${ghToken}`, "Accept":"application/vnd.github+json" }
-    });
-    if(checkRes.ok){
-      const checkData = await checkRes.json();
-      ghSha = checkData.sha;
-      localStorage.setItem(LS_SHA, ghSha);
-    }
-    /* a 404 here just means the file doesn't exist yet — fine, we'll create it */
-  }
-    const payload = { accounts: state.accounts, months: state.months, recurring: state.recurring, bills: state.bills, savedAt: new Date().toISOString() };
-    const body = {
-      message: `Update net worth data — ${new Date().toISOString().slice(0,16).replace("T"," ")}`,
-      content: b64EncodeUnicode(JSON.stringify(payload, null, 2)),
-      branch: GITHUB_REPO.branch
-    };
-    if(ghSha) body.sha = ghSha;
-
-    const res = await fetch(ghUrl(), {
-      method:"PUT",
-      headers:{ "Authorization": `Bearer ${ghToken}`, "Accept":"application/vnd.github+json" },
-      body: JSON.stringify(body)
-    });
-
-    if(!res.ok){
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || `GitHub returned ${res.status}`);
-    }
-    const data = await res.json();
-    ghSha = data.content.sha;
-    localStorage.setItem(LS_SHA, ghSha);
-    dirty = false;
-    setSyncStatus("ok", `Saved ${new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}`);
-    document.getElementById("ghStatus").textContent = "Saved to GitHub.";
-  }catch(e){
-    setSyncStatus("err", "Save failed");
-    document.getElementById("ghStatus").textContent = "Save failed: " + e.message;
-  }
-}
-
-async function loadFromGitHub(silent){
-  if(!ghConfigured()){
-    if(!silent) document.getElementById("ghStatus").textContent = "Fill in the repo owner, name, path, and token first.";
-    setSyncStatus("idle", "Not connected");
-    return;
-  }
-  setSyncStatus("busy", "Loading…");
-  try{
-    const res = await fetch(ghUrl() + `?ref=${GITHUB_REPO.branch}`, {
-      headers:{ "Authorization": `Bearer ${ghToken}`, "Accept":"application/vnd.github+json" }
-    });
-
-    if(res.status === 404){
-      ghSha = null;
-      setSyncStatus("ok", "Connected (no data yet)");
-      document.getElementById("ghStatus").textContent = 'No data file yet — click "Save & sync now" to create one.';
-      return;
-    }
-    if(!res.ok){
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err.message || `GitHub returned ${res.status}`);
-    }
-    const data = await res.json();
-    ghSha = data.sha;
-    localStorage.setItem(LS_SHA, ghSha);
-    const payload = JSON.parse(b64DecodeUnicode(data.content));
-
-    if(payload.accounts) state.accounts = payload.accounts;
-    if(payload.months) state.months = payload.months;
-    if(payload.recurring) state.recurring = payload.recurring;
-    if(payload.bills) state.bills = payload.bills;
-
-    persistLocal();
-    render();
-    setSyncStatus("ok", `Synced ${new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}`);
-    document.getElementById("ghStatus").textContent = "Loaded latest data from GitHub.";
-  }catch(e){
-    setSyncStatus("err", "Load failed");
-    document.getElementById("ghStatus").textContent = "Load failed: " + e.message + (silent ? " (showing local cache)" : "");
-  }
-}
-
-/* ============================================================
-   BACKUP EXPORT / IMPORT
-   ============================================================ */
-
-document.getElementById("exportBtn").addEventListener("click", () => {
-  const payload = { accounts: state.accounts, months: state.months, recurring: state.recurring, bills: state.bills, exportedAt: new Date().toISOString() };
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:"application/json" });
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `networth-backup-${new Date().toISOString().slice(0,10)}.json`;
-  a.click();
-  URL.revokeObjectURL(a.href);
-});
-
-document.getElementById("importBtn").addEventListener("click", () => {
-  document.getElementById("importFile").click();
-});
-
+// IMPORT FILE HANDLER
 document.getElementById("importFile").addEventListener("change", e => {
   const file = e.target.files[0];
   if(!file) return;
   const reader = new FileReader();
-  reader.onload = () => {
+  reader.onload = evt => {
     try{
-      const payload = JSON.parse(reader.result);
-      if(payload.accounts) state.accounts = payload.accounts;
-      if(payload.months) state.months = payload.months;
-      if(payload.recurring) state.recurring = payload.recurring;
-      if(payload.bills) state.bills = payload.bills;
-      persistLocal();
+      const imported = JSON.parse(evt.target.result);
+      state = Object.assign(structuredClone(DEFAULT_STATE), imported);
+      markDirty();
       render();
-      document.getElementById("ghStatus").textContent = "Backup imported.";
+      alert("Backup loaded successfully.");
     }catch(err){
-      alert("That file doesn't look like a valid net worth backup.");
+      alert("Invalid backup JSON file.");
     }
   };
   reader.readAsText(file);
-  e.target.value = "";
 });
 
 /* ============================================================
-   INIT
+   GITHUB SYNC IMPLEMENTATION
    ============================================================ */
 
-function init(){
-  render();
-  setSyncStatus("idle", ghConfigured() ? "Connected" : "Local only");
-  if(ghConfigured()){
-    loadFromGitHub(true);
+function ghConfigured(){ return Boolean(ghToken); }
+
+function updateSyncPill(status, text){
+  const pill = document.getElementById("syncPill");
+  const txt = document.getElementById("syncText");
+  pill.className = "sync-pill " + status;
+  txt.textContent = text;
+}
+
+async function saveToGitHub(){
+  if(!ghToken){
+    updateSyncPill("", "Local only");
+    return;
+  }
+  updateSyncPill("busy", "Saving…");
+  const url = `https://api.github.com/repos/${GITHUB_REPO.owner}/${GITHUB_REPO.repo}/contents/${GITHUB_REPO.path}`;
+  
+  try{
+    const bodyData = {
+      message: "Update net worth data",
+      content: btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2)))),
+      branch: GITHUB_REPO.branch
+    };
+    if(ghSha) bodyData.sha = ghSha;
+
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: {
+        "Authorization": `Bearer ${ghToken}`,
+        "Accept": "application/vnd.github+json",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(bodyData)
+    });
+
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    ghSha = data.content.sha;
+    localStorage.setItem(LS_SHA, ghSha);
+    dirty = false;
+    updateSyncPill("ok", "Synced");
+    document.getElementById("ghStatus").textContent = "Last sync successful.";
+  }catch(err){
+    updateSyncPill("err", "Sync error");
+    document.getElementById("ghStatus").textContent = "Sync failed: " + err.message;
   }
 }
 
-if(document.readyState === "loading"){
-  document.addEventListener("DOMContentLoaded", init);
-}else{
-  init();
+async function loadFromGitHub(){
+  if(!ghToken){
+    updateSyncPill("", "Local only");
+    return;
+  }
+  updateSyncPill("busy", "Loading…");
+  const url = `https://api.github.com/repos/${GITHUB_REPO.owner}/${GITHUB_REPO.repo}/contents/${GITHUB_REPO.path}?ref=${GITHUB_REPO.branch}`;
+
+  try{
+    const res = await fetch(url, {
+      headers: {
+        "Authorization": `Bearer ${ghToken}`,
+        "Accept": "application/vnd.github+json"
+      }
+    });
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const data = await res.json();
+    ghSha = data.sha;
+    localStorage.setItem(LS_SHA, ghSha);
+    
+    const content = decodeURIComponent(escape(atob(data.content)));
+    state = Object.assign(structuredClone(DEFAULT_STATE), JSON.parse(content));
+    persistLocal();
+    render();
+    updateSyncPill("ok", "Synced");
+    document.getElementById("ghStatus").textContent = "Loaded latest from GitHub.";
+  }catch(err){
+    updateSyncPill("err", "Load error");
+    document.getElementById("ghStatus").textContent = "Load failed: " + err.message;
+  }
 }
 
-</script>
+// INITIALIZATION
+if(ghToken){
+  document.getElementById("ghTokenInput").value = ghToken;
+  loadFromGitHub();
+}else{
+  updateSyncPill("", "Local only");
+}
 
+render();
+
+</script>
 </body>
 </html>
