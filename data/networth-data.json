@@ -12,10 +12,6 @@
       {
         "id": "usbank_ef",
         "name": "US Bank EF"
-      },
-      {
-        "id": "ally_ef",
-        "name": "Ally Bank EF"
       }
     ],
     "credit": [
@@ -39,7 +35,6 @@
         "checking": 56.12,
         "savings": 2302.28,
         "usbank_ef": 800,
-        "ally_ef": 0,
         "usbank_cc": 0,
         "target_cc": 0,
         "scheels_cc": 0
@@ -51,7 +46,6 @@
         "checking": 115.62,
         "savings": 2340.01,
         "usbank_ef": 700,
-        "ally_ef": 0,
         "usbank_cc": 0,
         "target_cc": 0,
         "scheels_cc": 0
@@ -63,7 +57,6 @@
         "checking": 107.32,
         "savings": 3354.78,
         "usbank_ef": 5000,
-        "ally_ef": 0,
         "usbank_cc": 0,
         "target_cc": 0,
         "scheels_cc": 0
@@ -75,7 +68,6 @@
         "checking": 23.95,
         "savings": 2920.56,
         "usbank_ef": 6000,
-        "ally_ef": 0,
         "usbank_cc": 0,
         "target_cc": 0,
         "scheels_cc": 0
@@ -87,7 +79,6 @@
         "checking": 103.27,
         "savings": 2941.17,
         "usbank_ef": 6000.04,
-        "ally_ef": 0,
         "usbank_cc": 0,
         "target_cc": 0,
         "scheels_cc": 0
@@ -99,7 +90,6 @@
         "checking": 23.01,
         "savings": 2455.17,
         "usbank_ef": 6800.05,
-        "ally_ef": 0,
         "usbank_cc": 1228.75,
         "target_cc": 0,
         "scheels_cc": 0
@@ -111,7 +101,6 @@
         "checking": 12.25,
         "savings": 1348.98,
         "usbank_ef": 7899.05,
-        "ally_ef": 0,
         "usbank_cc": 859.52,
         "target_cc": 0,
         "scheels_cc": 0
@@ -123,7 +112,6 @@
         "checking": 98.53,
         "savings": 1515.32,
         "usbank_ef": 8100,
-        "ally_ef": 0,
         "usbank_cc": 265.33,
         "target_cc": 256.65,
         "scheels_cc": 772
@@ -135,7 +123,6 @@
         "checking": 27.85,
         "savings": 2528.11,
         "usbank_ef": 8100.06,
-        "ally_ef": 0,
         "usbank_cc": 0,
         "target_cc": 124.9,
         "scheels_cc": 773.9
@@ -147,7 +134,6 @@
         "checking": 96.15,
         "savings": 1785.03,
         "usbank_ef": 9200,
-        "ally_ef": 0,
         "usbank_cc": 170.94,
         "target_cc": 10.45,
         "scheels_cc": 454.6
@@ -159,7 +145,6 @@
         "checking": 4.49,
         "savings": 3035.43,
         "usbank_ef": 9200.08,
-        "ally_ef": 0,
         "usbank_cc": 167.85,
         "target_cc": 13.85,
         "scheels_cc": 564.36
@@ -171,7 +156,6 @@
         "checking": 35.67,
         "savings": 2544.67,
         "usbank_ef": 10000.13,
-        "ally_ef": 0,
         "usbank_cc": 821.11,
         "target_cc": 0,
         "scheels_cc": 732.63
@@ -183,7 +167,6 @@
         "checking": 21.08,
         "savings": 2140.29,
         "usbank_ef": 10000,
-        "ally_ef": 10000,
         "usbank_cc": 714.95,
         "target_cc": 0,
         "scheels_cc": 430.07
@@ -195,7 +178,6 @@
         "checking": 24.99,
         "savings": 4842.11,
         "usbank_ef": 10019.33,
-        "ally_ef": 10019.33,
         "usbank_cc": 261.76,
         "target_cc": 0,
         "scheels_cc": 506.7
@@ -207,7 +189,6 @@
         "checking": 39.83,
         "savings": 4824.75,
         "usbank_ef": 11044.08,
-        "ally_ef": 11044.08,
         "usbank_cc": 558.53,
         "target_cc": 0,
         "scheels_cc": 620.14
@@ -219,7 +200,6 @@
         "checking": 13.14,
         "savings": 4757.68,
         "usbank_ef": 11073.66,
-        "ally_ef": 11073.66,
         "usbank_cc": 335.21,
         "target_cc": 0,
         "scheels_cc": 545.44
@@ -231,7 +211,6 @@
         "checking": 9.01,
         "savings": 4733.35,
         "usbank_ef": 11044.08,
-        "ally_ef": 11101.84,
         "usbank_cc": 994.68,
         "target_cc": 0,
         "scheels_cc": 1354.65
@@ -243,7 +222,6 @@
         "checking": 3.08,
         "savings": 4568.78,
         "usbank_ef": 9930.63,
-        "ally_ef": 0,
         "usbank_cc": 530.84,
         "target_cc": 52.88,
         "scheels_cc": 748.9
@@ -255,7 +233,6 @@
         "checking": 38.04,
         "savings": 4567.72,
         "usbank_ef": 10055.18,
-        "ally_ef": 0,
         "usbank_cc": 912.11,
         "target_cc": 80.89,
         "scheels_cc": 1139.92
@@ -267,7 +244,6 @@
         "checking": 2.55,
         "savings": 2965.28,
         "usbank_ef": 9480.38,
-        "ally_ef": 0,
         "usbank_cc": 496.19,
         "target_cc": 119.81,
         "scheels_cc": 988.09
@@ -279,7 +255,6 @@
         "checking": 10,
         "savings": 3738.18,
         "usbank_ef": 11004.21,
-        "ally_ef": 0,
         "usbank_cc": 350,
         "target_cc": 12.32,
         "scheels_cc": 1200
