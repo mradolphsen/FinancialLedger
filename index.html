@@ -965,6 +965,17 @@ async function saveToGitHub(){
   }
   setSyncStatus("busy", "Saving…");
   try{
+  if(!ghSha){
+    const checkRes = await fetch(ghUrl() + `?ref=${GITHUB_REPO.branch}`, {
+      headers:{ "Authorization": `Bearer ${ghToken}`, "Accept":"application/vnd.github+json" }
+    });
+    if(checkRes.ok){
+      const checkData = await checkRes.json();
+      ghSha = checkData.sha;
+      localStorage.setItem(LS_SHA, ghSha);
+    }
+    /* a 404 here just means the file doesn't exist yet — fine, we'll create it */
+  }
     const payload = { accounts: state.accounts, months: state.months, recurring: state.recurring, bills: state.bills, savedAt: new Date().toISOString() };
     const body = {
       message: `Update net worth data — ${new Date().toISOString().slice(0,16).replace("T"," ")}`,
