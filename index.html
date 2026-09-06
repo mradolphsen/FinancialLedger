@@ -74,16 +74,54 @@ a{ color:var(--navy); }
 
 /* HEADER */
 header.top{
-  display:flex; justify-content:space-between; align-items:flex-start;
+  display:flex; justify-content:space-between; align-items:center;
   gap:16px; flex-wrap:wrap;
-  padding-bottom:16px; border-bottom:1px solid var(--line); margin-bottom:20px;
+  padding-bottom:16px; border-bottom:1px solid var(--line); margin-bottom:16px;
 }
 h1{
   font-family:'Libre Franklin',sans-serif; font-weight:800;
-  font-size:32px; letter-spacing:-0.015em; margin:0 0 4px; color:var(--navy);
+  font-size:32px; letter-spacing:-0.015em; margin:0; color:var(--navy);
 }
-.sub{ color:var(--ink-muted); font-size:13.5px; }
 .top-actions{ display:flex; align-items:center; gap:10px; }
+
+/* NAVIGATION TABS */
+.nav-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 2px solid var(--line);
+  margin-bottom: 20px;
+}
+
+.nav-tab {
+  padding: 10px 20px;
+  font-family: 'Libre Franklin', sans-serif;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--ink-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: color .15s ease, border-color .15s ease;
+}
+
+.nav-tab:hover {
+  color: var(--navy);
+}
+
+.nav-tab.active {
+  color: var(--navy);
+  border-bottom-color: var(--blue);
+}
+
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+}
 
 /* SYNC PILL */
 .sync-pill{
@@ -225,7 +263,7 @@ table.data input[type=number] {
   -moz-appearance: textfield;
 }
 
-/* EXPANDED COLUMN INPUT WIDTHS (Prevents numbers from getting cut off) */
+/* EXPANDED COLUMN INPUT WIDTHS */
 table.data input[type=number], table.data input[type=text], table.data input[type=date]{
   width:100%; min-width:125px; border:1px solid var(--line); border-radius:4px; padding:5px 6px;
   font-family:'IBM Plex Mono',monospace; font-size:13px; background:var(--bg); color:var(--ink);
@@ -303,8 +341,7 @@ footer a{ color:var(--ink-faint); }
 
   <header class="top">
     <div>
-      <h1>Net Worth Tracker</h1>
-      <div class="sub" id="subline">Loading…</div>
+      <h1>Financial Ledger</h1>
     </div>
     <div class="top-actions">
       <span class="sync-pill" id="syncPill">
@@ -315,57 +352,67 @@ footer a{ color:var(--ink-faint); }
     </div>
   </header>
 
-  <div class="hero" id="hero"></div>
+  <!-- NAVIGATION TABS -->
+  <nav class="nav-tabs" role="tablist">
+    <button class="nav-tab active" data-tab="tab-month-end" role="tab" aria-selected="true">Month End</button>
+  </nav>
 
-  <!-- ===================== MONTH END ===================== -->
-  <section class="block open" id="monthBlock">
-    <div class="block-head" data-toggle="monthBlock">
-      <h2>Month End<span class="block-sub">End-of-month account balances</span></h2>
-      <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </div>
-    <div class="block-body">
-      <div class="table-scroll" style="margin-top:12px;">
-        <table class="data" id="monthTable"></table>
-      </div>
-      <p class="hint">Net worth = total bank account balances minus total credit card balances for that month. Balances lock automatically after 10 days into the new month. Notes remain permanently editable.</p>
-    </div>
-  </section>
+  <!-- SUBPAGE CONTENT: MONTH END -->
+  <div class="tab-content active" id="tab-month-end" role="tabpanel">
 
-  <!-- ===================== SIDE-BY-SIDE MODULES ===================== -->
-  <div class="modules-grid">
-    
-    <!-- RECURRING EXPENSES -->
-    <section class="block open" id="recurBlock">
-      <div class="block-head" data-toggle="recurBlock">
-        <h2>Recurring Expenses<span class="block-sub">Expenses that come up regularly</span></h2>
+    <div class="hero" id="hero"></div>
+
+    <!-- ===================== MONTH END ===================== -->
+    <section class="block open" id="monthBlock">
+      <div class="block-head" data-toggle="monthBlock">
+        <h2>Month End<span class="block-sub">End-of-month account balances</span></h2>
         <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="block-body">
-        <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
-          <button class="btn primary" id="addRecurBtn">+ Add expense</button>
+        <div class="table-scroll" style="margin-top:12px;">
+          <table class="data" id="monthTable"></table>
         </div>
-        <div class="table-scroll">
-          <table class="data" id="recurTable"></table>
-        </div>
+        <p class="hint">Net worth = total bank account balances minus total credit card balances for that month. Balances lock automatically after 10 days into the new month. Notes remain permanently editable.</p>
       </div>
     </section>
 
-    <!-- BILL PAYMENT PLANNER -->
-    <section class="block open" id="billBlock">
-      <div class="block-head" data-toggle="billBlock">
-        <h2>Bill Payment Planner<span class="block-sub">Drag rows to line bills up with paydays</span></h2>
-        <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="block-body">
-        <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
-          <button class="btn primary" id="addBillBtn">+ Add bill</button>
+    <!-- ===================== SIDE-BY-SIDE MODULES ===================== -->
+    <div class="modules-grid">
+      
+      <!-- RECURRING EXPENSES -->
+      <section class="block open" id="recurBlock">
+        <div class="block-head" data-toggle="recurBlock">
+          <h2>Recurring Expenses<span class="block-sub">Expenses that come up regularly</span></h2>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <div class="table-scroll">
-          <table class="data" id="billTable"></table>
+        <div class="block-body">
+          <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+            <button class="btn primary" id="addRecurBtn">+ Add expense</button>
+          </div>
+          <div class="table-scroll">
+            <table class="data" id="recurTable"></table>
+          </div>
         </div>
-        <p class="hint">Drag the ⠿ handle to reorder rows relative to paychecks.</p>
-      </div>
-    </section>
+      </section>
+
+      <!-- BILL PAYMENT PLANNER -->
+      <section class="block open" id="billBlock">
+        <div class="block-head" data-toggle="billBlock">
+          <h2>Bill Payment Planner<span class="block-sub">Drag rows to line bills up with paydays</span></h2>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="block-body">
+          <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+            <button class="btn primary" id="addBillBtn">+ Add bill</button>
+          </div>
+          <div class="table-scroll">
+            <table class="data" id="billTable"></table>
+          </div>
+          <p class="hint">Drag the ⠿ handle to reorder rows relative to paychecks.</p>
+        </div>
+      </section>
+
+    </div>
 
   </div>
 
@@ -804,10 +851,6 @@ function renderAccountLists(){
 
 function render(){
   ensureCurrentMonthExists();
-  document.getElementById("subline").textContent =
-    sortedMonths().length
-      ? `Tracking ${sortedMonths().length} month${sortedMonths().length === 1 ? "" : "s"} · last updated locally`
-      : "No months tracked yet";
   renderHero();
   renderMonthTable();
   renderRecurTable();
@@ -952,6 +995,23 @@ document.addEventListener("DOMContentLoaded", () => {
   if(ghConfigured()){
     loadFromGitHub();
   }
+
+  // Navigation Tab Switching
+  document.querySelectorAll(".nav-tab").forEach(tab => {
+    tab.addEventListener("click", () => {
+      document.querySelectorAll(".nav-tab").forEach(t => {
+        t.classList.remove("active");
+        t.setAttribute("aria-selected", "false");
+      });
+      document.querySelectorAll(".tab-content").forEach(c => c.classList.remove("active"));
+
+      tab.classList.add("active");
+      tab.setAttribute("aria-selected", "true");
+      const targetId = tab.getAttribute("data-tab");
+      const targetContent = document.getElementById(targetId);
+      if(targetContent) targetContent.classList.add("active");
+    });
+  });
 
   // Toggle Section Collapse
   document.querySelectorAll(".block-head").forEach(head => {
