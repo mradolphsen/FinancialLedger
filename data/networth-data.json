@@ -11,7 +11,7 @@
       },
       {
         "id": "usbank_ef",
-        "name": "Emergency Fund"
+        "name": "EF"
       }
     ],
     "credit": [
@@ -32,5 +32,5 @@
   "months": {},
   "recurring": [],
   "bills": [],
-  "savedAt": "2026-09-06T01:20:55.442Z"
+  "savedAt": "2026-09-06T01:21:03.893Z"
 }
