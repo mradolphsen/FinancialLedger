@@ -337,7 +337,8 @@
       "role": "ACRC",
       "basePay": 24.07,
       "myHourly": 24.72,
-      "compRatio": "83.94"
+      "compRatio": "83.94",
+      "positionInfo": "CRC"
     },
     {
       "id": "n2tq861",
