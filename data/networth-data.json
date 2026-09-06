@@ -182,7 +182,7 @@
       "balances": {
         "checking": 21.08,
         "savings": 2140.29,
-        "usbank_ef": 0,
+        "usbank_ef": 10000,
         "ally_ef": 10000,
         "usbank_cc": 714.95,
         "target_cc": 0,
