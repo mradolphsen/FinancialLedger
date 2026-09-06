@@ -190,6 +190,8 @@ table.data td{
   font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums;
 }
 table.data td.label-cell{ font-family:'Source Sans 3'; white-space:normal; min-width:110px; }
+table.data th.col-end, table.data td.col-end{ border-right:2px solid var(--line-strong); }
+table.data th.notes-col, table.data td.notes-col{ min-width:280px; }
 table.data tr.current-month{ background:var(--blue-soft); }
 table.data tr:hover{ background:var(--blue-pale); }
 table.data input[type=number], table.data input[type=text], table.data input[type=date]{
@@ -557,24 +559,22 @@ function renderMonthTable(){
   const creditAccts = state.accounts.credit;
 
   let head = `<thead><tr>
-      <th rowspan="2">Month</th>
-      ${bankAccts.length ? `<th class="group" colspan="${bankAccts.length}">Bank Accounts</th>` : ""}
-      ${creditAccts.length ? `<th class="group" colspan="${creditAccts.length}">Credit Cards</th>` : ""}
-      <th rowspan="2">Total Bank</th>
-      <th rowspan="2">Total Credit</th>
-      <th rowspan="2">Net Worth</th>
-      <th rowspan="2">Change</th>
-      <th rowspan="2">Notes</th>
+      <th rowspan="2" class="col-end">Month</th>
+      ${bankAccts.length ? `<th class="group col-end" colspan="${bankAccts.length}">Bank Accounts</th>` : ""}
+      ${creditAccts.length ? `<th class="group col-end" colspan="${creditAccts.length}">Credit Cards</th>` : ""}
+      <th rowspan="2" class="col-end">Net Worth</th>
+      <th rowspan="2" class="col-end">Change</th>
+      <th rowspan="2" class="notes-col">Notes</th>
       <th rowspan="2"></th>
     </tr>
     <tr>
-      ${bankAccts.map(a => `<th>${escapeHtml(a.name)}</th>`).join("")}
-      ${creditAccts.map(a => `<th>${escapeHtml(a.name)}</th>`).join("")}
+      ${bankAccts.map((a,i) => `<th class="${i === bankAccts.length-1 ? "col-end" : ""}">${escapeHtml(a.name)}</th>`).join("")}
+      ${creditAccts.map((a,i) => `<th class="${i === creditAccts.length-1 ? "col-end" : ""}">${escapeHtml(a.name)}</th>`).join("")}
     </tr></thead>`;
 
   let rows = "";
   if(months.length === 0){
-    const colCount = 6 + bankAccts.length + creditAccts.length;
+    const colCount = 5 + bankAccts.length + creditAccts.length;
     rows = `<tr class="empty-row"><td colspan="${colCount}">No months added yet. Click "+ Add month" to start tracking.</td></tr>`;
   }else{
     const thisMonth = currentMonthKey();
@@ -587,14 +587,12 @@ function renderMonthTable(){
       const diffText = diff === null ? "—" : (diff >= 0 ? "+" : "") + fmtMoney(diff);
 
       rows += `<tr class="${key === thisMonth ? "current-month" : ""}" data-month="${key}">
-        <td class="label-cell"><strong>${monthLabel(key)}</strong></td>
-        ${bankAccts.map(a => `<td><input type="number" step="0.01" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] ?? ""}"></td>`).join("")}
-        ${creditAccts.map(a => `<td><input type="number" step="0.01" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] ?? ""}"></td>`).join("")}
-        <td class="total-cell">${fmtMoney(totals.bank)}</td>
-        <td class="total-cell">${fmtMoney(totals.credit)}</td>
-        <td class="total-cell">${fmtMoney(totals.net)}</td>
-        <td class="diff-cell ${diffClass}">${diffText}</td>
-        <td><textarea data-kind="notes" data-month="${key}" placeholder="Notes…">${escapeHtml(entry.notes || "")}</textarea></td>
+        <td class="label-cell col-end"><strong>${monthLabel(key)}</strong></td>
+        ${bankAccts.map((a,i) => `<td class="${i === bankAccts.length-1 ? "col-end" : ""}"><input type="number" step="0.01" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] ?? ""}"></td>`).join("")}
+        ${creditAccts.map((a,i) => `<td class="${i === creditAccts.length-1 ? "col-end" : ""}"><input type="number" step="0.01" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] ?? ""}"></td>`).join("")}
+        <td class="total-cell col-end">${fmtMoney(totals.net)}</td>
+        <td class="diff-cell col-end ${diffClass}">${diffText}</td>
+        <td class="notes-col"><textarea data-kind="notes" data-month="${key}" placeholder="Notes…">${escapeHtml(entry.notes || "")}</textarea></td>
         <td class="actions-cell"><button class="btn small danger" data-action="delete-month" data-month="${key}" title="Delete month">✕</button></td>
       </tr>`;
     });
@@ -610,18 +608,17 @@ function renderMonthTable(){
 function renderRecurTable(){
   const table = document.getElementById("recurTable");
   let head = `<thead><tr>
-      <th>Expense</th><th>Est. Due</th><th>Amount</th><th>Notes</th><th></th>
+      <th>Expense</th><th>Est. Due</th><th>Amount</th><th></th>
     </tr></thead>`;
   let rows = "";
   if(state.recurring.length === 0){
-    rows = `<tr class="empty-row"><td colspan="5">No recurring expenses yet.</td></tr>`;
+    rows = `<tr class="empty-row"><td colspan="4">No recurring expenses yet.</td></tr>`;
   }else{
     state.recurring.forEach(item => {
       rows += `<tr data-id="${item.id}">
         <td class="label-cell"><input type="text" data-kind="recur-name" data-id="${item.id}" value="${escapeHtml(item.name)}" placeholder="e.g. Car insurance"></td>
         <td><input type="text" data-kind="recur-due" data-id="${item.id}" value="${escapeHtml(item.dueEstimate)}" placeholder="e.g. 15th of month"></td>
         <td><input type="number" step="0.01" data-kind="recur-amount" data-id="${item.id}" value="${item.amount ?? ""}" placeholder="0.00"></td>
-        <td><textarea data-kind="recur-notes" data-id="${item.id}" placeholder="Notes…">${escapeHtml(item.notes || "")}</textarea></td>
         <td class="actions-cell"><button class="btn small danger" data-action="delete-recur" data-id="${item.id}" title="Remove">✕</button></td>
       </tr>`;
     });
