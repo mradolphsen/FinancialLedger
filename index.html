@@ -194,8 +194,21 @@ table.data th.col-end, table.data td.col-end{ border-right:2px solid var(--line-
 table.data th.notes-col, table.data td.notes-col{ min-width:280px; }
 table.data tr.current-month{ background:var(--blue-soft); }
 table.data tr:hover{ background:var(--blue-pale); }
+
+/* Remove Chrome, Safari, Edge, Opera spin buttons */
+table.data input::-webkit-outer-spin-button,
+table.data input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* Remove Firefox spin buttons */
+table.data input[type=number] {
+  -moz-appearance: textfield;
+}
+
 table.data input[type=number], table.data input[type=text], table.data input[type=date]{
-  width:100%; min-width:88px; border:1px solid var(--line); border-radius:4px; padding:5px 7px;
+  width:100%; min-width:120px; border:1px solid var(--line); border-radius:4px; padding:5px 7px;
   font-family:'IBM Plex Mono',monospace; font-size:13.5px; background:var(--bg); color:var(--ink);
 }
 table.data td.label-cell input[type=text]{ font-family:inherit; }
@@ -474,10 +487,18 @@ function currentMonthKey(){
   return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
 }
 
+function parseMoney(val){
+  if(val === undefined || val === null || val === "") return 0;
+  if(typeof val === "number") return isNaN(val) ? 0 : val;
+  const str = String(val).replace(/[^0-9.-]/g, "");
+  const n = parseFloat(str);
+  return isNaN(n) ? 0 : n;
+}
+
 function fmtMoney(n){
-  if(n === undefined || n === null || isNaN(n)) n = 0;
-  const sign = n < 0 ? "-" : "";
-  return sign + "$" + Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+  const num = parseMoney(n);
+  const sign = num < 0 ? "-" : "";
+  return sign + "$ " + Math.abs(num).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
 function sortedMonths(){
@@ -488,8 +509,8 @@ function monthTotals(key){
   const entry = state.months[key];
   if(!entry) return {bank:0, credit:0, net:0};
   let bank = 0, credit = 0;
-  state.accounts.bank.forEach(a => bank += Number(entry.balances[a.id] || 0));
-  state.accounts.credit.forEach(a => credit += Number(entry.balances[a.id] || 0));
+  state.accounts.bank.forEach(a => bank += parseMoney(entry.balances[a.id]));
+  state.accounts.credit.forEach(a => credit += parseMoney(entry.balances[a.id]));
   return {bank, credit, net: bank - credit};
 }
 
@@ -581,8 +602,8 @@ function renderMonthTable(){
 
       rows += `<tr class="${key === thisMonth ? "current-month" : ""}" data-month="${key}">
         <td class="label-cell col-end"><strong>${monthLabel(key)}</strong></td>
-        ${bankAccts.map((a,i) => `<td class="${i === bankAccts.length-1 ? "col-end" : ""}"><input type="number" step="0.01" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] ?? ""}"></td>`).join("")}
-        ${creditAccts.map((a,i) => `<td class="${i === creditAccts.length-1 ? "col-end" : ""}"><input type="number" step="0.01" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] ?? ""}"></td>`).join("")}
+        ${bankAccts.map((a,i) => `<td class="${i === bankAccts.length-1 ? "col-end" : ""}"><input type="text" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] !== undefined && entry.balances[a.id] !== "" ? fmtMoney(entry.balances[a.id]) : ""}"></td>`).join("")}
+        ${creditAccts.map((a,i) => `<td class="${i === creditAccts.length-1 ? "col-end" : ""}"><input type="text" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] !== undefined && entry.balances[a.id] !== "" ? fmtMoney(entry.balances[a.id]) : ""}"></td>`).join("")}
         <td class="total-cell col-end">${fmtMoney(totals.net)}</td>
         <td class="diff-cell col-end ${diffClass}">${diffText}</td>
         <td class="notes-col"><textarea data-kind="notes" data-month="${key}" placeholder="Notes…">${escapeHtml(entry.notes || "")}</textarea></td>
@@ -611,7 +632,7 @@ function renderRecurTable(){
       rows += `<tr data-id="${item.id}">
         <td class="label-cell"><input type="text" data-kind="recur-name" data-id="${item.id}" value="${escapeHtml(item.name)}" placeholder="e.g. Car insurance"></td>
         <td><input type="text" data-kind="recur-due" data-id="${item.id}" value="${escapeHtml(item.dueEstimate)}" placeholder="e.g. 15th of month"></td>
-        <td><input type="number" step="0.01" data-kind="recur-amount" data-id="${item.id}" value="${item.amount ?? ""}" placeholder="0.00"></td>
+        <td><input type="text" data-kind="recur-amount" data-id="${item.id}" value="${item.amount !== undefined && item.amount !== "" ? fmtMoney(item.amount) : ""}" placeholder="$ 0.00"></td>
         <td class="actions-cell"><button class="btn small danger" data-action="delete-recur" data-id="${item.id}" title="Remove">✕</button></td>
       </tr>`;
     });
@@ -636,7 +657,7 @@ function renderBillTable(){
       rows += `<tr data-id="${item.id}" draggable="true">
         <td class="drag-cell" title="Drag to reorder">⠿</td>
         <td class="label-cell"><input type="text" data-kind="bill-name" data-id="${item.id}" value="${escapeHtml(item.name)}" placeholder="e.g. Rent"></td>
-        <td><input type="number" step="0.01" data-kind="bill-amount" data-id="${item.id}" value="${item.amount ?? ""}" placeholder="0.00"></td>
+        <td><input type="text" data-kind="bill-amount" data-id="${item.id}" value="${item.amount !== undefined && item.amount !== "" ? fmtMoney(item.amount) : ""}" placeholder="$ 0.00"></td>
         <td><input type="date" data-kind="bill-due" data-id="${item.id}" value="${item.dueDate || ""}"></td>
         <td><input type="date" data-kind="bill-pay" data-id="${item.id}" value="${item.payDate || ""}"></td>
         <td class="actions-cell"><input type="checkbox" data-kind="bill-paid" data-id="${item.id}" ${item.paid ? "checked" : ""}></td>
@@ -769,33 +790,38 @@ async function saveToGitHub(){
   updateSyncStatus("Saving…", "busy");
 
   const url = `https://api.github.com/repos/${GITHUB_REPO.owner}/${GITHUB_REPO.repo}/contents/${GITHUB_REPO.path}`;
-  const content = btoa(unescape(encodeURIComponent(JSON.stringify(state, null, 2))));
-
-  try {
-    const payload = {
-      message: "Update net worth data",
-      content: content,
+  try{
+    const jsonStr = JSON.stringify(state, null, 2);
+    const contentEncoded = btoa(unescape(encodeURIComponent(jsonStr)));
+    const body = {
+      message: "Update networth data",
+      content: contentEncoded,
       branch: GITHUB_REPO.branch
     };
-    if(ghSha) payload.sha = ghSha;
+    if(ghSha) body.sha = ghSha;
 
     const res = await fetch(url, {
       method: "PUT",
       headers: {
-        "Authorization": `token ${ghToken}`,
+        "Authorization": `Bearer ${ghToken}`,
         "Content-Type": "application/json"
       },
-      body: JSON.stringify(payload)
+      body: JSON.stringify(body)
     });
 
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
-    const data = await res.json();
-    ghSha = data.content.sha;
+    if(!res.ok){
+      const err = await res.json();
+      throw new Error(err.message || "Failed to save to GitHub");
+    }
+
+    const resData = await res.json();
+    ghSha = resData.content.sha;
     localStorage.setItem(LS_SHA, ghSha);
     dirty = false;
     updateSyncStatus("Synced", "ok");
-  } catch(e) {
-    updateSyncStatus("Sync failed", "err");
+  }catch(e){
+    console.error(e);
+    updateSyncStatus("Sync error", "err");
   }
 }
 
@@ -804,201 +830,254 @@ async function loadFromGitHub(){
   updateSyncStatus("Loading…", "busy");
 
   const url = `https://api.github.com/repos/${GITHUB_REPO.owner}/${GITHUB_REPO.repo}/contents/${GITHUB_REPO.path}?ref=${GITHUB_REPO.branch}`;
-
-  try {
+  try{
     const res = await fetch(url, {
-      headers: { "Authorization": `token ${ghToken}` }
+      headers: { "Authorization": `Bearer ${ghToken}` }
     });
 
-    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    if(!res.ok){
+      if(res.status === 404){
+        updateSyncStatus("New repo path", "ok");
+        return;
+      }
+      throw new Error("Failed to load from GitHub");
+    }
+
     const data = await res.json();
     ghSha = data.sha;
     localStorage.setItem(LS_SHA, ghSha);
 
-    const jsonStr = decodeURIComponent(escape(atob(data.content.replace(/\n/g, ""))));
-    state = Object.assign(structuredClone(DEFAULT_STATE), JSON.parse(jsonStr));
+    const decoded = decodeURIComponent(escape(atob(data.content)));
+    const parsed = JSON.parse(decoded);
+    state = Object.assign(structuredClone(DEFAULT_STATE), parsed);
     persistLocal();
     dirty = false;
     render();
-    updateSyncStatus("Loaded", "ok");
-  } catch(e) {
-    updateSyncStatus("Load failed", "err");
+    updateSyncStatus("Synced", "ok");
+  }catch(e){
+    console.error(e);
+    updateSyncStatus("Sync error", "err");
   }
 }
 
 /* ============================================================
-   EVENT DELEGATION & LISTENERS
+   EVENT LISTENERS
    ============================================================ */
 
-document.addEventListener("change", e => {
-  const el = e.target;
-  const kind = el.getAttribute("data-kind");
-  if(!kind) return;
+document.addEventListener("DOMContentLoaded", () => {
 
-  switch(kind){
-    case "balance":{
-      const month = el.getAttribute("data-month");
-      const acct = el.getAttribute("data-account");
-      if(!state.months[month]) return;
-      state.months[month].balances[acct] = el.value === "" ? 0 : Number(el.value);
-      markDirty();
-      renderHero();
-      renderMonthTable();
-      break;
-    }
-    case "notes":{
-      const month = el.getAttribute("data-month");
-      if(state.months[month]){
-        state.months[month].notes = el.value;
-        markDirty();
-      }
-      break;
-    }
-    case "recur-name": updateRecur(el.getAttribute("data-id"), "name", el.value); break;
-    case "recur-due":  updateRecur(el.getAttribute("data-id"), "dueEstimate", el.value); break;
-    case "recur-amount": updateRecur(el.getAttribute("data-id"), "amount", el.value === "" ? 0 : Number(el.value)); break;
-    case "bill-name":  updateBill(el.getAttribute("data-id"), "name", el.value); break;
-    case "bill-amount": updateBill(el.getAttribute("data-id"), "amount", el.value === "" ? 0 : Number(el.value)); break;
-    case "bill-due":   updateBill(el.getAttribute("data-id"), "dueDate", el.value); break;
-    case "bill-pay":   updateBill(el.getAttribute("data-id"), "payDate", el.value); break;
-    case "bill-paid":  updateBill(el.getAttribute("data-id"), "paid", el.checked); break;
-    case "bill-notes": updateBill(el.getAttribute("data-id"), "notes", el.value); break;
-    case "acct-name":{
-      const group = el.getAttribute("data-group");
-      const id = el.getAttribute("data-id");
-      const acct = state.accounts[group].find(a => a.id === id);
-      if(acct){ acct.name = el.value; markDirty(); renderMonthTable(); }
-      break;
-    }
-  }
-});
-
-document.addEventListener("click", e => {
-  const btn = e.target.closest("button");
-  if(!btn) return;
-
-  const action = btn.getAttribute("data-action");
-
-  if(action === "delete-month"){
-    const m = btn.getAttribute("data-month");
-    delete state.months[m];
-    markDirty();
-    render();
-  } else if(action === "delete-recur"){
-    const id = btn.getAttribute("data-id");
-    state.recurring = state.recurring.filter(r => r.id !== id);
-    markDirty();
-    renderRecurTable();
-  } else if(action === "delete-bill"){
-    const id = btn.getAttribute("data-id");
-    state.bills = state.bills.filter(b => b.id !== id);
-    markDirty();
-    renderBillTable();
-  } else if(action === "delete-acct"){
-    const group = btn.getAttribute("data-group");
-    const id = btn.getAttribute("data-id");
-    state.accounts[group] = state.accounts[group].filter(a => a.id !== id);
-    Object.keys(state.months).forEach(m => { delete state.months[m].balances[id]; });
-    markDirty();
-    render();
-  }
-
-  const toggle = e.target.closest("[data-toggle]")?.getAttribute("data-toggle");
-  if(toggle){
-    document.getElementById(toggle).classList.toggle("open");
-  }
-});
-
-// UI Controls & Modals
-document.getElementById("addMonthBtn").addEventListener("click", () => {
-  const key = prompt("Enter month (YYYY-MM):", currentMonthKey());
-  if(!key || !/^\d{4}-\d{2}$/.test(key)) return;
-  if(!state.months[key]){
-    state.months[key] = { balances:{}, notes:"" };
-    markDirty();
-    render();
-  }
-});
-
-document.getElementById("addRecurBtn").addEventListener("click", () => {
-  state.recurring.push({ id: uid(), name: "", dueEstimate: "", amount: 0 });
-  markDirty();
-  renderRecurTable();
-});
-
-document.getElementById("addBillBtn").addEventListener("click", () => {
-  state.bills.push({ id: uid(), name: "", amount: 0, dueDate: "", payDate: "", paid: false, notes: "" });
-  markDirty();
-  renderBillTable();
-});
-
-document.getElementById("addBankAccountBtn").addEventListener("click", () => {
-  const name = prompt("Account Name:");
-  if(!name) return;
-  state.accounts.bank.push({ id: uid(), name });
-  markDirty();
   render();
-});
 
-document.getElementById("addCreditAccountBtn").addEventListener("click", () => {
-  const name = prompt("Card Name:");
-  if(!name) return;
-  state.accounts.credit.push({ id: uid(), name });
-  markDirty();
-  render();
-});
+  if(ghConfigured()){
+    loadFromGitHub();
+  }
 
-// Settings Modal
-const overlay = document.getElementById("settingsOverlay");
-document.getElementById("settingsToggleBtn").addEventListener("click", () => {
-  document.getElementById("ghTokenInput").value = ghToken;
-  overlay.classList.add("open");
-});
-document.getElementById("closeSettingsBtn").addEventListener("click", () => overlay.classList.remove("open"));
+  // Toggle Section Collapse
+  document.querySelectorAll(".block-head").forEach(head => {
+    head.addEventListener("click", () => {
+      const parent = head.parentElement;
+      parent.classList.toggle("open");
+    });
+  });
 
-document.getElementById("saveGhBtn").addEventListener("click", () => {
-  ghToken = document.getElementById("ghTokenInput").value.trim();
-  localStorage.setItem(LS_TOKEN, ghToken);
-  saveToGitHub();
-});
+  // Settings Modal
+  const modal = document.getElementById("settingsOverlay");
+  document.getElementById("settingsToggleBtn").addEventListener("click", () => {
+    document.getElementById("ghTokenInput").value = ghToken;
+    modal.classList.add("open");
+  });
+  document.getElementById("closeSettingsBtn").addEventListener("click", () => {
+    modal.classList.remove("open");
+  });
 
-document.getElementById("loadGhBtn").addEventListener("click", loadFromGitHub);
-
-// Backup Import / Export
-document.getElementById("exportBtn").addEventListener("click", () => {
-  const blob = new Blob([JSON.stringify(state, null, 2)], {type: "application/json"});
-  const a = document.createElement("a");
-  a.href = URL.createObjectURL(blob);
-  a.download = `networth-backup-${currentMonthKey()}.json`;
-  a.click();
-});
-
-document.getElementById("importBtn").addEventListener("click", () => document.getElementById("importFile").click());
-document.getElementById("importFile").addEventListener("change", e => {
-  const file = e.target.files[0];
-  if(!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    try {
-      state = Object.assign(structuredClone(DEFAULT_STATE), JSON.parse(ev.target.result));
+  // Add Month Button
+  document.getElementById("addMonthBtn").addEventListener("click", () => {
+    const key = prompt("Enter year and month (YYYY-MM):", currentMonthKey());
+    if(!key || !/^\d{4}-\d{2}$/.test(key)) return;
+    if(!state.months[key]){
+      state.months[key] = { balances: {}, notes: "" };
       markDirty();
       render();
-      alert("Import successful!");
-    } catch(err) {
-      alert("Invalid backup JSON file.");
     }
-  };
-  reader.readAsText(file);
-});
+  });
 
-document.getElementById("scrollTop").addEventListener("click", e => {
-  e.preventDefault();
-  window.scrollTo({top: 0, behavior: "smooth"});
-});
+  // Add Recurring Expense
+  document.getElementById("addRecurBtn").addEventListener("click", () => {
+    state.recurring.push({ id: uid(), name: "", dueEstimate: "", amount: 0 });
+    markDirty();
+    renderRecurTable();
+  });
 
-// Initialization
-render();
-if(ghConfigured()){ loadFromGitHub(); }
+  // Add Bill
+  document.getElementById("addBillBtn").addEventListener("click", () => {
+    state.bills.push({ id: uid(), name: "", amount: 0, dueDate: "", payDate: "", paid: false, notes: "" });
+    markDirty();
+    renderBillTable();
+  });
+
+  // Add Accounts (Settings)
+  document.getElementById("addBankAccountBtn").addEventListener("click", () => {
+    const name = prompt("Enter bank account name:");
+    if(!name) return;
+    state.accounts.bank.push({ id: uid(), name });
+    markDirty();
+    render();
+  });
+
+  document.getElementById("addCreditAccountBtn").addEventListener("click", () => {
+    const name = prompt("Enter credit card name:");
+    if(!name) return;
+    state.accounts.credit.push({ id: uid(), name });
+    markDirty();
+    render();
+  });
+
+  // Handle Input Changes & Button Actions
+  document.addEventListener("input", e => {
+    const target = e.target;
+    const kind = target.getAttribute("data-kind");
+
+    if(kind === "balance"){
+      const key = target.getAttribute("data-month");
+      const acct = target.getAttribute("data-account");
+      const rawVal = parseMoney(target.value);
+      state.months[key].balances[acct] = rawVal;
+      markDirty();
+      renderHero();
+      // Update totals live in table row
+      const monthRow = target.closest("tr");
+      if(monthRow){
+        const totals = monthTotals(key);
+        const totalCell = monthRow.querySelector(".total-cell");
+        if(totalCell) totalCell.textContent = fmtMoney(totals.net);
+      }
+    } else if(kind === "notes"){
+      const key = target.getAttribute("data-month");
+      state.months[key].notes = target.value;
+      markDirty();
+    } else if(kind === "recur-name"){
+      updateRecur(target.getAttribute("data-id"), "name", target.value);
+    } else if(kind === "recur-due"){
+      updateRecur(target.getAttribute("data-id"), "dueEstimate", target.value);
+    } else if(kind === "recur-amount"){
+      updateRecur(target.getAttribute("data-id"), "amount", parseMoney(target.value));
+    } else if(kind === "bill-name"){
+      updateBill(target.getAttribute("data-id"), "name", target.value);
+    } else if(kind === "bill-amount"){
+      updateBill(target.getAttribute("data-id"), "amount", parseMoney(target.value));
+    } else if(kind === "bill-due"){
+      updateBill(target.getAttribute("data-id"), "dueDate", target.value);
+    } else if(kind === "bill-pay"){
+      updateBill(target.getAttribute("data-id"), "payDate", target.value);
+    } else if(kind === "bill-paid"){
+      updateBill(target.getAttribute("data-id"), "paid", target.checked);
+    } else if(kind === "bill-notes"){
+      updateBill(target.getAttribute("data-id"), "notes", target.value);
+    } else if(kind === "acct-name"){
+      const group = target.getAttribute("data-group");
+      const id = target.getAttribute("data-id");
+      const acct = state.accounts[group].find(a => a.id === id);
+      if(acct){ acct.name = target.value; markDirty(); }
+    }
+  });
+
+  // Re-format currency on focusout / blur
+  document.addEventListener("focusout", e => {
+    const kind = e.target.getAttribute("data-kind");
+    if(kind === "balance" || kind === "recur-amount" || kind === "bill-amount"){
+      const num = parseMoney(e.target.value);
+      e.target.value = e.target.value.trim() !== "" ? fmtMoney(num) : "";
+    }
+  });
+
+  document.addEventListener("click", e => {
+    const btn = e.target.closest("button[data-action]");
+    if(!btn) return;
+    const action = btn.getAttribute("data-action");
+
+    if(action === "delete-month"){
+      const key = btn.getAttribute("data-month");
+      if(confirm(`Delete ${monthLabel(key)}?`)){
+        delete state.months[key];
+        markDirty();
+        render();
+      }
+    } else if(action === "delete-recur"){
+      const id = btn.getAttribute("data-id");
+      state.recurring = state.recurring.filter(r => r.id !== id);
+      markDirty();
+      renderRecurTable();
+    } else if(action === "delete-bill"){
+      const id = btn.getAttribute("data-id");
+      state.bills = state.bills.filter(b => b.id !== id);
+      markDirty();
+      renderBillTable();
+    } else if(action === "delete-acct"){
+      const group = btn.getAttribute("data-group");
+      const id = btn.getAttribute("data-id");
+      if(confirm("Remove account? Saved balances for this account will be removed.")){
+        state.accounts[group] = state.accounts[group].filter(a => a.id !== id);
+        Object.keys(state.months).forEach(m => {
+          delete state.months[m].balances[id];
+        });
+        markDirty();
+        render();
+      }
+    }
+  });
+
+  // Save GitHub Settings
+  document.getElementById("saveGhBtn").addEventListener("click", () => {
+    ghToken = document.getElementById("ghTokenInput").value.trim();
+    localStorage.setItem(LS_TOKEN, ghToken);
+    saveToGitHub();
+  });
+
+  // Load from GitHub Button
+  document.getElementById("loadGhBtn").addEventListener("click", () => {
+    ghToken = document.getElementById("ghTokenInput").value.trim();
+    localStorage.setItem(LS_TOKEN, ghToken);
+    loadFromGitHub();
+  });
+
+  // Export Backup
+  document.getElementById("exportBtn").addEventListener("click", () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state, null, 2));
+    const dlAnchor = document.createElement("a");
+    dlAnchor.setAttribute("href", dataStr);
+    dlAnchor.setAttribute("download", `networth-backup-${new Date().toISOString().slice(0,10)}.json`);
+    document.body.appendChild(dlAnchor);
+    dlAnchor.click();
+    dlAnchor.remove();
+  });
+
+  // Import Backup
+  const importFile = document.getElementById("importFile");
+  document.getElementById("importBtn").addEventListener("click", () => importFile.click());
+  importFile.addEventListener("change", e => {
+    const file = e.target.files[0];
+    if(!file) return;
+    const reader = new FileReader();
+    reader.onload = evt => {
+      try{
+        const parsed = JSON.parse(evt.target.result);
+        state = Object.assign(structuredClone(DEFAULT_STATE), parsed);
+        markDirty();
+        render();
+        alert("Backup imported successfully!");
+      }catch(err){
+        alert("Invalid JSON file.");
+      }
+    };
+    reader.readAsText(file);
+  });
+
+  document.getElementById("scrollTop").addEventListener("click", e => {
+    e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+
+});
 
 </script>
 </body>
