@@ -122,17 +122,28 @@ button.icon-btn:hover{ border-color:var(--line-strong); background:var(--blue-pa
 .stat.down .value{ color:var(--danger); }
 .stat .foot{ font-size:12px; color:var(--ink-faint); margin-top:4px; }
 
+/* LAYOUT GRID FOR MODULES */
+.modules-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
 /* SECTION BLOCKS */
 section.block{
   background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md);
   margin-bottom:20px; box-shadow:var(--shadow);
+}
+.modules-grid section.block{
+  margin-bottom:0;
 }
 .block-head{
   display:flex; align-items:center; justify-content:space-between; gap:12px;
   padding:12px 14px; cursor:pointer; user-select:none;
 }
 .block-head h2{ font-size:16px; margin:0; font-weight:700; font-family:'Libre Franklin',sans-serif; color:var(--navy); }
-.block-head .block-sub{ font-size:12.5px; color:var(--ink-muted); font-weight:400; margin-left:8px; }
+.block-head .block-sub{ font-size:12.5px; color:var(--ink-muted); font-weight:400; margin-left:8px; display:block; }
 .block-head .chev{ transition:transform .15s ease; color:var(--ink-faint); flex:none; }
 section.block.open .block-head .chev{ transform:rotate(90deg); }
 .block-body{ padding:0 12px 14px; display:none; }
@@ -179,7 +190,8 @@ table.tiers input:hover, table.tiers input:focus{ border-color:var(--line); back
 
 /* DATA TABLES */
 .table-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius-sm); }
-table.data{ width:100%; border-collapse:collapse; font-size:13.5px; min-width:640px; }
+table.data{ width:100%; border-collapse:collapse; font-size:13.5px; }
+#monthTable{ min-width:640px; }
 table.data th{
   position:sticky; top:0; background:var(--blue-pale); text-align:left; font-weight:600;
   color:var(--navy); font-size:11.5px; text-transform:uppercase; letter-spacing:.03em;
@@ -187,46 +199,42 @@ table.data th{
 }
 table.data th.group{ text-align:center; background:var(--blue-soft); }
 
-/* Added moderate padding back to cells */
 table.data td{
   padding:6px 8px; border-bottom:1px solid var(--line); white-space:nowrap;
   font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums;
 }
-table.data td.label-cell{ font-family:'Source Sans 3'; white-space:normal; min-width:100px; padding-left:10px; padding-right:10px; }
+table.data td.label-cell{ font-family:'Source Sans 3'; white-space:normal; min-width:90px; padding-left:8px; padding-right:8px; }
 table.data th.col-end, table.data td.col-end{ border-right:2px solid var(--line-strong); }
-table.data th.notes-col, table.data td.notes-col{ min-width:200px; }
+table.data th.notes-col, table.data td.notes-col{ min-width:140px; }
 table.data tr.current-month{ background:var(--blue-soft); }
 table.data tr:hover{ background:var(--blue-pale); }
 
-/* Remove Chrome, Safari, Edge, Opera spin buttons */
+/* Remove spin buttons */
 table.data input::-webkit-outer-spin-button,
 table.data input::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
 }
-
-/* Remove Firefox spin buttons */
 table.data input[type=number] {
   -moz-appearance: textfield;
 }
 
-/* Increased internal input/textarea padding */
 table.data input[type=number], table.data input[type=text], table.data input[type=date]{
-  width:100%; min-width:105px; border:1px solid var(--line); border-radius:4px; padding:5px 8px;
+  width:100%; min-width:85px; border:1px solid var(--line); border-radius:4px; padding:5px 6px;
   font-family:'IBM Plex Mono',monospace; font-size:13px; background:var(--bg); color:var(--ink);
 }
 table.data td.label-cell input[type=text]{ font-family:inherit; }
 table.data textarea{
-  width:100%; min-width:140px; min-height:32px; border:1px solid var(--line); border-radius:4px;
-  padding:5px 8px; font-family:inherit; font-size:13px; background:var(--bg); color:var(--ink); resize:vertical;
+  width:100%; min-width:110px; min-height:32px; border:1px solid var(--line); border-radius:4px;
+  padding:5px 6px; font-family:inherit; font-size:13px; background:var(--bg); color:var(--ink); resize:vertical;
 }
 
 td.total-cell{ font-weight:700; color:var(--navy); padding-left:10px; padding-right:10px; }
 td.diff-cell{ padding-left:10px; padding-right:10px; }
 td.diff-cell.pos{ color:var(--success); font-weight:700; }
 td.diff-cell.neg{ color:var(--danger); font-weight:700; }
-td.actions-cell{ text-align:center; padding-left:6px; padding-right:6px; }
-td.drag-cell{ cursor:grab; color:var(--ink-faint); text-align:center; width:22px; }
+td.actions-cell{ text-align:center; padding-left:4px; padding-right:4px; }
+td.drag-cell{ cursor:grab; color:var(--ink-faint); text-align:center; width:18px; }
 tr.dragging{ opacity:.4; }
 input[type=checkbox]{ width:16px; height:16px; cursor:pointer; }
 .empty-row td{ text-align:center; color:var(--ink-faint); font-family:'Source Sans 3'; padding:16px; }
@@ -248,6 +256,11 @@ input[type=checkbox]{ width:16px; height:16px; cursor:pointer; }
 
 footer{ text-align:center; color:var(--ink-faint); font-size:12px; margin-top:30px; }
 footer a{ color:var(--ink-faint); }
+
+@media (max-width:1024px){
+  .modules-grid { grid-template-columns:1fr; }
+  .modules-grid section.block { margin-bottom:20px; }
+}
 
 @media (max-width:760px){
   .hero{ grid-template-columns:1fr; }
@@ -301,38 +314,43 @@ footer a{ color:var(--ink-faint); }
     </div>
   </section>
 
-  <!-- ===================== RECURRING EXPENSES ===================== -->
-  <section class="block open" id="recurBlock">
-    <div class="block-head" data-toggle="recurBlock">
-      <h2>Recurring Expenses<span class="block-sub">Expenses that come up regularly</span></h2>
-      <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </div>
-    <div class="block-body">
-      <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
-        <button class="btn primary" id="addRecurBtn">+ Add expense</button>
+  <!-- ===================== SIDE-BY-SIDE MODULES ===================== -->
+  <div class="modules-grid">
+    
+    <!-- RECURRING EXPENSES -->
+    <section class="block open" id="recurBlock">
+      <div class="block-head" data-toggle="recurBlock">
+        <h2>Recurring Expenses<span class="block-sub">Expenses that come up regularly</span></h2>
+        <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <div class="table-scroll">
-        <table class="data" id="recurTable"></table>
+      <div class="block-body">
+        <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+          <button class="btn primary" id="addRecurBtn">+ Add expense</button>
+        </div>
+        <div class="table-scroll">
+          <table class="data" id="recurTable"></table>
+        </div>
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- ===================== BILL PAYMENT PLANNER ===================== -->
-  <section class="block open" id="billBlock">
-    <div class="block-head" data-toggle="billBlock">
-      <h2>Bill Payment Planner<span class="block-sub">Drag rows to line bills up with paydays</span></h2>
-      <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    </div>
-    <div class="block-body">
-      <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
-        <button class="btn primary" id="addBillBtn">+ Add bill</button>
+    <!-- BILL PAYMENT PLANNER -->
+    <section class="block open" id="billBlock">
+      <div class="block-head" data-toggle="billBlock">
+        <h2>Bill Payment Planner<span class="block-sub">Drag rows to line bills up with paydays</span></h2>
+        <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <div class="table-scroll">
-        <table class="data" id="billTable"></table>
+      <div class="block-body">
+        <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+          <button class="btn primary" id="addBillBtn">+ Add bill</button>
+        </div>
+        <div class="table-scroll">
+          <table class="data" id="billTable"></table>
+        </div>
+        <p class="hint">Drag the ⠿ handle to reorder rows relative to paychecks.</p>
       </div>
-      <p class="hint">Drag the ⠿ handle to reorder rows as you move payments around relative to your paychecks.</p>
-    </div>
-  </section>
+    </section>
+
+  </div>
 
   <footer>
     Your own numbers, kept in your browser and optionally synced to your private GitHub repository.
@@ -637,7 +655,7 @@ function renderRecurTable(){
     state.recurring.forEach(item => {
       rows += `<tr data-id="${item.id}">
         <td class="label-cell"><input type="text" data-kind="recur-name" data-id="${item.id}" value="${escapeHtml(item.name)}" placeholder="e.g. Car insurance"></td>
-        <td><input type="text" data-kind="recur-due" data-id="${item.id}" value="${escapeHtml(item.dueEstimate)}" placeholder="e.g. 15th of month"></td>
+        <td><input type="text" data-kind="recur-due" data-id="${item.id}" value="${escapeHtml(item.dueEstimate)}" placeholder="e.g. 15th"></td>
         <td><input type="text" data-kind="recur-amount" data-id="${item.id}" value="${item.amount !== undefined && item.amount !== "" ? fmtMoney(item.amount) : ""}" placeholder="$ 0.00"></td>
         <td class="actions-cell"><button class="btn small danger" data-action="delete-recur" data-id="${item.id}" title="Remove">✕</button></td>
       </tr>`;
@@ -653,7 +671,7 @@ function renderRecurTable(){
 function renderBillTable(){
   const table = document.getElementById("billTable");
   let head = `<thead><tr>
-      <th></th><th>Bill</th><th>Amount</th><th>Due Date</th><th>Planned Pay Date</th><th>Paid</th><th>Notes</th><th></th>
+      <th></th><th>Bill</th><th>Amount</th><th>Due Date</th><th>Pay Date</th><th>Paid</th><th>Notes</th><th></th>
     </tr></thead>`;
   let rows = "";
   if(state.bills.length === 0){
