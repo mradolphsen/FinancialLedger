@@ -67,7 +67,7 @@ body{
   -webkit-font-smoothing:antialiased;
 }
 
-/* Reduced sidewall margin to maximize table width */
+/* Maximize layout width */
 .wrap{ max-width:1280px; margin:0 auto; padding:24px 8px 80px; }
 
 a{ color:var(--navy); }
@@ -191,7 +191,7 @@ table.tiers input:hover, table.tiers input:focus{ border-color:var(--line); back
 /* DATA TABLES */
 .table-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius-sm); }
 table.data{ width:100%; border-collapse:collapse; font-size:13.5px; }
-#monthTable{ min-width:640px; }
+#monthTable{ min-width:850px; }
 table.data th{
   position:sticky; top:0; background:var(--blue-pale); text-align:left; font-weight:600;
   color:var(--navy); font-size:11.5px; text-transform:uppercase; letter-spacing:.03em;
@@ -206,7 +206,7 @@ table.data td{
 table.data td.label-cell{ font-family:'Source Sans 3'; white-space:normal; min-width:90px; padding-left:8px; padding-right:8px; }
 table.data th.col-end, table.data td.col-end{ border-right:2px solid var(--line-strong); }
 
-/* EXPANDED NOTES COLUMN & RIGHT-LEFT SCROLL ENABLER */
+/* NOTES COLUMN WIDE FORMATTING */
 table.data th.notes-col, table.data td.notes-col{
   min-width:320px;
   width:360px;
@@ -225,18 +225,32 @@ table.data input[type=number] {
   -moz-appearance: textfield;
 }
 
+/* EXPANDED COLUMN INPUT WIDTHS (Prevents numbers from getting cut off) */
 table.data input[type=number], table.data input[type=text], table.data input[type=date]{
-  width:100%; min-width:85px; border:1px solid var(--line); border-radius:4px; padding:5px 6px;
+  width:100%; min-width:125px; border:1px solid var(--line); border-radius:4px; padding:5px 6px;
   font-family:'IBM Plex Mono',monospace; font-size:13px; background:var(--bg); color:var(--ink);
 }
+
+/* READ-ONLY FIELD STYLING */
+table.data input[readonly]{
+  background:transparent;
+  border-color:transparent;
+  color:var(--ink-muted);
+  cursor:default;
+  font-weight:500;
+}
+table.data input[readonly]:focus{
+  outline:none;
+}
+
 table.data td.label-cell input[type=text]{ font-family:inherit; }
 table.data textarea{
   width:100%; min-width:110px; min-height:38px; border:1px solid var(--line); border-radius:4px;
   padding:5px 6px; font-family:inherit; font-size:13px; background:var(--bg); color:var(--ink); resize:vertical;
 }
 
-td.total-cell{ font-weight:700; color:var(--navy); padding-left:10px; padding-right:10px; }
-td.diff-cell{ padding-left:10px; padding-right:10px; }
+td.total-cell{ font-weight:700; color:var(--navy); padding-left:10px; padding-right:10px; min-width:120px; }
+td.diff-cell{ padding-left:10px; padding-right:10px; min-width:120px; }
 td.diff-cell.pos{ color:var(--success); font-weight:700; }
 td.diff-cell.neg{ color:var(--danger); font-weight:700; }
 td.actions-cell{ text-align:center; padding-left:4px; padding-right:4px; }
@@ -313,7 +327,7 @@ footer a{ color:var(--ink-faint); }
       <div class="table-scroll" style="margin-top:12px;">
         <table class="data" id="monthTable"></table>
       </div>
-      <p class="hint">Net worth = total bank account balances minus total credit card balances for that month. Months are automatically added as time progresses.</p>
+      <p class="hint">Net worth = total bank account balances minus total credit card balances for that month. Balances lock automatically after 10 days into the new month. Notes remain permanently editable.</p>
     </div>
   </section>
 
@@ -500,7 +514,7 @@ function markDirty(){
 }
 
 /* ============================================================
-   AUTOMATIC MONTH MANAGEMENT
+   AUTOMATIC MONTH MANAGEMENT & EDITABILITY LOGIC
    ============================================================ */
 
 function ensureCurrentMonthExists(){
@@ -511,6 +525,32 @@ function ensureCurrentMonthExists(){
     state.months[curKey] = { balances: {}, notes: "" };
     markDirty();
   }
+}
+
+function isMonthEditable(key){
+  const now = new Date();
+  const curY = now.getFullYear();
+  const curM = now.getMonth() + 1; // 1-12
+  const curKey = curY + "-" + String(curM).padStart(2, "0");
+
+  // Current month is always editable
+  if(key === curKey) return true;
+
+  // Calculate previous month's key
+  let prevY = curY;
+  let prevM = curM - 1;
+  if(prevM === 0){
+    prevM = 12;
+    prevY -= 1;
+  }
+  const prevKey = prevY + "-" + String(prevM).padStart(2, "0");
+
+  // Previous month is editable ONLY for the first 10 days of the current month (days 1-10)
+  if(key === prevKey && now.getDate() <= 10) {
+    return true;
+  }
+
+  return false;
 }
 
 /* ============================================================
@@ -597,7 +637,7 @@ function renderHero(){
     <div class="stat">
       <div class="label">Total credit card debt</div>
       <div class="value">${fmtMoney(latest.credit)}</div>
-      <div class="foot">as of ${monthLabel(latestKey)}</div>
+      <div class="foot">${monthLabel(latestKey)}</div>
     </div>
   `;
 }
@@ -638,11 +678,13 @@ function renderMonthTable(){
       const diff = prevTotals ? totals.net - prevTotals.net : null;
       const diffClass = diff === null ? "" : (diff > 0 ? "pos" : (diff < 0 ? "neg" : ""));
       const diffText = diff === null ? "—" : (diff >= 0 ? "+" : "") + fmtMoney(diff);
+      const editable = isMonthEditable(key);
+      const readonlyAttr = editable ? "" : "readonly";
 
       rows += `<tr class="${key === thisMonth ? "current-month" : ""}" data-month="${key}">
         <td class="label-cell col-end"><strong>${monthLabel(key)}</strong></td>
-        ${bankAccts.map((a,i) => `<td class="${i === bankAccts.length-1 ? "col-end" : ""}"><input type="text" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] !== undefined && entry.balances[a.id] !== "" ? fmtMoney(entry.balances[a.id]) : ""}"></td>`).join("")}
-        ${creditAccts.map((a,i) => `<td class="${i === creditAccts.length-1 ? "col-end" : ""}"><input type="text" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] !== undefined && entry.balances[a.id] !== "" ? fmtMoney(entry.balances[a.id]) : ""}"></td>`).join("")}
+        ${bankAccts.map((a,i) => `<td class="${i === bankAccts.length-1 ? "col-end" : ""}"><input type="text" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] !== undefined && entry.balances[a.id] !== "" ? fmtMoney(entry.balances[a.id]) : ""}" ${readonlyAttr}></td>`).join("")}
+        ${creditAccts.map((a,i) => `<td class="${i === creditAccts.length-1 ? "col-end" : ""}"><input type="text" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] !== undefined && entry.balances[a.id] !== "" ? fmtMoney(entry.balances[a.id]) : ""}" ${readonlyAttr}></td>`).join("")}
         <td class="total-cell col-end">${fmtMoney(totals.net)}</td>
         <td class="diff-cell col-end ${diffClass}">${diffText}</td>
         <td class="notes-col"><textarea data-kind="notes" data-month="${key}" placeholder="Notes…">${escapeHtml(entry.notes || "")}</textarea></td>
@@ -967,6 +1009,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if(kind === "balance"){
       const key = target.getAttribute("data-month");
+
+      // Guard check to ignore edits if month is read-only
+      if(!isMonthEditable(key)) return;
+
       const acct = target.getAttribute("data-account");
       const rawVal = parseMoney(target.value);
       state.months[key].balances[acct] = rawVal;
