@@ -262,7 +262,6 @@
       "notes": "Extra Pay Control Arms ($700)"
     }
   },
-  "monthOrder": [],
   "recurring": [
     {
       "id": "hm85oom",
@@ -318,5 +317,53 @@
       "notes": ""
     }
   ],
+  "payTracker": [
+    {
+      "id": "f2v05zx",
+      "startMonth": "Jul 2024",
+      "company": "Mayo Clinic",
+      "department": "CVRU",
+      "role": "ACRC",
+      "basePay": 23.48,
+      "myHourly": 23.77
+    },
+    {
+      "id": "t1gv1fo",
+      "startMonth": "Mar 2025 ",
+      "company": "Mayo Clinic",
+      "department": "CVRU",
+      "role": "ACRC",
+      "basePay": 24.07,
+      "myHourly": 24.72
+    },
+    {
+      "id": "n2tq861",
+      "startMonth": "Aug 2025",
+      "company": "Mayo Clinic",
+      "department": "CVRU",
+      "role": "CRC",
+      "basePay": 27.44,
+      "myHourly": 28.3
+    },
+    {
+      "id": "l57teoe",
+      "startMonth": "Mar 2026 - 3.5% annual",
+      "company": "Mayo Clinic",
+      "department": "CVRU",
+      "role": "CRC",
+      "basePay": 27.99,
+      "myHourly": 29.29
+    },
+    {
+      "id": "dh7im50",
+      "startMonth": "Oct 2026",
+      "company": "Mayo Clinic",
+      "department": "CVRU",
+      "role": "Cert CRC",
+      "basePay": 27.99,
+      "myHourly": 30.29
+    }
+  ],
+  "monthOrder": [],
   "savedAt": "2026-09-06T01:32:42.827Z"
 }
