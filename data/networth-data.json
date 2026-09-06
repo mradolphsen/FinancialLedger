@@ -279,7 +279,7 @@
         "checking": 10,
         "savings": 3738.18,
         "usbank_ef": 11004.2,
-        "ally_ef": 11004.21,
+        "ally_ef": 0,
         "usbank_cc": 350,
         "target_cc": 12.32,
         "scheels_cc": 1200
