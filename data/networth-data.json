@@ -12,10 +12,6 @@
       {
         "id": "usbank_ef",
         "name": "Emergency Fund"
-      },
-      {
-        "id": "ally_ef",
-        "name": "Ally Bank EF"
       }
     ],
     "credit": [
@@ -36,5 +32,5 @@
   "months": {},
   "recurring": [],
   "bills": [],
-  "savedAt": "2026-09-06T01:20:52.326Z"
+  "savedAt": "2026-09-06T01:20:55.442Z"
 }
