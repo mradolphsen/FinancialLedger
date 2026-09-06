@@ -345,7 +345,8 @@
       "department": "CVRU",
       "role": "CRC",
       "basePay": 27.44,
-      "myHourly": 28.3
+      "myHourly": 28.3,
+      "compRatio": "82.51"
     },
     {
       "id": "l57teoe",
