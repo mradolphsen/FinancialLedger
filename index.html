@@ -1,3 +1,10 @@
+Here is the full, updated single-file HTML code with the fix integrated.
+
+### Core Change Applied
+
+* **Targeted DOM Updates:** Updated `updatePayRecord()` so that typing in any field modifies state and updates calculated cells (`% Above Base`, `Pre Tax`, `Post Tax`, etc.) directly on the active row element instead of calling `renderPayTable()`. This prevents the input element from re-rendering and stealing text cursor focus while you type.
+
+```html
 <!doctype html>
 <html lang="en">
 <head>
@@ -1359,3 +1366,5 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
+
+```
