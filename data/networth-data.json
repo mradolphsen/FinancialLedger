@@ -359,7 +359,8 @@
       "role": "CRC",
       "basePay": 27.99,
       "myHourly": 29.29,
-      "compRatio": "83.71"
+      "compRatio": "83.71",
+      "positionInfo": "CRC"
     },
     {
       "id": "dh7im50",
