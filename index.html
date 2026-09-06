@@ -488,7 +488,7 @@ function fmtMoney(n){
 }
 
 function sortedMonths(){
-  return Object.keys(state.months).sort();
+  return Object.keys(state.months).sort().reverse();
 }
 
 function monthTotals(key){
@@ -581,7 +581,7 @@ function renderMonthTable(){
     months.forEach((key, idx) => {
       const entry = state.months[key];
       const totals = monthTotals(key);
-      const prevTotals = idx > 0 ? monthTotals(months[idx-1]) : null;
+      const prevTotals = idx < months.length - 1 ? monthTotals(months[idx+1]) : null;
       const diff = prevTotals ? totals.net - prevTotals.net : null;
       const diffClass = diff === null ? "" : (diff > 0 ? "pos" : (diff < 0 ? "neg" : ""));
       const diffText = diff === null ? "—" : (diff >= 0 ? "+" : "") + fmtMoney(diff);
