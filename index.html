@@ -590,8 +590,8 @@ function renderMonthTable(){
 
       rows += `<tr class="${key === thisMonth ? "current-month" : ""}" data-month="${key}">
         <td class="label-cell col-end"><strong>${monthLabel(key)}</strong></td>
-        ${bankAccts.map((a,i) => `<td class="${i === bankAccts.length-1 ? "col-end" : ""}"><input type="number" step="0.01" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] ?? ""}"></td>`).join("")}
-        ${creditAccts.map((a,i) => `<td class="${i === creditAccts.length-1 ? "col-end" : ""}"><input type="number" step="0.01" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] ?? ""}"></td>`).join("")}
+        ${bankAccts.map((a,i) => `<td class="${i === bankAccts.length-1 ? "col-end" : ""}"><input type="number" step="0.01" data-kind="currency" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] ?? ""}"></td>`).join("")}
+        ${creditAccts.map((a,i) => `<td class="${i === creditAccts.length-1 ? "col-end" : ""}"><input type="number" step="0.01" data-kind="currency" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] ?? ""}"></td>`).join("")}
         <td class="total-cell col-end">${fmtMoney(totals.net)}</td>
         <td class="diff-cell col-end ${diffClass}">${diffText}</td>
         <td class="notes-col"><textarea data-kind="notes" data-month="${key}" placeholder="Notes…">${escapeHtml(entry.notes || "")}</textarea></td>
