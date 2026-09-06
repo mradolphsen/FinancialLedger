@@ -38,7 +38,7 @@
       "balances": {
         "checking": 56.12,
         "savings": 2302.28,
-        "usbank_ef": 800.0,
+        "usbank_ef": 800,
         "ally_ef": 0,
         "usbank_cc": 0,
         "target_cc": 0,
@@ -50,7 +50,7 @@
       "balances": {
         "checking": 115.62,
         "savings": 2340.01,
-        "usbank_ef": 700.0,
+        "usbank_ef": 700,
         "ally_ef": 0,
         "usbank_cc": 0,
         "target_cc": 0,
@@ -62,7 +62,7 @@
       "balances": {
         "checking": 107.32,
         "savings": 3354.78,
-        "usbank_ef": 5000.0,
+        "usbank_ef": 5000,
         "ally_ef": 0,
         "usbank_cc": 0,
         "target_cc": 0,
@@ -74,7 +74,7 @@
       "balances": {
         "checking": 23.95,
         "savings": 2920.56,
-        "usbank_ef": 6000.0,
+        "usbank_ef": 6000,
         "ally_ef": 0,
         "usbank_cc": 0,
         "target_cc": 0,
@@ -122,11 +122,11 @@
       "balances": {
         "checking": 98.53,
         "savings": 1515.32,
-        "usbank_ef": 8100.0,
+        "usbank_ef": 8100,
         "ally_ef": 0,
         "usbank_cc": 265.33,
         "target_cc": 256.65,
-        "scheels_cc": 772.0
+        "scheels_cc": 772
       },
       "notes": ""
     },
@@ -136,7 +136,7 @@
         "savings": 2528.11,
         "usbank_ef": 8100.06,
         "ally_ef": 0,
-        "usbank_cc": 0.0,
+        "usbank_cc": 0,
         "target_cc": 124.9,
         "scheels_cc": 773.9
       },
@@ -146,7 +146,7 @@
       "balances": {
         "checking": 96.15,
         "savings": 1785.03,
-        "usbank_ef": 9200.0,
+        "usbank_ef": 9200,
         "ally_ef": 0,
         "usbank_cc": 170.94,
         "target_cc": 10.45,
@@ -173,7 +173,7 @@
         "usbank_ef": 10000.13,
         "ally_ef": 0,
         "usbank_cc": 821.11,
-        "target_cc": 0.0,
+        "target_cc": 0,
         "scheels_cc": 732.63
       },
       "notes": ""
@@ -183,9 +183,9 @@
         "checking": 21.08,
         "savings": 2140.29,
         "usbank_ef": 0,
-        "ally_ef": 10000.0,
+        "ally_ef": 10000,
         "usbank_cc": 714.95,
-        "target_cc": 0.0,
+        "target_cc": 0,
         "scheels_cc": 430.07
       },
       "notes": ""
@@ -197,7 +197,7 @@
         "usbank_ef": 0,
         "ally_ef": 10019.33,
         "usbank_cc": 261.76,
-        "target_cc": 0.0,
+        "target_cc": 0,
         "scheels_cc": 506.7
       },
       "notes": "Tax Return"
@@ -209,7 +209,7 @@
         "usbank_ef": 0,
         "ally_ef": 11044.08,
         "usbank_cc": 558.53,
-        "target_cc": 0.0,
+        "target_cc": 0,
         "scheels_cc": 620.14
       },
       "notes": "Raise & Extra Pay"
@@ -221,7 +221,7 @@
         "usbank_ef": 0,
         "ally_ef": 11073.66,
         "usbank_cc": 335.21,
-        "target_cc": 0.0,
+        "target_cc": 0,
         "scheels_cc": 545.44
       },
       "notes": ""
@@ -233,7 +233,7 @@
         "usbank_ef": 0,
         "ally_ef": 11101.84,
         "usbank_cc": 994.68,
-        "target_cc": 0.0,
+        "target_cc": 0,
         "scheels_cc": 1354.65
       },
       "notes": "New Phone"
@@ -276,13 +276,13 @@
     },
     "2026-09": {
       "balances": {
-        "checking": 10.0,
+        "checking": 10,
         "savings": 3738.18,
         "usbank_ef": 0,
         "ally_ef": 11004.21,
-        "usbank_cc": 350.0,
+        "usbank_cc": 350,
         "target_cc": 12.32,
-        "scheels_cc": 1200.0
+        "scheels_cc": 1200
       },
       "notes": "Extra Pay & Control Arms"
     }
@@ -292,14 +292,14 @@
       "id": "hm85oom",
       "name": "Rent",
       "dueEstimate": "1st",
-      "amount": 1281.0,
+      "amount": 1281,
       "notes": ""
     },
     {
       "id": "6ho2yz9",
       "name": "RPU",
       "dueEstimate": "1st - 3rd",
-      "amount": 75.0,
+      "amount": 75,
       "notes": ""
     },
     {
@@ -313,24 +313,34 @@
       "id": "0uq9qoo",
       "name": "Ed Financial",
       "dueEstimate": "8th",
-      "amount": 137.0,
+      "amount": 137,
       "notes": ""
     },
     {
       "id": "91rv9r5",
       "name": "Century Link",
       "dueEstimate": "12th",
-      "amount": 49.0,
+      "amount": 49,
       "notes": ""
     },
     {
       "id": "c9avk5h",
       "name": "College Ave",
       "dueEstimate": "14th",
-      "amount": 355.0,
+      "amount": 355,
       "notes": ""
     }
   ],
-  "bills": [],
-  "savedAt": "2026-09-06T00:00:00.000Z"
+  "bills": [
+    {
+      "id": "9mpsgv1",
+      "name": "",
+      "amount": null,
+      "dueDate": "",
+      "payDate": "",
+      "paid": false,
+      "notes": ""
+    }
+  ],
+  "savedAt": "2026-09-06T01:32:42.827Z"
 }
