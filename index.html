@@ -265,7 +265,7 @@ table.data input[type=number] {
 
 /* EXPANDED COLUMN INPUT WIDTHS */
 table.data input[type=number], table.data input[type=text], table.data input[type=date]{
-  width:100%; min-width:100px; border:1px solid var(--line); border-radius:4px; padding:5px 6px;
+  width:100%; min-width:90px; border:1px solid var(--line); border-radius:4px; padding:5px 6px;
   font-family:'IBM Plex Mono',monospace; font-size:13px; background:var(--bg); color:var(--ink);
 }
 
@@ -435,7 +435,7 @@ footer a{ color:var(--ink-faint); }
         <div class="table-scroll">
           <table class="data pay-grid" id="payTable"></table>
         </div>
-        <p class="hint">Calculations: Yearly Pre-Tax = Hourly × 2080 hrs | Yearly Post-Tax = 70% of Pre-Tax | Paycheck = Hourly × 80 hrs | Comp-Ratio = (My Hourly / Base Pay) × 100.</p>
+        <p class="hint">Calculations: Yearly Pre-Tax = Hourly × 2080 hrs | Yearly Post-Tax = 70% of Pre-Tax | Paycheck = Hourly × 80 hrs | Comp-Ratio is manually set.</p>
       </div>
     </section>
   </div>
@@ -547,11 +547,10 @@ const DEFAULT_STATE = {
   recurring:[],
   bills:[],
   payTracker:[
-    { id: uid(), startMonth: "Jul 2024", company: "Mayo Clinic", department: "CVRU", role: "ACRC", basePay: 23.48, myHourly: 23.77 },
-    { id: uid(), startMonth: "Mar 2025 - 4% annual", company: "Mayo Clinic", department: "CVRU", role: "ACRC", basePay: 24.07, myHourly: 24.72 },
-    { id: uid(), startMonth: "Aug 2025", company: "Mayo Clinic", department: "CVRU", role: "CRC", basePay: 27.44, myHourly: 28.30 },
-    { id: uid(), startMonth: "Mar 2026 - 3.5% annual", company: "Mayo Clinic", department: "CVRU", role: "CRC", basePay: 27.99, myHourly: 29.29 },
-    { id: uid(), startMonth: "Oct 2026", company: "Mayo Clinic", department: "CVRU", role: "Cert CRC", basePay: 27.99, myHourly: 30.29 }
+    { id: uid(), startMonth: "Jul 2024", positionInfo: "Mayo Clinic / CVRU / ACRC", basePay: 23.48, myHourly: 23.77, compRatio: "82.74" },
+    { id: uid(), startMonth: "Mar 2025 - 4% annual", positionInfo: "Mayo Clinic / CVRU / ACRC", basePay: 24.07, myHourly: 24.72, compRatio: "83.94" },
+    { id: uid(), startMonth: "Aug 2025", positionInfo: "Mayo Clinic / CVRU / CRC", basePay: 27.44, myHourly: 28.30, compRatio: "82.51" },
+    { id: uid(), startMonth: "Mar 2026 - 3.5% annual", positionInfo: "Mayo Clinic / CVRU / CRC", basePay: 27.99, myHourly: 29.29, compRatio: "83.71" }
   ]
 };
 
@@ -871,16 +870,12 @@ function renderPayTable(){
   let head = `<thead>
     <tr>
       <th rowspan="2" class="col-end">Start Month & Year</th>
-      <th colspan="3" class="group col-end">Position Information</th>
+      <th rowspan="2" class="col-end">Position Details</th>
       <th colspan="5" class="group col-end">Hourly Earnings</th>
       <th colspan="2" class="group col-end">Yearly Earnings</th>
       <th colspan="2" class="group col-end">Paycheck Earnings</th>
-      <th rowspan="2"></th>
     </tr>
     <tr>
-      <th>Company</th>
-      <th>Department</th>
-      <th class="col-end">Role</th>
       <th>Base Pay</th>
       <th>My Hourly</th>
       <th>% Above Base</th>
@@ -895,7 +890,7 @@ function renderPayTable(){
 
   let rows = "";
   if(state.payTracker.length === 0){
-    rows = `<tr class="empty-row"><td colspan="14">No pay records tracked yet.</td></tr>`;
+    rows = `<tr class="empty-row"><td colspan="12">No pay records tracked yet.</td></tr>`;
   } else {
     state.payTracker.forEach((row, idx) => {
       const basePay = parseMoney(row.basePay);
@@ -903,7 +898,6 @@ function renderPayTable(){
 
       // Calculations
       const pctAboveBase = basePay > 0 ? ((myHourly - basePay) / basePay) * 100 : 0;
-      const compRatio = basePay > 0 ? (myHourly / basePay) * 100 : 0;
       
       const prevHourly = idx > 0 ? parseMoney(state.payTracker[idx - 1].myHourly) : myHourly;
       const hourlyDiff = idx > 0 ? myHourly - prevHourly : 0;
@@ -915,21 +909,21 @@ function renderPayTable(){
       const prevPaycheckTotal = idx > 0 ? prevHourly * 80 : paycheckTotal;
       const paycheckDiff = idx > 0 ? paycheckTotal - prevPaycheckTotal : 0;
 
+      // Handle condensed position info backward compatibility
+      const posDisplay = row.positionInfo !== undefined ? row.positionInfo : [row.company, row.department, row.role].filter(Boolean).join(" / ");
+
       rows += `<tr data-id="${row.id}">
         <td class="col-end"><input type="text" data-kind="pay-field" data-field="startMonth" data-id="${row.id}" value="${escapeHtml(row.startMonth || "")}"></td>
-        <td><input type="text" data-kind="pay-field" data-field="company" data-id="${row.id}" value="${escapeHtml(row.company || "")}"></td>
-        <td><input type="text" data-kind="pay-field" data-field="department" data-id="${row.id}" value="${escapeHtml(row.department || "")}"></td>
-        <td class="col-end"><input type="text" data-kind="pay-field" data-field="role" data-id="${row.id}" value="${escapeHtml(row.role || "")}"></td>
+        <td class="col-end"><input type="text" data-kind="pay-field" data-field="positionInfo" data-id="${row.id}" value="${escapeHtml(posDisplay)}" placeholder="Company / Dept / Role"></td>
         <td><input type="text" data-kind="pay-field" data-field="basePay" data-id="${row.id}" value="${row.basePay !== undefined ? fmtMoney(row.basePay) : ""}"></td>
         <td><input type="text" class="highlight-hourly" data-kind="pay-field" data-field="myHourly" data-id="${row.id}" value="${row.myHourly !== undefined ? fmtMoney(row.myHourly) : ""}"></td>
         <td><input type="text" readonly value="${pctAboveBase.toFixed(2)}%"></td>
-        <td><input type="text" readonly value="${compRatio.toFixed(2)}"></td>
+        <td><input type="text" data-kind="pay-field" data-field="compRatio" data-id="${row.id}" value="${escapeHtml(row.compRatio || "")}" placeholder="82.74"></td>
         <td class="col-end"><input type="text" readonly value="${fmtMoney(hourlyDiff)}"></td>
         <td><input type="text" readonly value="${fmtMoney(yearlyPre)}"></td>
         <td class="col-end"><input type="text" readonly value="${fmtMoney(yearlyPost)}"></td>
         <td><input type="text" readonly value="${fmtMoney(paycheckTotal)}"></td>
         <td class="col-end"><input type="text" readonly value="${fmtMoney(paycheckDiff)}"></td>
-        <td class="actions-cell"><button class="btn small danger" data-action="delete-pay" data-id="${row.id}" title="Remove">✕</button></td>
       </tr>`;
     });
   }
@@ -1173,11 +1167,10 @@ document.addEventListener("DOMContentLoaded", () => {
     state.payTracker.push({
       id: uid(),
       startMonth: "",
-      company: "",
-      department: "",
-      role: "",
+      positionInfo: "",
       basePay: 0,
-      myHourly: 0
+      myHourly: 0,
+      compRatio: ""
     });
     markDirty();
     renderPayTable();
@@ -1282,11 +1275,6 @@ document.addEventListener("DOMContentLoaded", () => {
       state.bills = state.bills.filter(b => b.id !== id);
       markDirty();
       renderBillTable();
-    } else if(action === "delete-pay"){
-      const id = btn.getAttribute("data-id");
-      state.payTracker = state.payTracker.filter(p => p.id !== id);
-      markDirty();
-      renderPayTable();
     } else if(action === "delete-acct"){
       const group = btn.getAttribute("data-group");
       const id = btn.getAttribute("data-id");
