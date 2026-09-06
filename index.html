@@ -68,7 +68,7 @@ body{
 }
 
 /* Maximize layout width */
-.wrap{ max-width:1280px; margin:0 auto; padding:24px 8px 80px; }
+.wrap{ max-width:1380px; margin:0 auto; padding:24px 8px 80px; }
 
 a{ color:var(--navy); }
 
@@ -229,7 +229,7 @@ table.tiers input:hover, table.tiers input:focus{ border-color:var(--line); back
 /* DATA TABLES */
 .table-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius-sm); }
 table.data{ width:100%; border-collapse:collapse; font-size:13.5px; }
-#monthTable{ min-width:850px; }
+#monthTable, #payTable{ min-width:900px; }
 table.data th{
   position:sticky; top:0; background:var(--blue-pale); text-align:left; font-weight:600;
   color:var(--navy); font-size:11.5px; text-transform:uppercase; letter-spacing:.03em;
@@ -265,7 +265,7 @@ table.data input[type=number] {
 
 /* EXPANDED COLUMN INPUT WIDTHS */
 table.data input[type=number], table.data input[type=text], table.data input[type=date]{
-  width:100%; min-width:125px; border:1px solid var(--line); border-radius:4px; padding:5px 6px;
+  width:100%; min-width:100px; border:1px solid var(--line); border-radius:4px; padding:5px 6px;
   font-family:'IBM Plex Mono',monospace; font-size:13px; background:var(--bg); color:var(--ink);
 }
 
@@ -287,8 +287,8 @@ table.data textarea{
   padding:5px 6px; font-family:inherit; font-size:13px; background:var(--bg); color:var(--ink); resize:vertical;
 }
 
-td.total-cell{ font-weight:700; color:var(--navy); padding-left:10px; padding-right:10px; min-width:120px; }
-td.diff-cell{ padding-left:10px; padding-right:10px; min-width:120px; }
+td.total-cell{ font-weight:700; color:var(--navy); padding-left:10px; padding-right:10px; min-width:110px; }
+td.diff-cell{ padding-left:10px; padding-right:10px; min-width:110px; }
 td.diff-cell.pos{ color:var(--success); font-weight:700; }
 td.diff-cell.neg{ color:var(--danger); font-weight:700; }
 td.actions-cell{ text-align:center; padding-left:4px; padding-right:4px; }
@@ -296,6 +296,10 @@ td.drag-cell{ cursor:grab; color:var(--ink-faint); text-align:center; width:18px
 tr.dragging{ opacity:.4; }
 input[type=checkbox]{ width:16px; height:16px; cursor:pointer; }
 .empty-row td{ text-align:center; color:var(--ink-faint); font-family:'Source Sans 3'; padding:16px; }
+
+/* PAY TRACKER SPECIFIC STYLES */
+table.pay-grid th.group { font-style: italic; font-weight: 700; text-transform: none; font-size: 13px; }
+table.pay-grid input[type=text].highlight-hourly { font-weight: 800; }
 
 /* MODALS */
 .modal-overlay{
@@ -355,6 +359,7 @@ footer a{ color:var(--ink-faint); }
   <!-- NAVIGATION TABS -->
   <nav class="nav-tabs" role="tablist">
     <button class="nav-tab active" data-tab="tab-month-end" role="tab" aria-selected="true">Month End</button>
+    <button class="nav-tab" data-tab="tab-pay-tracker" role="tab" aria-selected="false">Pay Tracker</button>
   </nav>
 
   <!-- SUBPAGE CONTENT: MONTH END -->
@@ -414,6 +419,25 @@ footer a{ color:var(--ink-faint); }
 
     </div>
 
+  </div>
+
+  <!-- SUBPAGE CONTENT: PAY TRACKER -->
+  <div class="tab-content" id="tab-pay-tracker" role="tabpanel">
+    <section class="block open" id="payTrackerBlock">
+      <div class="block-head" data-toggle="payTrackerBlock">
+        <h2>Pay Tracker<span class="block-sub">Career pay progression and calculated earnings</span></h2>
+        <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="block-body">
+        <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+          <button class="btn primary" id="addPayRowBtn">+ Add pay record</button>
+        </div>
+        <div class="table-scroll">
+          <table class="data pay-grid" id="payTable"></table>
+        </div>
+        <p class="hint">Calculations: Yearly Pre-Tax = Hourly × 2080 hrs | Yearly Post-Tax = 70% of Pre-Tax | Paycheck = Hourly × 80 hrs | Comp-Ratio = (My Hourly / Base Pay) × 100.</p>
+      </div>
+    </section>
   </div>
 
   <footer>
@@ -521,7 +545,14 @@ const DEFAULT_STATE = {
   },
   months:{},
   recurring:[],
-  bills:[]
+  bills:[],
+  payTracker:[
+    { id: uid(), startMonth: "Jul 2024", company: "Mayo Clinic", department: "CVRU", role: "ACRC", basePay: 23.48, myHourly: 23.77 },
+    { id: uid(), startMonth: "Mar 2025 - 4% annual", company: "Mayo Clinic", department: "CVRU", role: "ACRC", basePay: 24.07, myHourly: 24.72 },
+    { id: uid(), startMonth: "Aug 2025", company: "Mayo Clinic", department: "CVRU", role: "CRC", basePay: 27.44, myHourly: 28.30 },
+    { id: uid(), startMonth: "Mar 2026 - 3.5% annual", company: "Mayo Clinic", department: "CVRU", role: "CRC", basePay: 27.99, myHourly: 29.29 },
+    { id: uid(), startMonth: "Oct 2026", company: "Mayo Clinic", department: "CVRU", role: "Cert CRC", basePay: 27.99, myHourly: 30.29 }
+  ]
 };
 
 /* ============================================================
@@ -625,7 +656,7 @@ function parseMoney(val){
 function fmtMoney(n){
   const num = parseMoney(n);
   const sign = num < 0 ? "-" : "";
-  return sign + "$ " + Math.abs(num).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+  return sign + "$" + Math.abs(num).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
 }
 
 function sortedMonths(){
@@ -759,7 +790,7 @@ function renderRecurTable(){
       rows += `<tr data-id="${item.id}">
         <td class="label-cell"><input type="text" data-kind="recur-name" data-id="${item.id}" value="${escapeHtml(item.name)}" placeholder="e.g. Car insurance"></td>
         <td><input type="text" data-kind="recur-due" data-id="${item.id}" value="${escapeHtml(item.dueEstimate)}" placeholder="e.g. 15th"></td>
-        <td><input type="text" data-kind="recur-amount" data-id="${item.id}" value="${item.amount !== undefined && item.amount !== "" ? fmtMoney(item.amount) : ""}" placeholder="$ 0.00"></td>
+        <td><input type="text" data-kind="recur-amount" data-id="${item.id}" value="${item.amount !== undefined && item.amount !== "" ? fmtMoney(item.amount) : ""}" placeholder="$0.00"></td>
         <td class="actions-cell"><button class="btn small danger" data-action="delete-recur" data-id="${item.id}" title="Remove">✕</button></td>
       </tr>`;
     });
@@ -784,7 +815,7 @@ function renderBillTable(){
       rows += `<tr data-id="${item.id}" draggable="true">
         <td class="drag-cell" title="Drag to reorder">⠿</td>
         <td class="label-cell"><input type="text" data-kind="bill-name" data-id="${item.id}" value="${escapeHtml(item.name)}" placeholder="e.g. Rent"></td>
-        <td><input type="text" data-kind="bill-amount" data-id="${item.id}" value="${item.amount !== undefined && item.amount !== "" ? fmtMoney(item.amount) : ""}" placeholder="$ 0.00"></td>
+        <td><input type="text" data-kind="bill-amount" data-id="${item.id}" value="${item.amount !== undefined && item.amount !== "" ? fmtMoney(item.amount) : ""}" placeholder="$0.00"></td>
         <td><input type="date" data-kind="bill-due" data-id="${item.id}" value="${item.dueDate || ""}"></td>
         <td><input type="date" data-kind="bill-pay" data-id="${item.id}" value="${item.payDate || ""}"></td>
         <td class="actions-cell"><input type="checkbox" data-kind="bill-paid" data-id="${item.id}" ${item.paid ? "checked" : ""}></td>
@@ -826,6 +857,87 @@ function bindBillDragEvents(){
 }
 
 /* ============================================================
+   RENDER: PAY TRACKER TABLE
+   ============================================================ */
+
+function renderPayTable(){
+  const table = document.getElementById("payTable");
+  if(!table) return;
+
+  if(!state.payTracker) {
+    state.payTracker = DEFAULT_STATE.payTracker;
+  }
+
+  let head = `<thead>
+    <tr>
+      <th rowspan="2" class="col-end">Start Month & Year</th>
+      <th colspan="3" class="group col-end">Position Information</th>
+      <th colspan="5" class="group col-end">Hourly Earnings</th>
+      <th colspan="2" class="group col-end">Yearly Earnings</th>
+      <th colspan="2" class="group col-end">Paycheck Earnings</th>
+      <th rowspan="2"></th>
+    </tr>
+    <tr>
+      <th>Company</th>
+      <th>Department</th>
+      <th class="col-end">Role</th>
+      <th>Base Pay</th>
+      <th>My Hourly</th>
+      <th>% Above Base</th>
+      <th>Comp-Ratio</th>
+      <th class="col-end">Difference</th>
+      <th>Pre Tax</th>
+      <th class="col-end">Post Tax</th>
+      <th>Total</th>
+      <th class="col-end">Difference</th>
+    </tr>
+  </thead>`;
+
+  let rows = "";
+  if(state.payTracker.length === 0){
+    rows = `<tr class="empty-row"><td colspan="14">No pay records tracked yet.</td></tr>`;
+  } else {
+    state.payTracker.forEach((row, idx) => {
+      const basePay = parseMoney(row.basePay);
+      const myHourly = parseMoney(row.myHourly);
+
+      // Calculations
+      const pctAboveBase = basePay > 0 ? ((myHourly - basePay) / basePay) * 100 : 0;
+      const compRatio = basePay > 0 ? (myHourly / basePay) * 100 : 0;
+      
+      const prevHourly = idx > 0 ? parseMoney(state.payTracker[idx - 1].myHourly) : myHourly;
+      const hourlyDiff = idx > 0 ? myHourly - prevHourly : 0;
+
+      const yearlyPre = myHourly * 2080;
+      const yearlyPost = yearlyPre * 0.70;
+
+      const paycheckTotal = myHourly * 80;
+      const prevPaycheckTotal = idx > 0 ? prevHourly * 80 : paycheckTotal;
+      const paycheckDiff = idx > 0 ? paycheckTotal - prevPaycheckTotal : 0;
+
+      rows += `<tr data-id="${row.id}">
+        <td class="col-end"><input type="text" data-kind="pay-field" data-field="startMonth" data-id="${row.id}" value="${escapeHtml(row.startMonth || "")}"></td>
+        <td><input type="text" data-kind="pay-field" data-field="company" data-id="${row.id}" value="${escapeHtml(row.company || "")}"></td>
+        <td><input type="text" data-kind="pay-field" data-field="department" data-id="${row.id}" value="${escapeHtml(row.department || "")}"></td>
+        <td class="col-end"><input type="text" data-kind="pay-field" data-field="role" data-id="${row.id}" value="${escapeHtml(row.role || "")}"></td>
+        <td><input type="text" data-kind="pay-field" data-field="basePay" data-id="${row.id}" value="${row.basePay !== undefined ? fmtMoney(row.basePay) : ""}"></td>
+        <td><input type="text" class="highlight-hourly" data-kind="pay-field" data-field="myHourly" data-id="${row.id}" value="${row.myHourly !== undefined ? fmtMoney(row.myHourly) : ""}"></td>
+        <td><input type="text" readonly value="${pctAboveBase.toFixed(2)}%"></td>
+        <td><input type="text" readonly value="${compRatio.toFixed(2)}"></td>
+        <td class="col-end"><input type="text" readonly value="${fmtMoney(hourlyDiff)}"></td>
+        <td><input type="text" readonly value="${fmtMoney(yearlyPre)}"></td>
+        <td class="col-end"><input type="text" readonly value="${fmtMoney(yearlyPost)}"></td>
+        <td><input type="text" readonly value="${fmtMoney(paycheckTotal)}"></td>
+        <td class="col-end"><input type="text" readonly value="${fmtMoney(paycheckDiff)}"></td>
+        <td class="actions-cell"><button class="btn small danger" data-action="delete-pay" data-id="${row.id}" title="Remove">✕</button></td>
+      </tr>`;
+    });
+  }
+
+  table.innerHTML = head + "<tbody>" + rows + "</tbody>";
+}
+
+/* ============================================================
    RENDER: SETTINGS — ACCOUNT LISTS
    ============================================================ */
 
@@ -855,6 +967,7 @@ function render(){
   renderMonthTable();
   renderRecurTable();
   renderBillTable();
+  renderPayTable();
   renderAccountLists();
   updateSyncStatus();
 }
@@ -880,6 +993,15 @@ function updateRecur(id, field, value){
 function updateBill(id, field, value){
   const item = state.bills.find(b => b.id === id);
   if(item){ item[field] = value; markDirty(); }
+}
+
+function updatePayRecord(id, field, value){
+  const item = state.payTracker.find(p => p.id === id);
+  if(item){
+    item[field] = (field === "basePay" || field === "myHourly") ? parseMoney(value) : value;
+    markDirty();
+    renderPayTable();
+  }
 }
 
 /* ============================================================
@@ -1045,6 +1167,22 @@ document.addEventListener("DOMContentLoaded", () => {
     renderBillTable();
   });
 
+  // Add Pay Record
+  document.getElementById("addPayRowBtn").addEventListener("click", () => {
+    if(!state.payTracker) state.payTracker = [];
+    state.payTracker.push({
+      id: uid(),
+      startMonth: "",
+      company: "",
+      department: "",
+      role: "",
+      basePay: 0,
+      myHourly: 0
+    });
+    markDirty();
+    renderPayTable();
+  });
+
   // Add Accounts (Settings)
   document.getElementById("addBankAccountBtn").addEventListener("click", () => {
     const name = prompt("Enter bank account name:");
@@ -1107,6 +1245,10 @@ document.addEventListener("DOMContentLoaded", () => {
       updateBill(target.getAttribute("data-id"), "paid", target.checked);
     } else if(kind === "bill-notes"){
       updateBill(target.getAttribute("data-id"), "notes", target.value);
+    } else if(kind === "pay-field"){
+      const field = target.getAttribute("data-field");
+      const id = target.getAttribute("data-id");
+      updatePayRecord(id, field, target.value);
     } else if(kind === "acct-name"){
       const group = target.getAttribute("data-group");
       const id = target.getAttribute("data-id");
@@ -1118,7 +1260,8 @@ document.addEventListener("DOMContentLoaded", () => {
   // Re-format currency on focusout / blur
   document.addEventListener("focusout", e => {
     const kind = e.target.getAttribute("data-kind");
-    if(kind === "balance" || kind === "recur-amount" || kind === "bill-amount"){
+    const field = e.target.getAttribute("data-field");
+    if(kind === "balance" || kind === "recur-amount" || kind === "bill-amount" || field === "basePay" || field === "myHourly"){
       const num = parseMoney(e.target.value);
       e.target.value = e.target.value.trim() !== "" ? fmtMoney(num) : "";
     }
@@ -1139,6 +1282,11 @@ document.addEventListener("DOMContentLoaded", () => {
       state.bills = state.bills.filter(b => b.id !== id);
       markDirty();
       renderBillTable();
+    } else if(action === "delete-pay"){
+      const id = btn.getAttribute("data-id");
+      state.payTracker = state.payTracker.filter(p => p.id !== id);
+      markDirty();
+      renderPayTable();
     } else if(action === "delete-acct"){
       const group = btn.getAttribute("data-group");
       const id = btn.getAttribute("data-id");
