@@ -1,0 +1,1093 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>Net Worth Tracker</title>
+
+<meta name="theme-color" content="#012D61">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+<link
+  href="https://fonts.googleapis.com/css2?family=Libre+Franklin:wght@500;600;700;800&family=Source+Sans+3:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+  rel="stylesheet"
+>
+
+<style>
+
+/* ============================================================
+   DESIGN SYSTEM (carried over from the original ledger)
+   ============================================================ */
+
+:root{
+  --bg:#F3F6F9;
+  --surface:#FFFFFF;
+
+  --ink:#14181C;
+  --ink-muted:#5B6570;
+  --ink-faint:#8A939C;
+
+  --line:#DBE2E8;
+  --line-strong:#BEC8D1;
+
+  --navy:#012D61;
+  --blue:#0067B1;
+  --blue-soft:#E3EEF8;
+  --blue-pale:#F1F6FA;
+
+  --amber:#C48A00;
+  --amber-soft:#FFF6DE;
+
+  --danger:#AB2328;
+  --danger-soft:#F8E2E2;
+
+  --success:#2E7D5B;
+  --success-soft:#E1F0E9;
+
+  --radius-sm:6px;
+  --radius-md:10px;
+
+  --shadow: 0 1px 2px rgba(1,45,97,0.08);
+  --shadow-hover: 0 3px 10px rgba(1,45,97,0.10);
+}
+
+*{ box-sizing:border-box; }
+
+html,body{ margin:0; padding:0; }
+
+body{
+  background:var(--bg);
+  color:var(--ink);
+  font-family:'Source Sans 3', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size:15px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+
+.wrap{ max-width:1180px; margin:0 auto; padding:32px 20px 80px; }
+
+a{ color:var(--navy); }
+
+/* HEADER */
+header.top{
+  display:flex; justify-content:space-between; align-items:flex-start;
+  gap:16px; flex-wrap:wrap;
+  padding-bottom:20px; border-bottom:1px solid var(--line); margin-bottom:24px;
+}
+h1{
+  font-family:'Libre Franklin',sans-serif; font-weight:800;
+  font-size:32px; letter-spacing:-0.015em; margin:0 0 4px; color:var(--navy);
+}
+.sub{ color:var(--ink-muted); font-size:13.5px; }
+.top-actions{ display:flex; align-items:center; gap:10px; }
+
+/* SYNC PILL */
+.sync-pill{
+  display:inline-flex; align-items:center; gap:6px; font-size:12.5px;
+  padding:6px 11px; border-radius:999px; background:var(--surface);
+  border:1px solid var(--line); color:var(--ink-muted); white-space:nowrap;
+}
+.sync-pill .dot{ width:7px; height:7px; border-radius:50%; background:var(--ink-faint); flex:none; }
+.sync-pill.ok .dot{ background:var(--success); }
+.sync-pill.busy .dot{ background:var(--amber); animation:pulse 1s ease-in-out infinite; }
+.sync-pill.err .dot{ background:var(--danger); }
+@keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+
+button.icon-btn{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-sm);
+  width:34px; height:34px; display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color:var(--navy); transition:border-color .15s ease, background .15s ease;
+}
+button.icon-btn:hover{ border-color:var(--line-strong); background:var(--blue-pale); }
+
+/* HERO STATS */
+.hero{
+  display:grid; grid-template-columns:1fr 1fr 1fr; gap:0;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md);
+  overflow:hidden; margin-bottom:24px; box-shadow:var(--shadow);
+}
+.stat{ padding:20px 22px; border-right:1px solid var(--line); }
+.stat:last-child{ border-right:none; }
+.stat .label{ font-size:12.5px; color:var(--ink-muted); margin-bottom:8px; }
+.stat .value{
+  font-family:'Libre Franklin',sans-serif; font-weight:800; font-size:28px;
+  color:var(--ink); font-variant-numeric:tabular-nums; letter-spacing:-0.01em;
+}
+.stat .value small{ font-family:'Source Sans 3',sans-serif; font-weight:600; font-size:14px; color:var(--ink-muted); margin-left:3px; }
+.stat.up .value{ color:var(--success); }
+.stat.down .value{ color:var(--danger); }
+.stat .foot{ font-size:12px; color:var(--ink-faint); margin-top:6px; }
+
+/* SECTION BLOCKS */
+section.block{
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md);
+  margin-bottom:20px; box-shadow:var(--shadow);
+}
+.block-head{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:14px 18px; cursor:pointer; user-select:none;
+}
+.block-head h2{ font-size:16px; margin:0; font-weight:700; font-family:'Libre Franklin',sans-serif; color:var(--navy); }
+.block-head .block-sub{ font-size:12.5px; color:var(--ink-muted); font-weight:400; margin-left:8px; }
+.block-head .chev{ transition:transform .15s ease; color:var(--ink-faint); flex:none; }
+section.block.open .block-head .chev{ transform:rotate(90deg); }
+.block-body{ padding:0 18px 18px; display:none; }
+section.block.open .block-body{ display:block; }
+.block-actions{ display:flex; gap:8px; }
+
+/* SETTINGS / FORM FIELDS */
+.grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:16px; }
+.field label{ display:block; font-size:12.5px; color:var(--ink-muted); margin-bottom:5px; }
+.field input, .field select, .field textarea{
+  width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:var(--radius-sm);
+  font-family:inherit; font-size:14px; background:var(--bg); color:var(--ink);
+}
+.field input:focus, .field select:focus, .field textarea:focus,
+button:focus-visible, input:focus-visible{ outline:2px solid var(--blue); outline-offset:1px; }
+.field.mono input{ font-family:'IBM Plex Mono',monospace; }
+
+fieldset{ border:1px solid var(--line); border-radius:var(--radius-sm); padding:14px; margin:0 0 16px; }
+legend{ font-size:12.5px; color:var(--ink-muted); padding:0 6px; }
+.hint{ font-size:12.5px; color:var(--ink-faint); margin-top:6px; line-height:1.5; }
+
+table.tiers{ width:100%; border-collapse:collapse; font-size:13.5px; margin-bottom:6px; }
+table.tiers th, table.tiers td{ padding:6px 8px; text-align:left; border-bottom:1px solid var(--line); }
+table.tiers th{ color:var(--ink-muted); font-weight:500; font-size:12px; }
+table.tiers input{
+  width:100%; border:1px solid transparent; background:transparent;
+  font-family:inherit; font-size:13.5px; padding:3px 4px; border-radius:4px;
+}
+table.tiers input:hover, table.tiers input:focus{ border-color:var(--line); background:var(--bg); }
+
+/* BUTTONS */
+.btn{
+  display:inline-flex; align-items:center; gap:7px; padding:9px 14px; border-radius:var(--radius-sm);
+  font-size:13.5px; font-weight:500; cursor:pointer; border:1px solid var(--line);
+  background:var(--surface); color:var(--ink); transition:border-color .15s ease, background .15s ease;
+}
+.btn:hover{ border-color:var(--line-strong); background:var(--blue-pale); }
+.btn.primary{ background:var(--blue); border-color:var(--blue); color:#fff; }
+.btn.primary:hover{ background:var(--navy); border-color:var(--navy); }
+.btn.ghost{ background:transparent; border-color:transparent; color:var(--navy); padding:9px 4px; }
+.btn.danger{ color:var(--danger); }
+.btn.small{ padding:5px 10px; font-size:12.5px; }
+.btn-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
+
+/* DATA TABLES */
+.table-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius-sm); }
+table.data{ width:100%; border-collapse:collapse; font-size:13.5px; min-width:640px; }
+table.data th{
+  position:sticky; top:0; background:var(--blue-pale); text-align:left; font-weight:600;
+  color:var(--navy); font-size:11.5px; text-transform:uppercase; letter-spacing:.03em;
+  padding:9px 10px; border-bottom:1px solid var(--line-strong); white-space:nowrap; z-index:2;
+}
+table.data th.group{ text-align:center; background:var(--blue-soft); }
+table.data td{
+  padding:7px 8px; border-bottom:1px solid var(--line); white-space:nowrap;
+  font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums;
+}
+table.data td.label-cell{ font-family:'Source Sans 3'; white-space:normal; min-width:110px; }
+table.data tr.current-month{ background:var(--blue-soft); }
+table.data tr:hover{ background:var(--blue-pale); }
+table.data input[type=number], table.data input[type=text], table.data input[type=date]{
+  width:100%; min-width:88px; border:1px solid var(--line); border-radius:4px; padding:5px 7px;
+  font-family:'IBM Plex Mono',monospace; font-size:13.5px; background:var(--bg); color:var(--ink);
+}
+table.data td.label-cell input[type=text]{ font-family:inherit; }
+table.data textarea{
+  width:100%; min-width:160px; min-height:34px; border:1px solid var(--line); border-radius:4px;
+  padding:5px 7px; font-family:inherit; font-size:13px; background:var(--bg); color:var(--ink); resize:vertical;
+}
+td.total-cell{ font-weight:700; color:var(--navy); }
+td.diff-cell.pos{ color:var(--success); font-weight:700; }
+td.diff-cell.neg{ color:var(--danger); font-weight:700; }
+td.actions-cell{ text-align:center; }
+td.drag-cell{ cursor:grab; color:var(--ink-faint); text-align:center; width:26px; }
+tr.dragging{ opacity:.4; }
+input[type=checkbox]{ width:17px; height:17px; cursor:pointer; }
+.empty-row td{ text-align:center; color:var(--ink-faint); font-family:'Source Sans 3'; padding:18px; }
+
+/* MODALS */
+.modal-overlay{
+  position:fixed; inset:0; background:rgba(27,36,34,0.45); display:none;
+  align-items:flex-start; justify-content:center; padding:48px 20px; z-index:100; overflow-y:auto;
+}
+.modal-overlay.open{ display:flex; }
+.modal-dialog{ background:var(--surface); border-radius:var(--radius-md); max-width:680px; width:100%; box-shadow:0 12px 40px rgba(15,20,19,0.25); }
+.modal-head{
+  display:flex; align-items:center; justify-content:space-between; padding:16px 20px;
+  border-bottom:1px solid var(--line); position:sticky; top:0; background:var(--surface);
+  border-radius:var(--radius-md) var(--radius-md) 0 0;
+}
+.modal-head h2{ margin:0; font-family:'Libre Franklin',sans-serif; font-weight:700; font-size:20px; color:var(--navy); }
+.modal-body{ padding:18px 20px 20px; max-height:78vh; overflow-y:auto; }
+
+footer{ text-align:center; color:var(--ink-faint); font-size:12px; margin-top:30px; }
+footer a{ color:var(--ink-faint); }
+
+@media (max-width:760px){
+  .hero{ grid-template-columns:1fr; }
+  .stat{ border-right:none; border-bottom:1px solid var(--line); }
+  .stat:last-child{ border-bottom:none; }
+  h1{ font-size:27px; }
+}
+@media (max-width:640px){
+  .wrap{ padding-left:14px; padding-right:14px; }
+  .modal-overlay{ padding:20px 10px; }
+  .modal-body{ padding-left:14px; padding-right:14px; }
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+  <header class="top">
+    <div>
+      <h1>Net Worth Tracker</h1>
+      <div class="sub" id="subline">Loading…</div>
+    </div>
+    <div class="top-actions">
+      <span class="sync-pill" id="syncPill">
+        <span class="dot"></span>
+        <span id="syncText">Checking…</span>
+      </span>
+      <button class="icon-btn" id="settingsToggleBtn" title="Settings" aria-label="Open settings">⚙</button>
+    </div>
+  </header>
+
+  <div class="hero" id="hero"></div>
+
+  <!-- ===================== MONTH END ===================== -->
+  <section class="block open" id="monthBlock">
+    <div class="block-head" data-toggle="monthBlock">
+      <h2>Month End<span class="block-sub">End-of-month account balances</span></h2>
+      <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="block-body">
+      <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+        <button class="btn primary" id="addMonthBtn">+ Add month</button>
+      </div>
+      <div class="table-scroll">
+        <table class="data" id="monthTable"></table>
+      </div>
+      <p class="hint">Net worth = total bank account balances minus total credit card balances for that month. The change column compares to the prior month row.</p>
+    </div>
+  </section>
+
+  <!-- ===================== RECURRING EXPENSES ===================== -->
+  <section class="block open" id="recurBlock">
+    <div class="block-head" data-toggle="recurBlock">
+      <h2>Recurring Expenses<span class="block-sub">Expenses that come up regularly</span></h2>
+      <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="block-body">
+      <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+        <button class="btn primary" id="addRecurBtn">+ Add expense</button>
+      </div>
+      <div class="table-scroll">
+        <table class="data" id="recurTable"></table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================== BILL PAYMENT PLANNER ===================== -->
+  <section class="block open" id="billBlock">
+    <div class="block-head" data-toggle="billBlock">
+      <h2>Bill Payment Planner<span class="block-sub">Drag rows to line bills up with paydays</span></h2>
+      <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div class="block-body">
+      <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+        <button class="btn primary" id="addBillBtn">+ Add bill</button>
+      </div>
+      <div class="table-scroll">
+        <table class="data" id="billTable"></table>
+      </div>
+      <p class="hint">Drag the ⠿ handle to reorder rows as you move payments around relative to your paychecks.</p>
+    </div>
+  </section>
+
+  <footer>
+    Your own numbers, kept in your browser (and optionally GitHub).
+    <a href="#" id="scrollTop">Back to top</a>
+  </footer>
+
+</div>
+
+<!-- ==================== SETTINGS MODAL ==================== -->
+<div class="modal-overlay" id="settingsOverlay">
+  <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
+    <div class="modal-head">
+      <h2 id="settingsModalTitle">Settings</h2>
+      <button class="icon-btn" id="closeSettingsBtn" aria-label="Close settings">✕</button>
+    </div>
+    <div class="modal-body">
+
+      <fieldset>
+        <legend>Bank accounts</legend>
+        <table class="tiers" id="bankAccountsTable">
+          <thead><tr><th>Account name</th><th></th></tr></thead>
+          <tbody id="bankAccountsBody"></tbody>
+        </table>
+        <div class="btn-row"><button class="btn ghost" id="addBankAccountBtn">+ Add bank account</button></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Credit cards</legend>
+        <table class="tiers" id="creditAccountsTable">
+          <thead><tr><th>Card name</th><th></th></tr></thead>
+          <tbody id="creditAccountsBody"></tbody>
+        </table>
+        <div class="btn-row"><button class="btn ghost" id="addCreditAccountBtn">+ Add credit card</button></div>
+        <p class="hint">Renaming an account keeps its saved balances. Removing an account deletes its balances from every month.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Sync to GitHub</legend>
+        <p class="hint">
+          Data is stored as a small JSON file in a repo you control, so it follows you between computers.
+          Create a <strong>fine-grained personal access token</strong> scoped only to that repo with
+          <strong>Contents: read and write</strong> permission. The token is saved only in this browser's
+          local storage — never written into the data file — but treat it like a password.
+        </p>
+        <p class="hint">
+          Synced to a private data file in your own GitHub repo — the repo itself isn't shown here since it is fixed for this copy of the page.
+        </p>
+        <div class="field mono">
+          <label for="ghTokenInput">Personal access token</label>
+          <input type="password" id="ghTokenInput" placeholder="github_pat_...">
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="saveGhBtn">Save & sync now</button>
+          <button class="btn" id="loadGhBtn">Load from GitHub</button>
+        </div>
+        <p class="hint" id="ghStatus"></p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Backup</legend>
+        <div class="btn-row" style="margin-top:0;">
+          <button class="btn" id="exportBtn">Export backup (.json)</button>
+          <button class="btn" id="importBtn">Import backup</button>
+          <input type="file" id="importFile" accept="application/json" style="display:none;">
+        </div>
+      </fieldset>
+
+    </div>
+  </div>
+</div>
+
+<script>
+
+/* ============================================================
+   DEFAULT DATA / STORAGE KEYS
+   ============================================================ */
+
+const LS_STATE  = "nw_state_v1";
+const LS_TOKEN  = "nw_gh_token_v1";
+const LS_SHA    = "nw_gh_sha_v1";
+
+/*
+ * GitHub repo target — fixed for this copy of the page.
+ */
+const GITHUB_REPO = {
+  owner: "mradolphsen",
+  repo: "FinancialLedger",
+  branch: "main",
+  path: "data/networth-data.json"
+};
+
+function uid(){ return Math.random().toString(36).slice(2,9); }
+
+const DEFAULT_STATE = {
+  accounts:{
+    bank:[
+      {id:"checking",  name:"Checking"},
+      {id:"savings",   name:"Savings"},
+      {id:"usbank_ef", name:"US Bank Emergency Fund"},
+      {id:"ally_ef",   name:"Ally Bank Emergency Fund"}
+    ],
+    credit:[
+      {id:"usbank_cc", name:"US Bank"},
+      {id:"target_cc", name:"Target"},
+      {id:"scheels_cc",name:"Scheels"}
+    ]
+  },
+  months:{
+    /* "YYYY-MM": { balances:{accountId:number}, notes:"" } */
+  },
+  monthOrder:[],
+  recurring:[
+    /* {id, name, dueEstimate, amount, notes} */
+  ],
+  bills:[
+    /* {id, name, amount, dueDate, payDate, paid, notes} */
+  ]
+};
+
+/* ============================================================
+   STATE
+   ============================================================ */
+
+let state   = loadJSON(LS_STATE, DEFAULT_STATE);
+let ghToken = localStorage.getItem(LS_TOKEN) || "";
+let ghSha   = localStorage.getItem(LS_SHA) || null;
+let dirty   = false;
+let saveTimer = null;
+
+function loadJSON(key, fallback){
+  try{
+    const raw = localStorage.getItem(key);
+    if(!raw) return structuredClone(fallback);
+    const parsed = JSON.parse(raw);
+    return Object.assign(structuredClone(fallback), parsed);
+  }catch(e){
+    return structuredClone(fallback);
+  }
+}
+
+function persistLocal(){
+  localStorage.setItem(LS_STATE, JSON.stringify(state));
+}
+
+function markDirty(){
+  dirty = true;
+  persistLocal();
+  if(ghConfigured()){
+    clearTimeout(saveTimer);
+    saveTimer = setTimeout(saveToGitHub, 1500);
+  }
+}
+
+/* ============================================================
+   HELPERS
+   ============================================================ */
+
+function monthLabel(key){
+  const [y,m] = key.split("-").map(Number);
+  return new Date(Date.UTC(y, m-1, 1)).toLocaleDateString(undefined,{month:"short", year:"numeric", timeZone:"UTC"});
+}
+
+function currentMonthKey(){
+  const d = new Date();
+  return d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0");
+}
+
+function fmtMoney(n){
+  if(n === undefined || n === null || isNaN(n)) n = 0;
+  const sign = n < 0 ? "-" : "";
+  return sign + "$" + Math.abs(n).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function sortedMonths(){
+  return Object.keys(state.months).sort();
+}
+
+function monthTotals(key){
+  const entry = state.months[key];
+  if(!entry) return {bank:0, credit:0, net:0};
+  let bank = 0, credit = 0;
+  state.accounts.bank.forEach(a => bank += Number(entry.balances[a.id] || 0));
+  state.accounts.credit.forEach(a => credit += Number(entry.balances[a.id] || 0));
+  return {bank, credit, net: bank - credit};
+}
+
+/* ============================================================
+   RENDER: HERO
+   ============================================================ */
+
+function renderHero(){
+  const months = sortedMonths();
+  const hero = document.getElementById("hero");
+
+  if(months.length === 0){
+    hero.innerHTML = `
+      <div class="stat"><div class="label">Current net worth</div><div class="value">—</div><div class="foot">Add a month to get started</div></div>
+      <div class="stat"><div class="label">Change vs last month</div><div class="value">—</div></div>
+      <div class="stat"><div class="label">Total credit card debt</div><div class="value">—</div></div>
+    `;
+    return;
+  }
+
+  const latestKey = months[months.length-1];
+  const latest = monthTotals(latestKey);
+  const prevKey = months.length > 1 ? months[months.length-2] : null;
+  const prev = prevKey ? monthTotals(prevKey) : null;
+  const diff = prev ? latest.net - prev.net : null;
+
+  let diffClass = "", diffText = "—";
+  if(diff !== null){
+    diffClass = diff > 0 ? "up" : (diff < 0 ? "down" : "");
+    diffText = (diff >= 0 ? "+" : "") + fmtMoney(diff);
+  }
+
+  hero.innerHTML = `
+    <div class="stat">
+      <div class="label">Current net worth</div>
+      <div class="value">${fmtMoney(latest.net)}</div>
+      <div class="foot">as of ${monthLabel(latestKey)}</div>
+    </div>
+    <div class="stat ${diffClass}">
+      <div class="label">Change vs last month</div>
+      <div class="value">${diffText}</div>
+      <div class="foot">${prevKey ? "vs " + monthLabel(prevKey) : "no prior month yet"}</div>
+    </div>
+    <div class="stat">
+      <div class="label">Total credit card debt</div>
+      <div class="value">${fmtMoney(latest.credit)}</div>
+      <div class="foot">as of ${monthLabel(latestKey)}</div>
+    </div>
+  `;
+}
+
+/* ============================================================
+   RENDER: MONTH END TABLE
+   ============================================================ */
+
+function renderMonthTable(){
+  const table = document.getElementById("monthTable");
+  const months = sortedMonths();
+  const bankAccts = state.accounts.bank;
+  const creditAccts = state.accounts.credit;
+
+  let head = `<thead><tr>
+      <th rowspan="2">Month</th>
+      ${bankAccts.length ? `<th class="group" colspan="${bankAccts.length}">Bank Accounts</th>` : ""}
+      ${creditAccts.length ? `<th class="group" colspan="${creditAccts.length}">Credit Cards</th>` : ""}
+      <th rowspan="2">Total Bank</th>
+      <th rowspan="2">Total Credit</th>
+      <th rowspan="2">Net Worth</th>
+      <th rowspan="2">Change</th>
+      <th rowspan="2">Notes</th>
+      <th rowspan="2"></th>
+    </tr>
+    <tr>
+      ${bankAccts.map(a => `<th>${escapeHtml(a.name)}</th>`).join("")}
+      ${creditAccts.map(a => `<th>${escapeHtml(a.name)}</th>`).join("")}
+    </tr></thead>`;
+
+  let rows = "";
+  if(months.length === 0){
+    const colCount = 6 + bankAccts.length + creditAccts.length;
+    rows = `<tr class="empty-row"><td colspan="${colCount}">No months added yet. Click "+ Add month" to start tracking.</td></tr>`;
+  }else{
+    const thisMonth = currentMonthKey();
+    months.forEach((key, idx) => {
+      const entry = state.months[key];
+      const totals = monthTotals(key);
+      const prevTotals = idx > 0 ? monthTotals(months[idx-1]) : null;
+      const diff = prevTotals ? totals.net - prevTotals.net : null;
+      const diffClass = diff === null ? "" : (diff > 0 ? "pos" : (diff < 0 ? "neg" : ""));
+      const diffText = diff === null ? "—" : (diff >= 0 ? "+" : "") + fmtMoney(diff);
+
+      rows += `<tr class="${key === thisMonth ? "current-month" : ""}" data-month="${key}">
+        <td class="label-cell"><strong>${monthLabel(key)}</strong></td>
+        ${bankAccts.map(a => `<td><input type="number" step="0.01" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] ?? ""}"></td>`).join("")}
+        ${creditAccts.map(a => `<td><input type="number" step="0.01" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] ?? ""}"></td>`).join("")}
+        <td class="total-cell">${fmtMoney(totals.bank)}</td>
+        <td class="total-cell">${fmtMoney(totals.credit)}</td>
+        <td class="total-cell">${fmtMoney(totals.net)}</td>
+        <td class="diff-cell ${diffClass}">${diffText}</td>
+        <td><textarea data-kind="notes" data-month="${key}" placeholder="Notes…">${escapeHtml(entry.notes || "")}</textarea></td>
+        <td class="actions-cell"><button class="btn small danger" data-action="delete-month" data-month="${key}" title="Delete month">✕</button></td>
+      </tr>`;
+    });
+  }
+
+  table.innerHTML = head + "<tbody>" + rows + "</tbody>";
+}
+
+/* ============================================================
+   RENDER: RECURRING EXPENSES TABLE
+   ============================================================ */
+
+function renderRecurTable(){
+  const table = document.getElementById("recurTable");
+  let head = `<thead><tr>
+      <th>Expense</th><th>Est. Due</th><th>Amount</th><th>Notes</th><th></th>
+    </tr></thead>`;
+  let rows = "";
+  if(state.recurring.length === 0){
+    rows = `<tr class="empty-row"><td colspan="5">No recurring expenses yet.</td></tr>`;
+  }else{
+    state.recurring.forEach(item => {
+      rows += `<tr data-id="${item.id}">
+        <td class="label-cell"><input type="text" data-kind="recur-name" data-id="${item.id}" value="${escapeHtml(item.name)}" placeholder="e.g. Car insurance"></td>
+        <td><input type="text" data-kind="recur-due" data-id="${item.id}" value="${escapeHtml(item.dueEstimate)}" placeholder="e.g. 15th of month"></td>
+        <td><input type="number" step="0.01" data-kind="recur-amount" data-id="${item.id}" value="${item.amount ?? ""}" placeholder="0.00"></td>
+        <td><textarea data-kind="recur-notes" data-id="${item.id}" placeholder="Notes…">${escapeHtml(item.notes || "")}</textarea></td>
+        <td class="actions-cell"><button class="btn small danger" data-action="delete-recur" data-id="${item.id}" title="Remove">✕</button></td>
+      </tr>`;
+    });
+  }
+  table.innerHTML = head + "<tbody>" + rows + "</tbody>";
+}
+
+/* ============================================================
+   RENDER: BILL PAYMENT PLANNER
+   ============================================================ */
+
+function renderBillTable(){
+  const table = document.getElementById("billTable");
+  let head = `<thead><tr>
+      <th></th><th>Bill</th><th>Amount</th><th>Due Date</th><th>Planned Pay Date</th><th>Paid</th><th>Notes</th><th></th>
+    </tr></thead>`;
+  let rows = "";
+  if(state.bills.length === 0){
+    rows = `<tr class="empty-row"><td colspan="8">No bills planned yet.</td></tr>`;
+  }else{
+    state.bills.forEach(item => {
+      rows += `<tr data-id="${item.id}" draggable="true">
+        <td class="drag-cell" title="Drag to reorder">⠿</td>
+        <td class="label-cell"><input type="text" data-kind="bill-name" data-id="${item.id}" value="${escapeHtml(item.name)}" placeholder="e.g. Rent"></td>
+        <td><input type="number" step="0.01" data-kind="bill-amount" data-id="${item.id}" value="${item.amount ?? ""}" placeholder="0.00"></td>
+        <td><input type="date" data-kind="bill-due" data-id="${item.id}" value="${item.dueDate || ""}"></td>
+        <td><input type="date" data-kind="bill-pay" data-id="${item.id}" value="${item.payDate || ""}"></td>
+        <td class="actions-cell"><input type="checkbox" data-kind="bill-paid" data-id="${item.id}" ${item.paid ? "checked" : ""}></td>
+        <td><textarea data-kind="bill-notes" data-id="${item.id}" placeholder="Notes…">${escapeHtml(item.notes || "")}</textarea></td>
+        <td class="actions-cell"><button class="btn small danger" data-action="delete-bill" data-id="${item.id}" title="Remove">✕</button></td>
+      </tr>`;
+    });
+  }
+  table.innerHTML = head + "<tbody>" + rows + "</tbody>";
+  bindBillDragEvents();
+}
+
+function bindBillDragEvents(){
+  const tbody = document.querySelector("#billTable tbody");
+  if(!tbody) return;
+  let dragId = null;
+
+  tbody.querySelectorAll("tr[draggable=true]").forEach(row => {
+    row.addEventListener("dragstart", e => {
+      dragId = row.getAttribute("data-id");
+      row.classList.add("dragging");
+      e.dataTransfer.effectAllowed = "move";
+    });
+    row.addEventListener("dragend", () => row.classList.remove("dragging"));
+    row.addEventListener("dragover", e => e.preventDefault());
+    row.addEventListener("drop", e => {
+      e.preventDefault();
+      const targetId = row.getAttribute("data-id");
+      if(!dragId || dragId === targetId) return;
+      const fromIdx = state.bills.findIndex(b => b.id === dragId);
+      const toIdx = state.bills.findIndex(b => b.id === targetId);
+      if(fromIdx === -1 || toIdx === -1) return;
+      const [moved] = state.bills.splice(fromIdx, 1);
+      state.bills.splice(toIdx, 0, moved);
+      markDirty();
+      renderBillTable();
+    });
+  });
+}
+
+/* ============================================================
+   RENDER: SETTINGS — ACCOUNT LISTS
+   ============================================================ */
+
+function renderAccountLists(){
+  const bankBody = document.getElementById("bankAccountsBody");
+  bankBody.innerHTML = state.accounts.bank.map(a => `
+    <tr>
+      <td><input type="text" data-kind="acct-name" data-group="bank" data-id="${a.id}" value="${escapeHtml(a.name)}"></td>
+      <td><button class="btn small danger" data-action="delete-acct" data-group="bank" data-id="${a.id}">✕</button></td>
+    </tr>`).join("");
+
+  const creditBody = document.getElementById("creditAccountsBody");
+  creditBody.innerHTML = state.accounts.credit.map(a => `
+    <tr>
+      <td><input type="text" data-kind="acct-name" data-group="credit" data-id="${a.id}" value="${escapeHtml(a.name)}"></td>
+      <td><button class="btn small danger" data-action="delete-acct" data-group="credit" data-id="${a.id}">✕</button></td>
+    </tr>`).join("");
+}
+
+/* ============================================================
+   MASTER RENDER
+   ============================================================ */
+
+function render(){
+  document.getElementById("subline").textContent =
+    sortedMonths().length
+      ? `Tracking ${sortedMonths().length} month${sortedMonths().length === 1 ? "" : "s"} · last updated locally`
+      : "No months tracked yet";
+  renderHero();
+  renderMonthTable();
+  renderRecurTable();
+  renderBillTable();
+  renderAccountLists();
+}
+
+function escapeHtml(value){
+  return String(value)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#039;");
+}
+
+/* ============================================================
+   EVENT DELEGATION — DATA ENTRY
+   ============================================================ */
+
+document.addEventListener("change", e => {
+  const el = e.target;
+  const kind = el.getAttribute("data-kind");
+  if(!kind) return;
+
+  switch(kind){
+    case "balance":{
+      const month = el.getAttribute("data-month");
+      const acct = el.getAttribute("data-account");
+      state.months[month].balances[acct] = el.value === "" ? 0 : Number(el.value);
+      markDirty();
+      renderHero();
+      renderMonthTable();
+      break;
+    }
+    case "notes":{
+      const month = el.getAttribute("data-month");
+      state.months[month].notes = el.value;
+      markDirty();
+      break;
+    }
+    case "recur-name": updateRecur(el.getAttribute("data-id"), "name", el.value); break;
+    case "recur-due":  updateRecur(el.getAttribute("data-id"), "dueEstimate", el.value); break;
+    case "recur-amount": updateRecur(el.getAttribute("data-id"), "amount", el.value === "" ? null : Number(el.value)); break;
+    case "recur-notes": updateRecur(el.getAttribute("data-id"), "notes", el.value); break;
+
+    case "bill-name": updateBill(el.getAttribute("data-id"), "name", el.value); break;
+    case "bill-amount": updateBill(el.getAttribute("data-id"), "amount", el.value === "" ? null : Number(el.value)); break;
+    case "bill-due": updateBill(el.getAttribute("data-id"), "dueDate", el.value); break;
+    case "bill-pay": updateBill(el.getAttribute("data-id"), "payDate", el.value); break;
+    case "bill-paid": updateBill(el.getAttribute("data-id"), "paid", el.checked); break;
+    case "bill-notes": updateBill(el.getAttribute("data-id"), "notes", el.value); break;
+
+    case "acct-name":{
+      const group = el.getAttribute("data-group");
+      const id = el.getAttribute("data-id");
+      const list = group === "bank" ? state.accounts.bank : state.accounts.credit;
+      const acct = list.find(a => a.id === id);
+      if(acct){ acct.name = el.value; markDirty(); renderMonthTable(); }
+      break;
+    }
+  }
+});
+
+function updateRecur(id, field, value){
+  const item = state.recurring.find(r => r.id === id);
+  if(item){ item[field] = value; markDirty(); }
+}
+
+function updateBill(id, field, value){
+  const item = state.bills.find(b => b.id === id);
+  if(item){ item[field] = value; markDirty(); }
+}
+
+document.addEventListener("click", e => {
+  const btn = e.target.closest("button[data-action]");
+  if(!btn) return;
+  const action = btn.getAttribute("data-action");
+
+  if(action === "delete-month"){
+    const month = btn.getAttribute("data-month");
+    if(confirm(`Delete ${monthLabel(month)}? This cannot be undone.`)){
+      delete state.months[month];
+      markDirty();
+      render();
+    }
+  }
+  if(action === "delete-recur"){
+    state.recurring = state.recurring.filter(r => r.id !== btn.getAttribute("data-id"));
+    markDirty();
+    renderRecurTable();
+  }
+  if(action === "delete-bill"){
+    state.bills = state.bills.filter(b => b.id !== btn.getAttribute("data-id"));
+    markDirty();
+    renderBillTable();
+  }
+  if(action === "delete-acct"){
+    const group = btn.getAttribute("data-group");
+    const id = btn.getAttribute("data-id");
+    if(!confirm("Remove this account? Its balances will be deleted from every month.")) return;
+    if(group === "bank"){
+      state.accounts.bank = state.accounts.bank.filter(a => a.id !== id);
+    }else{
+      state.accounts.credit = state.accounts.credit.filter(a => a.id !== id);
+    }
+    Object.values(state.months).forEach(m => delete m.balances[id]);
+    markDirty();
+    renderAccountLists();
+    render();
+  }
+});
+
+/* ============================================================
+   ADD ROW / MONTH / ACCOUNT ACTIONS
+   ============================================================ */
+
+document.getElementById("addMonthBtn").addEventListener("click", () => {
+  const months = sortedMonths();
+  let next;
+  if(months.length === 0){
+    next = currentMonthKey();
+  }else{
+    const [y,m] = months[months.length-1].split("-").map(Number);
+    const d = new Date(Date.UTC(y, m, 1));
+    next = d.getUTCFullYear() + "-" + String(d.getUTCMonth()+1).padStart(2,"0");
+  }
+  if(state.months[next]){
+    alert(`${monthLabel(next)} already exists.`);
+    return;
+  }
+  const balances = {};
+  state.accounts.bank.forEach(a => balances[a.id] = 0);
+  state.accounts.credit.forEach(a => balances[a.id] = 0);
+  state.months[next] = { balances, notes:"" };
+  markDirty();
+  render();
+});
+
+document.getElementById("addRecurBtn").addEventListener("click", () => {
+  state.recurring.push({ id: uid(), name:"", dueEstimate:"", amount:null, notes:"" });
+  markDirty();
+  renderRecurTable();
+});
+
+document.getElementById("addBillBtn").addEventListener("click", () => {
+  state.bills.push({ id: uid(), name:"", amount:null, dueDate:"", payDate:"", paid:false, notes:"" });
+  markDirty();
+  renderBillTable();
+});
+
+document.getElementById("addBankAccountBtn").addEventListener("click", () => {
+  const id = "bank_" + uid();
+  state.accounts.bank.push({ id, name:"New account" });
+  Object.values(state.months).forEach(m => m.balances[id] = 0);
+  markDirty();
+  renderAccountLists();
+  renderMonthTable();
+});
+
+document.getElementById("addCreditAccountBtn").addEventListener("click", () => {
+  const id = "credit_" + uid();
+  state.accounts.credit.push({ id, name:"New card" });
+  Object.values(state.months).forEach(m => m.balances[id] = 0);
+  markDirty();
+  renderAccountLists();
+  renderMonthTable();
+});
+
+/* ============================================================
+   COLLAPSIBLE SECTIONS
+   ============================================================ */
+
+document.querySelectorAll(".block-head").forEach(head => {
+  head.addEventListener("click", () => {
+    document.getElementById(head.getAttribute("data-toggle")).classList.toggle("open");
+  });
+});
+
+document.getElementById("scrollTop").addEventListener("click", e => {
+  e.preventDefault();
+  window.scrollTo({top:0, behavior:"smooth"});
+});
+
+/* ============================================================
+   SETTINGS MODAL
+   ============================================================ */
+
+const settingsOverlay = document.getElementById("settingsOverlay");
+
+document.getElementById("settingsToggleBtn").addEventListener("click", () => {
+  document.getElementById("ghTokenInput").value = ghToken;
+  settingsOverlay.classList.add("open");
+});
+
+document.getElementById("closeSettingsBtn").addEventListener("click", () => {
+  settingsOverlay.classList.remove("open");
+});
+
+settingsOverlay.addEventListener("click", e => {
+  if(e.target === settingsOverlay) settingsOverlay.classList.remove("open");
+});
+
+/* ============================================================
+   GITHUB SYNC
+   ============================================================ */
+
+function ghConfigured(){
+  return !!ghToken;
+}
+
+function ghUrl(){
+  const { owner, repo, path } = GITHUB_REPO;
+  return `https://api.github.com/repos/${owner}/${repo}/contents/${path}`;
+}
+
+function b64EncodeUnicode(str){
+  return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, (m,p1) => String.fromCharCode("0x" + p1)));
+}
+function b64DecodeUnicode(str){
+  return decodeURIComponent(atob(str).split("").map(c => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2)).join(""));
+}
+
+function setSyncStatus(kind, text){
+  const pill = document.getElementById("syncPill");
+  pill.className = "sync-pill " + (kind === "ok" ? "ok" : kind === "busy" ? "busy" : kind === "err" ? "err" : "");
+  document.getElementById("syncText").textContent = text;
+}
+
+document.getElementById("saveGhBtn").addEventListener("click", async () => {
+  ghToken = document.getElementById("ghTokenInput").value.trim();
+  localStorage.setItem(LS_TOKEN, ghToken);
+  await saveToGitHub();
+});
+
+document.getElementById("loadGhBtn").addEventListener("click", async () => {
+  ghToken = document.getElementById("ghTokenInput").value.trim();
+  localStorage.setItem(LS_TOKEN, ghToken);
+  await loadFromGitHub(false);
+});
+
+async function saveToGitHub(){
+  if(!ghConfigured()){
+    document.getElementById("ghStatus").textContent = "Fill in the repo owner, name, path, and token first.";
+    setSyncStatus("err", "Not connected");
+    return;
+  }
+  setSyncStatus("busy", "Saving…");
+  try{
+    const payload = { accounts: state.accounts, months: state.months, recurring: state.recurring, bills: state.bills, savedAt: new Date().toISOString() };
+    const body = {
+      message: `Update net worth data — ${new Date().toISOString().slice(0,16).replace("T"," ")}`,
+      content: b64EncodeUnicode(JSON.stringify(payload, null, 2)),
+      branch: GITHUB_REPO.branch
+    };
+    if(ghSha) body.sha = ghSha;
+
+    const res = await fetch(ghUrl(), {
+      method:"PUT",
+      headers:{ "Authorization": `Bearer ${ghToken}`, "Accept":"application/vnd.github+json" },
+      body: JSON.stringify(body)
+    });
+
+    if(!res.ok){
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `GitHub returned ${res.status}`);
+    }
+    const data = await res.json();
+    ghSha = data.content.sha;
+    localStorage.setItem(LS_SHA, ghSha);
+    dirty = false;
+    setSyncStatus("ok", `Saved ${new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}`);
+    document.getElementById("ghStatus").textContent = "Saved to GitHub.";
+  }catch(e){
+    setSyncStatus("err", "Save failed");
+    document.getElementById("ghStatus").textContent = "Save failed: " + e.message;
+  }
+}
+
+async function loadFromGitHub(silent){
+  if(!ghConfigured()){
+    if(!silent) document.getElementById("ghStatus").textContent = "Fill in the repo owner, name, path, and token first.";
+    setSyncStatus("idle", "Not connected");
+    return;
+  }
+  setSyncStatus("busy", "Loading…");
+  try{
+    const res = await fetch(ghUrl() + `?ref=${GITHUB_REPO.branch}`, {
+      headers:{ "Authorization": `Bearer ${ghToken}`, "Accept":"application/vnd.github+json" }
+    });
+
+    if(res.status === 404){
+      ghSha = null;
+      setSyncStatus("ok", "Connected (no data yet)");
+      document.getElementById("ghStatus").textContent = 'No data file yet — click "Save & sync now" to create one.';
+      return;
+    }
+    if(!res.ok){
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err.message || `GitHub returned ${res.status}`);
+    }
+    const data = await res.json();
+    ghSha = data.sha;
+    localStorage.setItem(LS_SHA, ghSha);
+    const payload = JSON.parse(b64DecodeUnicode(data.content));
+
+    if(payload.accounts) state.accounts = payload.accounts;
+    if(payload.months) state.months = payload.months;
+    if(payload.recurring) state.recurring = payload.recurring;
+    if(payload.bills) state.bills = payload.bills;
+
+    persistLocal();
+    render();
+    setSyncStatus("ok", `Synced ${new Date().toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"})}`);
+    document.getElementById("ghStatus").textContent = "Loaded latest data from GitHub.";
+  }catch(e){
+    setSyncStatus("err", "Load failed");
+    document.getElementById("ghStatus").textContent = "Load failed: " + e.message + (silent ? " (showing local cache)" : "");
+  }
+}
+
+/* ============================================================
+   BACKUP EXPORT / IMPORT
+   ============================================================ */
+
+document.getElementById("exportBtn").addEventListener("click", () => {
+  const payload = { accounts: state.accounts, months: state.months, recurring: state.recurring, bills: state.bills, exportedAt: new Date().toISOString() };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type:"application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = `networth-backup-${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+document.getElementById("importBtn").addEventListener("click", () => {
+  document.getElementById("importFile").click();
+});
+
+document.getElementById("importFile").addEventListener("change", e => {
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    try{
+      const payload = JSON.parse(reader.result);
+      if(payload.accounts) state.accounts = payload.accounts;
+      if(payload.months) state.months = payload.months;
+      if(payload.recurring) state.recurring = payload.recurring;
+      if(payload.bills) state.bills = payload.bills;
+      persistLocal();
+      render();
+      document.getElementById("ghStatus").textContent = "Backup imported.";
+    }catch(err){
+      alert("That file doesn't look like a valid net worth backup.");
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = "";
+});
+
+/* ============================================================
+   INIT
+   ============================================================ */
+
+render();
+setSyncStatus("idle", ghConfigured() ? "Connected" : "Local only");
+if(ghConfigured()){
+  loadFromGitHub(true);
+}
+
+</script>
+
+</body>
+</html>
