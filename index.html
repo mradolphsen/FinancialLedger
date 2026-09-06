@@ -356,18 +356,15 @@ footer a{ color:var(--ink-faint); }
     </div>
   </header>
 
-  <!-- NAVIGATION TABS -->
   <nav class="nav-tabs" role="tablist">
     <button class="nav-tab active" data-tab="tab-month-end" role="tab" aria-selected="true">Month End</button>
     <button class="nav-tab" data-tab="tab-pay-tracker" role="tab" aria-selected="false">Pay Tracker</button>
   </nav>
 
-  <!-- SUBPAGE CONTENT: MONTH END -->
   <div class="tab-content active" id="tab-month-end" role="tabpanel">
 
     <div class="hero" id="hero"></div>
 
-    <!-- ===================== MONTH END ===================== -->
     <section class="block open" id="monthBlock">
       <div class="block-head" data-toggle="monthBlock">
         <h2>Month End<span class="block-sub">End-of-month account balances</span></h2>
@@ -381,10 +378,8 @@ footer a{ color:var(--ink-faint); }
       </div>
     </section>
 
-    <!-- ===================== SIDE-BY-SIDE MODULES ===================== -->
     <div class="modules-grid">
       
-      <!-- RECURRING EXPENSES -->
       <section class="block open" id="recurBlock">
         <div class="block-head" data-toggle="recurBlock">
           <h2>Recurring Expenses<span class="block-sub">Expenses that come up regularly</span></h2>
@@ -400,7 +395,6 @@ footer a{ color:var(--ink-faint); }
         </div>
       </section>
 
-      <!-- BILL PAYMENT PLANNER -->
       <section class="block open" id="billBlock">
         <div class="block-head" data-toggle="billBlock">
           <h2>Bill Payment Planner<span class="block-sub">Drag rows to line bills up with paydays</span></h2>
@@ -421,7 +415,6 @@ footer a{ color:var(--ink-faint); }
 
   </div>
 
-  <!-- SUBPAGE CONTENT: PAY TRACKER -->
   <div class="tab-content" id="tab-pay-tracker" role="tabpanel">
     <section class="block open" id="payTrackerBlock">
       <div class="block-head" data-toggle="payTrackerBlock">
@@ -447,7 +440,6 @@ footer a{ color:var(--ink-faint); }
 
 </div>
 
-<!-- ==================== SETTINGS MODAL ==================== -->
 <div class="modal-overlay" id="settingsOverlay">
   <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
     <div class="modal-head">
@@ -890,7 +882,7 @@ function renderPayTable(){
 
   let rows = "";
   if(state.payTracker.length === 0){
-    rows = `<tr class="empty-row"><td colspan="12">No pay records tracked yet.</td></tr>`;
+    rows = `<tr class="empty-row"><td colspan="11">No pay records tracked yet.</td></tr>`;
   } else {
     state.payTracker.forEach((row, idx) => {
       const basePay = parseMoney(row.basePay);
@@ -909,7 +901,6 @@ function renderPayTable(){
       const prevPaycheckTotal = idx > 0 ? prevHourly * 80 : paycheckTotal;
       const paycheckDiff = idx > 0 ? paycheckTotal - prevPaycheckTotal : 0;
 
-      // Handle condensed position info backward compatibility
       const posDisplay = row.positionInfo !== undefined ? row.positionInfo : [row.company, row.department, row.role].filter(Boolean).join(" / ");
 
       rows += `<tr data-id="${row.id}">
@@ -991,10 +982,36 @@ function updateBill(id, field, value){
 
 function updatePayRecord(id, field, value){
   const item = state.payTracker.find(p => p.id === id);
-  if(item){
-    item[field] = (field === "basePay" || field === "myHourly") ? parseMoney(value) : value;
-    markDirty();
-    renderPayTable();
+  if(!item) return;
+
+  item[field] = (field === "basePay" || field === "myHourly") ? parseMoney(value) : value;
+  markDirty();
+
+  const tr = document.querySelector(`#payTable tr[data-id="${id}"]`);
+  if(!tr) return;
+
+  const basePay = parseMoney(item.basePay);
+  const myHourly = parseMoney(item.myHourly);
+
+  const pctAboveBase = basePay > 0 ? ((myHourly - basePay) / basePay) * 100 : 0;
+  const yearlyPre = myHourly * 2080;
+  const yearlyPost = yearlyPre * 0.70;
+  const paycheckTotal = myHourly * 80;
+
+  const idx = state.payTracker.findIndex(p => p.id === id);
+  const prevHourly = idx > 0 ? parseMoney(state.payTracker[idx - 1].myHourly) : myHourly;
+  const hourlyDiff = idx > 0 ? myHourly - prevHourly : 0;
+  const prevPaycheckTotal = idx > 0 ? prevHourly * 80 : paycheckTotal;
+  const paycheckDiff = idx > 0 ? paycheckTotal - prevPaycheckTotal : 0;
+
+  const readonlyInputs = tr.querySelectorAll("input[readonly]");
+  if(readonlyInputs.length >= 6){
+    readonlyInputs[0].value = pctAboveBase.toFixed(2) + "%";
+    readonlyInputs[1].value = fmtMoney(hourlyDiff);
+    readonlyInputs[2].value = fmtMoney(yearlyPre);
+    readonlyInputs[3].value = fmtMoney(yearlyPost);
+    readonlyInputs[4].value = fmtMoney(paycheckTotal);
+    readonlyInputs[5].value = fmtMoney(paycheckDiff);
   }
 }
 
@@ -1193,15 +1210,13 @@ document.addEventListener("DOMContentLoaded", () => {
     render();
   });
 
-  // Handle Input Changes & Button Actions
+  // Handle Input Changes
   document.addEventListener("input", e => {
     const target = e.target;
     const kind = target.getAttribute("data-kind");
 
     if(kind === "balance"){
       const key = target.getAttribute("data-month");
-
-      // Guard check to ignore edits if month is read-only
       if(!isMonthEditable(key)) return;
 
       const acct = target.getAttribute("data-account");
@@ -1209,7 +1224,6 @@ document.addEventListener("DOMContentLoaded", () => {
       state.months[key].balances[acct] = rawVal;
       markDirty();
       renderHero();
-      // Update totals live in table row
       const monthRow = target.closest("tr");
       if(monthRow){
         const totals = monthTotals(key);
@@ -1254,7 +1268,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("focusout", e => {
     const kind = e.target.getAttribute("data-kind");
     const field = e.target.getAttribute("data-field");
-    if(kind === "balance" || kind === "recur-amount" || kind === "bill-amount" || field === "basePay" || field === "myHourly"){
+    if(kind === "balance" || kind === "recur-amount" || kind === "bill-amount" || (kind === "pay-field" && (field === "basePay" || field === "myHourly"))){
       const num = parseMoney(e.target.value);
       e.target.value = e.target.value.trim() !== "" ? fmtMoney(num) : "";
     }
