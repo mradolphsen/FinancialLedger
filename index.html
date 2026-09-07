@@ -187,6 +187,65 @@ section.block.open .block-head .chev{ transform:rotate(90deg); }
 .block-body{ padding:0 12px 14px; display:none; }
 section.block.open .block-body{ display:block; }
 
+/* YEAR SUBSECTION STYLES */
+.year-block {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  margin-top: 12px;
+  background: var(--surface);
+  overflow: hidden;
+}
+.year-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--blue-pale);
+  cursor: pointer;
+  user-select: none;
+  border-bottom: 1px solid var(--line);
+}
+.year-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.year-title {
+  font-family: 'Libre Franklin', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+  color: var(--navy);
+}
+.year-metrics {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+}
+.year-metric-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.year-metric-label {
+  color: var(--ink-muted);
+  font-size: 12px;
+}
+.year-metric-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700;
+}
+.year-metric-value.pos { color: var(--success); }
+.year-metric-value.neg { color: var(--danger); }
+
+.year-head .chev {
+  transition: transform .15s ease;
+  color: var(--navy);
+  flex: none;
+}
+.year-block.open .year-head .chev { transform: rotate(90deg); }
+.year-body { display: none; }
+.year-block.open .year-body { display: block; }
+
 /* SETTINGS / FORM FIELDS */
 .field label{ display:block; font-size:12.5px; color:var(--ink-muted); margin-bottom:5px; }
 .field input, .field select, .field textarea{
@@ -227,7 +286,7 @@ table.tiers input:hover, table.tiers input:focus{ border-color:var(--line); back
 /* DATA TABLES */
 .table-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius-sm); }
 table.data{ width:100%; border-collapse:collapse; font-size:13.5px; }
-#monthTable, #payTable{ min-width:900px; }
+.month-year-table, #payTable{ min-width:900px; }
 table.data th{
   position:sticky; top:0; background:var(--blue-pale); text-align:left; font-weight:600;
   color:var(--navy); font-size:11.5px; text-transform:uppercase; letter-spacing:.03em;
@@ -295,27 +354,38 @@ tr.dragging{ opacity:.4; }
 .empty-row td{ text-align:center; color:var(--ink-faint); font-family:'Source Sans 3'; padding:16px; }
 
 /* BILL PLANNER LEDGER SPECIFIC STYLES */
+.bill-header-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
 .bill-header-card {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  border: 2px solid var(--line-strong);
+  border: 1px solid var(--line-strong);
   border-radius: var(--radius-sm);
   padding: 8px 16px;
   background: var(--surface);
-  margin-bottom: 12px;
   font-family: 'Source Sans 3', sans-serif;
+}
+.bill-header-card.ending-card {
+  background: var(--blue-pale);
+  border-color: var(--blue);
 }
 .bill-header-title {
   font-weight: 700;
-  font-size: 15px;
+  font-size: 14.5px;
+  color: var(--navy);
 }
 .bill-header-value {
   font-family: 'IBM Plex Mono', monospace;
   font-weight: 700;
-  font-size: 16px;
+  font-size: 15.5px;
 }
 
+/* BILL PLANNER TABLE LAYOUT ADJUSTMENTS */
 table.ledger-grid th {
   text-transform: none;
   font-size: 13px;
@@ -332,6 +402,17 @@ table.ledger-grid td.label-cell {
   text-align: left;
   font-family: 'Source Sans 3', sans-serif;
   font-weight: 500;
+}
+
+/* Custom Column Widths for Bill Planner */
+table.ledger-grid col.col-drag { width: 30px; }
+table.ledger-grid col.col-trans { width: 45%; }
+table.ledger-grid col.col-money { width: 15%; }
+table.ledger-grid col.col-rem { width: 20%; }
+table.ledger-grid col.col-act { width: 36px; }
+
+table.ledger-grid td.col-money input {
+  min-width: 65px;
 }
 
 /* PAY TRACKER SPECIFIC STYLES */
@@ -472,14 +553,11 @@ footer a{ color:var(--ink-faint); }
     <!-- ===================== MONTH END ===================== -->
     <section class="block open" id="monthBlock">
       <div class="block-head" data-toggle="monthBlock">
-        <h2>Month End<span class="block-sub">End-of-month account balances</span></h2>
+        <h2>Month End<span class="block-sub">End-of-month account balances grouped by year</span></h2>
         <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
-      <div class="block-body">
-        <div class="table-scroll" style="margin-top:12px;">
-          <table class="data" id="monthTable"></table>
-        </div>
-        <p class="hint">Net worth = total bank account balances minus total credit card balances for that month. Balances lock automatically after 4 days into the new month. Notes remain permanently editable.</p>
+      <div class="block-body" id="monthYearContainer">
+        <!-- Rendered dynamically by year -->
       </div>
     </section>
 
@@ -509,17 +587,25 @@ footer a{ color:var(--ink-faint); }
           <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div class="block-body">
-          <div class="bill-header-card">
-            <span class="bill-header-title">Starting Amount</span>
-            <span class="bill-header-value" id="billStartAmount">$0.00</span>
+          
+          <div class="bill-header-group">
+            <div class="bill-header-card">
+              <span class="bill-header-title">Starting Balance</span>
+              <span class="bill-header-value" id="billStartAmount">$0.00</span>
+            </div>
+            <div class="bill-header-card ending-card">
+              <span class="bill-header-title">Ending Balance</span>
+              <span class="bill-header-value" id="billEndAmount">$0.00</span>
+            </div>
           </div>
+
           <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
             <button class="btn primary" id="addBillBtn">+ Add transaction</button>
           </div>
           <div class="table-scroll">
             <table class="data ledger-grid" id="billTable"></table>
           </div>
-          <p class="hint">Starting amount automatically pulled from prior month's Savings balance. Drag ⠿ handle to reorder rows.</p>
+          <p class="hint">Starting balance automatically pulled from prior month's Savings balance. Drag ⠿ handle to reorder rows.</p>
         </div>
       </section>
 
@@ -782,7 +868,7 @@ function ensureCurrentMonthExists(){
 function isMonthEditable(key){
   const now = new Date();
   const curY = now.getFullYear();
-  const curM = now.getMonth() + 1; // 1-12
+  const curM = now.getMonth() + 1;
   const curKey = curY + "-" + String(curM).padStart(2, "0");
 
   if(key === curKey) return true;
@@ -892,45 +978,107 @@ function renderHero(){
 }
 
 /* ============================================================
-   RENDER: MONTH END TABLE
+   RENDER: MONTH END SECTION GROUPED BY YEARS
    ============================================================ */
 
 function renderMonthTable(){
-  const table = document.getElementById("monthTable");
-  const months = sortedMonths();
+  const container = document.getElementById("monthYearContainer");
+  const allMonths = sortedMonths();
   const bankAccts = state.accounts.bank;
   const creditAccts = state.accounts.credit;
 
-  let head = `<thead><tr>
-      <th rowspan="2" class="col-end">Month</th>
-      ${bankAccts.length ? `<th class="group col-end" colspan="${bankAccts.length}">Bank Accounts</th>` : ""}
-      ${creditAccts.length ? `<th class="group col-end" colspan="${creditAccts.length}">Credit Cards</th>` : ""}
-      <th rowspan="2" class="col-end">Net Worth</th>
-      <th rowspan="2" class="col-end">Change</th>
-      <th rowspan="2" class="notes-col">Notes</th>
-    </tr>
-    <tr>
-      ${bankAccts.map((a,i) => `<th class="${i === bankAccts.length-1 ? "col-end" : ""}">${escapeHtml(a.name)}</th>`).join("")}
-      ${creditAccts.map((a,i) => `<th class="${i === creditAccts.length-1 ? "col-end" : ""}">${escapeHtml(a.name)}</th>`).join("")}
-    </tr></thead>`;
+  if(allMonths.length === 0){
+    container.innerHTML = `<p class="hint" style="padding:12px;">No monthly data tracked yet.</p>`;
+    return;
+  }
 
-  let rows = "";
-  if(months.length === 0){
-    const colCount = 4 + bankAccts.length + creditAccts.length;
-    rows = `<tr class="empty-row"><td colspan="${colCount}">No months tracked yet.</td></tr>`;
-  }else{
-    const thisMonth = currentMonthKey();
-    months.forEach((key, idx) => {
+  // Group months by year
+  const yearGroups = {};
+  allMonths.forEach(key => {
+    const yr = key.split("-")[0];
+    if(!yearGroups[yr]) yearGroups[yr] = [];
+    yearGroups[yr].push(key);
+  });
+
+  const sortedYears = Object.keys(yearGroups).sort().reverse();
+  const thisMonthKey = currentMonthKey();
+  const currentYear = new Date().getFullYear().toString();
+
+  let html = "";
+
+  sortedYears.forEach(year => {
+    const monthsInYear = yearGroups[year].sort().reverse(); // Dec -> Jan
+    
+    // Ending Net Worth is from the latest month recorded in that year
+    const latestYearKey = monthsInYear[0];
+    const endingNetWorth = monthTotals(latestYearKey).net;
+
+    // Sum of remaining changes for the year
+    let yearTotalChange = 0;
+    monthsInYear.forEach(key => {
+      const idx = allMonths.indexOf(key);
+      const totals = monthTotals(key);
+      const prevTotals = idx < allMonths.length - 1 ? monthTotals(allMonths[idx + 1]) : null;
+      if(prevTotals !== null){
+        yearTotalChange += (totals.net - prevTotals.net);
+      }
+    });
+
+    const changeClass = yearTotalChange > 0 ? "pos" : (yearTotalChange < 0 ? "neg" : "");
+    const changeSign = yearTotalChange >= 0 ? "+" : "";
+
+    // Keep current year open by default
+    const isOpen = year === currentYear ? "open" : "";
+
+    html += `
+      <div class="year-block ${isOpen}" data-year="${year}">
+        <div class="year-head">
+          <div class="year-title-group">
+            <span class="year-title">${year}</span>
+            <svg class="chev" width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="year-metrics">
+            <div class="year-metric-item">
+              <span class="year-metric-label">Ending Net Worth:</span>
+              <span class="year-metric-value">${fmtMoney(endingNetWorth)}</span>
+            </div>
+            <div class="year-metric-item">
+              <span class="year-metric-label">Total Change:</span>
+              <span class="year-metric-value ${changeClass}">${changeSign}${fmtMoney(yearTotalChange)}</span>
+            </div>
+          </div>
+        </div>
+        <div class="year-body">
+          <div class="table-scroll" style="border:none; border-radius:0;">
+            <table class="data month-year-table">
+              <thead>
+                <tr>
+                  <th rowspan="2" class="col-end">Month</th>
+                  ${bankAccts.length ? `<th class="group col-end" colspan="${bankAccts.length}">Bank Accounts</th>` : ""}
+                  ${creditAccts.length ? `<th class="group col-end" colspan="${creditAccts.length}">Credit Cards</th>` : ""}
+                  <th rowspan="2" class="col-end">Net Worth</th>
+                  <th rowspan="2" class="col-end">Change</th>
+                  <th rowspan="2" class="notes-col">Notes</th>
+                </tr>
+                <tr>
+                  ${bankAccts.map((a,i) => `<th class="${i === bankAccts.length-1 ? "col-end" : ""}">${escapeHtml(a.name)}</th>`).join("")}
+                  ${creditAccts.map((a,i) => `<th class="${i === creditAccts.length-1 ? "col-end" : ""}">${escapeHtml(a.name)}</th>`).join("")}
+                </tr>
+              </thead>
+              <tbody>`;
+
+    monthsInYear.forEach(key => {
       const entry = state.months[key];
       const totals = monthTotals(key);
-      const prevTotals = idx < months.length - 1 ? monthTotals(months[idx+1]) : null;
+      const idx = allMonths.indexOf(key);
+      const prevTotals = idx < allMonths.length - 1 ? monthTotals(allMonths[idx + 1]) : null;
       const diff = prevTotals ? totals.net - prevTotals.net : null;
       const diffClass = diff === null ? "" : (diff > 0 ? "pos" : (diff < 0 ? "neg" : ""));
       const diffText = diff === null ? "—" : (diff >= 0 ? "+" : "") + fmtMoney(diff);
       const editable = isMonthEditable(key);
       const readonlyAttr = editable ? "" : "readonly";
 
-      rows += `<tr class="${key === thisMonth ? "current-month" : ""}" data-month="${key}">
+      html += `<tr class="${key === thisMonthKey ? "current-month" : ""}" data-month="${key}">
         <td class="label-cell col-end"><strong>${monthLabel(key)}</strong></td>
         ${bankAccts.map((a,i) => `<td class="${i === bankAccts.length-1 ? "col-end" : ""}"><input type="text" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] !== undefined && entry.balances[a.id] !== "" ? fmtMoney(entry.balances[a.id]) : ""}" ${readonlyAttr}></td>`).join("")}
         ${creditAccts.map((a,i) => `<td class="${i === creditAccts.length-1 ? "col-end" : ""}"><input type="text" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] !== undefined && entry.balances[a.id] !== "" ? fmtMoney(entry.balances[a.id]) : ""}" ${readonlyAttr}></td>`).join("")}
@@ -939,9 +1087,20 @@ function renderMonthTable(){
         <td class="notes-col"><textarea data-kind="notes" data-month="${key}" placeholder="Notes…">${escapeHtml(entry.notes || "")}</textarea></td>
       </tr>`;
     });
-  }
 
-  table.innerHTML = head + "<tbody>" + rows + "</tbody>";
+    html += `</tbody></table></div></div></div>`;
+  });
+
+  html += `<p class="hint" style="margin-top:12px;">Net worth = total bank account balances minus total credit card balances for that month. Balances lock automatically after 4 days into the new month. Notes remain permanently editable.</p>`;
+
+  container.innerHTML = html;
+
+  // Bind toggle clicks to year accordions
+  container.querySelectorAll(".year-head").forEach(head => {
+    head.addEventListener("click", () => {
+      head.parentElement.classList.toggle("open");
+    });
+  });
 }
 
 /* ============================================================
@@ -995,13 +1154,21 @@ function renderBillTable(){
   const startEl = document.getElementById("billStartAmount");
   if(startEl) startEl.textContent = fmtMoney(startAmount);
 
-  let head = `<thead><tr>
-      <th style="width:24px;"></th>
-      <th style="text-align:left;">Expense</th>
+  let head = `<colgroup>
+      <col class="col-drag">
+      <col class="col-trans">
+      <col class="col-money">
+      <col class="col-money">
+      <col class="col-rem">
+      <col class="col-act">
+    </colgroup>
+    <thead><tr>
+      <th></th>
+      <th style="text-align:left;">Transaction</th>
       <th>Debit</th>
       <th>Credit</th>
       <th>Remaining</th>
-      <th style="width:30px;"></th>
+      <th></th>
     </tr></thead>`;
 
   let rows = "";
@@ -1019,8 +1186,8 @@ function renderBillTable(){
       rows += `<tr data-id="${item.id}" draggable="true">
         <td class="drag-cell" title="Drag to reorder">⠿</td>
         <td class="label-cell"><input type="text" data-kind="bill-name" data-id="${item.id}" value="${escapeHtml(item.name || "")}" placeholder="e.g. Paycheck or Rent"></td>
-        <td><input type="text" data-kind="bill-debit" data-id="${item.id}" value="${item.debit !== undefined && item.debit !== "" && item.debit !== 0 ? fmtMoney(item.debit) : ""}" placeholder="$0.00"></td>
-        <td><input type="text" data-kind="bill-credit" data-id="${item.id}" value="${item.credit !== undefined && item.credit !== "" && item.credit !== 0 ? fmtMoney(item.credit) : ""}" placeholder="$0.00"></td>
+        <td class="col-money"><input type="text" data-kind="bill-debit" data-id="${item.id}" value="${item.debit !== undefined && item.debit !== "" && item.debit !== 0 ? fmtMoney(item.debit) : ""}" placeholder="$0.00"></td>
+        <td class="col-money"><input type="text" data-kind="bill-credit" data-id="${item.id}" value="${item.credit !== undefined && item.credit !== "" && item.credit !== 0 ? fmtMoney(item.credit) : ""}" placeholder="$0.00"></td>
         <td><input type="text" readonly value="${fmtMoney(running)}"></td>
         <td class="actions-cell"><button class="btn small danger" data-action="delete-bill" data-id="${item.id}" title="Remove">✕</button></td>
       </tr>`;
@@ -1028,6 +1195,10 @@ function renderBillTable(){
   }
 
   table.innerHTML = head + "<tbody>" + rows + "</tbody>";
+  
+  const endEl = document.getElementById("billEndAmount");
+  if(endEl) endEl.textContent = fmtMoney(running);
+
   bindBillDragEvents();
 }
 
@@ -1287,6 +1458,9 @@ function recalculateLedger(){
       if(remainingInput) remainingInput.value = fmtMoney(running);
     }
   });
+
+  const endEl = document.getElementById("billEndAmount");
+  if(endEl) endEl.textContent = fmtMoney(running);
 }
 
 function updatePayRecord(id, field, value){
@@ -1534,12 +1708,7 @@ document.addEventListener("DOMContentLoaded", () => {
       state.months[key].balances[acct] = rawVal;
       markDirty();
       renderHero();
-      const monthRow = target.closest("tr");
-      if(monthRow){
-        const totals = monthTotals(key);
-        const totalCell = monthRow.querySelector(".total-cell");
-        if(totalCell) totalCell.textContent = fmtMoney(totals.net);
-      }
+      renderMonthTable(); // Rerender to update year metrics and month diffs
       if(acct === "savings"){
         renderBillTable();
       }
