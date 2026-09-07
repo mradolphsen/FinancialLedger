@@ -68,7 +68,7 @@ body{
 }
 
 /* Maximize layout width */
-.wrap{ max-width:1380px; margin:0 auto; padding:24px 8px 80px; }
+.wrap{ max-width:1440px; margin:0 auto; padding:24px 8px 80px; }
 
 a{ color:var(--navy); }
 
@@ -90,6 +90,7 @@ h1{
   gap: 8px;
   border-bottom: 2px solid var(--line);
   margin-bottom: 20px;
+  flex-wrap: wrap;
 }
 
 .nav-tab {
@@ -286,7 +287,7 @@ table.tiers input:hover, table.tiers input:focus{ border-color:var(--line); back
 /* DATA TABLES */
 .table-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius-sm); }
 table.data{ width:100%; border-collapse:collapse; font-size:13.5px; }
-.month-year-table, #payTable{ min-width:900px; }
+.month-year-table, #payTable, table.loan-grid{ min-width:900px; }
 table.data th{
   position:sticky; top:0; background:var(--blue-pale); text-align:left; font-weight:600;
   color:var(--navy); font-size:11.5px; text-transform:uppercase; letter-spacing:.03em;
@@ -322,7 +323,7 @@ table.data input[type=number] {
 
 /* EXPANDED COLUMN INPUT WIDTHS */
 table.data input[type=number], table.data input[type=text], table.data input[type=date]{
-  width:100%; min-width:90px; border:1px solid var(--line); border-radius:4px; padding:5px 6px;
+  width:100%; min-width:80px; border:1px solid var(--line); border-radius:4px; padding:5px 6px;
   font-family:'IBM Plex Mono',monospace; font-size:13px; background:var(--bg); color:var(--ink);
 }
 
@@ -483,6 +484,37 @@ table.pay-grid input[type=text].highlight-hourly { font-weight: 800; }
   border-radius: 4px;
 }
 
+/* LOAN TRACKER SPECIFIC STYLES */
+table.loan-grid th.loan-group-header {
+  text-align: center;
+  background: var(--blue-soft);
+  font-family: 'Libre Franklin', sans-serif;
+  font-weight: 800;
+  font-size: 13.5px;
+  color: var(--navy);
+  text-transform: none;
+}
+table.loan-grid tr.info-row td {
+  background: var(--surface);
+  font-weight: 600;
+}
+table.loan-grid tr.info-row td.info-label {
+  font-style: italic;
+  font-family: 'Source Sans 3', sans-serif;
+  color: var(--ink-muted);
+}
+table.loan-grid td.col-diff {
+  font-style: italic;
+  color: var(--ink-muted);
+}
+table.loan-grid tr.year-summary-row td {
+  background: var(--blue-pale);
+  font-weight: 700;
+  font-style: italic;
+  text-align: right;
+  color: var(--navy);
+}
+
 /* MODALS */
 .modal-overlay{
   position:fixed; inset:0; background:rgba(27,36,34,0.45); display:none;
@@ -543,6 +575,8 @@ footer a{ color:var(--ink-faint); }
   <nav class="nav-tabs" role="tablist">
     <button class="nav-tab active" data-tab="tab-month-end" role="tab" aria-selected="true">Month End</button>
     <button class="nav-tab" data-tab="tab-pay-tracker" role="tab" aria-selected="false">Pay Tracker</button>
+    <button class="nav-tab" data-tab="tab-private-loans" role="tab" aria-selected="false">Private Loans</button>
+    <button class="nav-tab" data-tab="tab-federal-loans" role="tab" aria-selected="false">Federal Loans</button>
   </nav>
 
   <!-- SUBPAGE CONTENT: MONTH END -->
@@ -702,6 +736,38 @@ footer a{ color:var(--ink-faint); }
 
   </div>
 
+  <!-- SUBPAGE CONTENT: PRIVATE LOANS -->
+  <div class="tab-content" id="tab-private-loans" role="tabpanel">
+    <section class="block open" id="privateLoansBlock">
+      <div class="block-head" data-toggle="privateLoansBlock">
+        <h2>Private Student Loans<span class="block-sub">Track payoff schedule and interest across private loans</span></h2>
+        <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="block-body">
+        <div class="table-scroll">
+          <table class="data loan-grid" id="privateLoanTable"></table>
+        </div>
+        <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule. Edit monthly payments or interest individually for custom adjustments.</p>
+      </div>
+    </section>
+  </div>
+
+  <!-- SUBPAGE CONTENT: FEDERAL LOANS -->
+  <div class="tab-content" id="tab-federal-loans" role="tabpanel">
+    <section class="block open" id="federalLoansBlock">
+      <div class="block-head" data-toggle="federalLoansBlock">
+        <h2>Federal Student Loans<span class="block-sub">Track payoff schedule and interest across federal loans</span></h2>
+        <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="block-body">
+        <div class="table-scroll">
+          <table class="data loan-grid" id="federalLoanTable"></table>
+        </div>
+        <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule. Edit monthly payments or interest individually for custom adjustments.</p>
+      </div>
+    </section>
+  </div>
+
   <footer>
     Your own numbers, kept in your browser and optionally synced to your private GitHub repository.
     <a href="#" id="scrollTop">Back to top</a>
@@ -791,6 +857,122 @@ const GITHUB_REPO = {
 
 function uid(){ return Math.random().toString(36).slice(2,9); }
 
+const INITIAL_PRIVATE_LOANS = {
+  startMonthYear: "2024-12",
+  loans: [
+    { id: "p1", name: "College Ave - 360021657718", principle: 8000.00, startingAmount: 9690.55, autoPayAmount: 90.00 },
+    { id: "p2", name: "College Ave - 360021753920", principle: 7200.00, startingAmount: 8461.19, autoPayAmount: 85.00 },
+    { id: "p3", name: "College Ave - 360021898853", principle: 15000.00, startingAmount: 16537.31, autoPayAmount: 180.00 }
+  ],
+  monthlyData: {
+    "2024-12": {
+      p1: { payment: 90.00, interest: 56.10 },
+      p2: { payment: 85.00, interest: 56.71 },
+      p3: { payment: 177.00, interest: 127.26 }
+    },
+    "2025-01": {
+      p1: { payment: 90.00, interest: 59.34 },
+      p2: { payment: 85.00, interest: 60.05 },
+      p3: { payment: 177.00, interest: 134.89 }
+    },
+    "2025-02": {
+      p1: { payment: 90.00, interest: 59.15 },
+      p2: { payment: 85.00, interest: 59.87 },
+      p3: { payment: 177.00, interest: 134.56 }
+    },
+    "2025-03": {
+      p1: { payment: 90.00, interest: 53.26 },
+      p2: { payment: 85.00, interest: 53.92 },
+      p3: { payment: 177.00, interest: 121.22 }
+    },
+    "2025-04": {
+      p1: { payment: 90.00, interest: 58.73 },
+      p2: { payment: 85.00, interest: 59.47 },
+      p3: { payment: 177.00, interest: 133.75 }
+    },
+    "2025-05": {
+      p1: { payment: 90.00, interest: 56.66 },
+      p2: { payment: 85.00, interest: 57.37 },
+      p3: { payment: 177.00, interest: 129.09 }
+    },
+    "2025-06": {
+      p1: { payment: 90.00, interest: 58.33 },
+      p2: { payment: 85.00, interest: 59.10 },
+      p3: { payment: 177.00, interest: 128.71 }
+    },
+    "2025-07": {
+      p1: { payment: 90.00, interest: 56.27 },
+      p2: { payment: 85.00, interest: 57.01 },
+      p3: { payment: 177.00, interest: 128.37 }
+    },
+    "2025-08": {
+      p1: { payment: 90.00, interest: 57.94 },
+      p2: { payment: 85.00, interest: 58.71 },
+      p3: { payment: 180.00, interest: 132.24 }
+    },
+    "2025-09": {
+      p1: { payment: 90.00, interest: 57.74 },
+      p2: { payment: 85.00, interest: 58.52 },
+      p3: { payment: 180.00, interest: 131.86 }
+    },
+    "2025-10": {
+      p1: { payment: 90.00, interest: 55.68 },
+      p2: { payment: 85.00, interest: 56.45 },
+      p3: { payment: 180.00, interest: 127.22 }
+    },
+    "2025-11": {
+      p1: { payment: 90.00, interest: 57.33 },
+      p2: { payment: 85.00, interest: 58.13 },
+      p3: { payment: 180.00, interest: 131.03 }
+    },
+    "2025-12": {
+      p1: { payment: 90.00, interest: 55.29 },
+      p2: { payment: 85.00, interest: 56.07 },
+      p3: { payment: 180.00, interest: 126.41 }
+    },
+    "2026-01": {
+      p1: { payment: 90.00, interest: 56.91 },
+      p2: { payment: 85.00, interest: 57.73 },
+      p3: { payment: 180.00, interest: 130.19 }
+    },
+    "2026-02": {
+      p1: { payment: 270.00, interest: 56.71 },
+      p2: { payment: 255.00, interest: 57.54 },
+      p3: { payment: 540.00, interest: 129.79 }
+    },
+    "2026-03": {
+      p1: { payment: 90.00, interest: 32.24 },
+      p2: { payment: 85.00, interest: 32.67 },
+      p3: { payment: 180.00, interest: 73.61 }
+    },
+    "2026-04": {
+      p1: { payment: 90.00, interest: 55.16 },
+      p2: { payment: 85.00, interest: 55.89 },
+      p3: { payment: 180.00, interest: 125.89 }
+    },
+    "2026-05": {
+      p1: { payment: 90.00, interest: 53.17 },
+      p2: { payment: 85.00, interest: 53.89 },
+      p3: { payment: 180.00, interest: 121.41 }
+    },
+    "2026-06": {
+      p1: { payment: 90.00, interest: 54.72 },
+      p2: { payment: 85.00, interest: 55.46 },
+      p3: { payment: 180.00, interest: 124.98 }
+    }
+  }
+};
+
+const INITIAL_FEDERAL_LOANS = {
+  startMonthYear: "2024-12",
+  loans: [
+    { id: "f1", name: "Federal Direct Subsidized 1", principle: 3500.00, startingAmount: 3500.00, autoPayAmount: 50.00 },
+    { id: "f2", name: "Federal Direct Unsubsidized 2", principle: 2000.00, startingAmount: 2150.00, autoPayAmount: 35.00 },
+    { id: "f3", name: "Federal Direct Subsidized 3", principle: 4500.00, startingAmount: 4500.00, autoPayAmount: 65.00 }
+  ],
+  monthlyData: {}
+};
+
 const DEFAULT_STATE = {
   accounts:{
     bank:[
@@ -820,7 +1002,9 @@ const DEFAULT_STATE = {
     { id: uid(), startMonth: "Aug 2025", positionInfo: "Mayo Clinic / CVRU / CRC", basePay: 27.44, myHourly: 28.30, compRatio: "82.51" },
     { id: uid(), startMonth: "Mar 2026 - 3.5% annual", positionInfo: "Mayo Clinic / CVRU / CRC", basePay: 27.99, myHourly: 29.29, compRatio: "83.71" },
     { id: uid(), startMonth: "Oct 2026", positionInfo: "Mayo Clinic / CVRU / Cert CRC", basePay: 27.99, myHourly: 30.29, compRatio: "86.58" }
-  ]
+  ],
+  privateLoans: INITIAL_PRIVATE_LOANS,
+  federalLoans: INITIAL_FEDERAL_LOANS
 };
 
 /* ============================================================
@@ -1391,6 +1575,197 @@ function renderPayTable(){
 }
 
 /* ============================================================
+   LOAN TRACKER LOGIC & ENGINE
+   ============================================================ */
+
+function addMonthsToKey(key, count){
+  let [y, m] = key.split("-").map(Number);
+  m += count;
+  while(m > 12){
+    m -= 12;
+    y += 1;
+  }
+  return y + "-" + String(m).padStart(2, "0");
+}
+
+function renderLoanTracker(tableId, stateKey){
+  const table = document.getElementById(tableId);
+  if(!table) return;
+
+  const data = state[stateKey];
+  if(!data || !data.loans || data.loans.length === 0){
+    table.innerHTML = `<tbody><tr class="empty-row"><td>No loan data configured.</td></tr></tbody>`;
+    return;
+  }
+
+  const loans = data.loans;
+  const startKey = data.startMonthYear || "2024-12";
+  if(!data.monthlyData) data.monthlyData = {};
+
+  // 1. Calculate Average Interest per loan based on historical inputs
+  const avgInterestMap = {};
+  loans.forEach(loan => {
+    let sumInt = 0;
+    let countInt = 0;
+    Object.keys(data.monthlyData).forEach(mKey => {
+      const entry = data.monthlyData[mKey]?.[loan.id];
+      if(entry && entry.interest !== undefined && entry.interest !== ""){
+        const val = parseMoney(entry.interest);
+        if(val > 0){
+          sumInt += val;
+          countInt++;
+        }
+      }
+    });
+    avgInterestMap[loan.id] = countInt > 0 ? (sumInt / countInt) : 50.00;
+  });
+
+  // 2. Dynamic Schedule Projection
+  const monthlyRows = [];
+  let monthIdx = 0;
+  const runningBalances = {};
+  const currentAutoPay = {};
+
+  loans.forEach(loan => {
+    runningBalances[loan.id] = parseMoney(loan.startingAmount);
+    currentAutoPay[loan.id] = parseMoney(loan.autoPayAmount);
+  });
+
+  const MAX_MONTHS = 360; // Safety cap (30 yrs)
+
+  while(monthIdx < MAX_MONTHS){
+    const mKey = addMonthsToKey(startKey, monthIdx);
+    const rowLoanData = {};
+    let totalAllBalances = 0;
+
+    loans.forEach(loan => {
+      const prevBal = runningBalances[loan.id];
+
+      // Check for user-driven override of Auto Pay (carried forward if modified)
+      const storedEntry = data.monthlyData[mKey]?.[loan.id];
+      
+      let payAmt = currentAutoPay[loan.id];
+      let isCustomPayment = false;
+
+      if(storedEntry && storedEntry.payment !== undefined && storedEntry.payment !== ""){
+        payAmt = parseMoney(storedEntry.payment);
+        if(storedEntry.isAutoPayChange){
+          currentAutoPay[loan.id] = payAmt;
+        } else {
+          isCustomPayment = true;
+        }
+      }
+
+      // Check interest (inputted or calculated average)
+      let intAmt = avgInterestMap[loan.id];
+      if(storedEntry && storedEntry.interest !== undefined && storedEntry.interest !== ""){
+        intAmt = parseMoney(storedEntry.interest);
+      }
+
+      // Remaining Balance Calculation = Last Month Balance - Payment + Interest
+      let remBal = prevBal - payAmt + intAmt;
+      if(remBal < 0) remBal = 0;
+
+      const diff = payAmt - intAmt; // Amount to principal
+
+      rowLoanData[loan.id] = {
+        payment: payAmt,
+        interest: intAmt,
+        remaining: remBal,
+        difference: diff,
+        isCustomPayment
+      };
+
+      runningBalances[loan.id] = remBal;
+      totalAllBalances += remBal;
+    });
+
+    monthlyRows.push({
+      monthIndex: monthIdx + 1,
+      monthKey: mKey,
+      loansData: rowLoanData
+    });
+
+    // Check stop condition: if all loans zeroed out
+    if(totalAllBalances <= 0) break;
+    monthIdx++;
+  }
+
+  // 3. Build Header HTML
+  let totalPrinciple = loans.reduce((sum, l) => sum + parseMoney(l.principle), 0);
+  let totalStarting = loans.reduce((sum, l) => sum + parseMoney(l.startingAmount), 0);
+  let totalAutoPay = loans.reduce((sum, l) => sum + parseMoney(l.autoPayAmount), 0);
+  let totalAvgInterest = loans.reduce((sum, l) => sum + avgInterestMap[l.id], 0);
+
+  let headerHtml = `<thead>
+    <tr>
+      <th rowspan="5" class="col-end" style="vertical-align:bottom; text-align:center;">Month</th>
+      ${loans.map(l => `<th colspan="4" class="loan-group-header col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="name" value="${escapeHtml(l.name)}" style="background:transparent; border:none; font-weight:800; text-align:center; font-family:inherit; color:var(--navy);"></th>`).join("")}
+      <th class="loan-group-header" style="text-align:right;">Totals</th>
+    </tr>
+    <tr class="info-row">
+      ${loans.map(l => `
+        <td class="info-label">Principle</td>
+        <td colspan="3" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="principle" value="${fmtMoney(l.principle)}"></td>
+      `).join("")}
+      <td style="text-align:right;">${fmtMoney(totalPrinciple)}</td>
+    </tr>
+    <tr class="info-row">
+      ${loans.map(l => `
+        <td class="info-label">Starting Amount</td>
+        <td colspan="3" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="startingAmount" value="${fmtMoney(l.startingAmount)}"></td>
+      `).join("")}
+      <td style="text-align:right;">${fmtMoney(totalStarting)}</td>
+    </tr>
+    <tr class="info-row">
+      ${loans.map(l => `
+        <td class="info-label">Auto Pay Amount</td>
+        <td colspan="3" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="autoPayAmount" value="${fmtMoney(l.autoPayAmount)}"></td>
+      `).join("")}
+      <td style="text-align:right;">${fmtMoney(totalAutoPay)}</td>
+    </tr>
+    <tr class="info-row">
+      ${loans.map(l => `
+        <td class="info-label">Average Interest</td>
+        <td colspan="3" class="col-end"><input type="text" readonly value="${fmtMoney(avgInterestMap[l.id])}"></td>
+      `).join("")}
+      <td style="text-align:right;">${fmtMoney(totalAvgInterest)}</td>
+    </tr>
+    <tr>
+      ${loans.map(() => `
+        <th>Payment</th>
+        <th>Interest</th>
+        <th>Remaining</th>
+        <th class="col-end">Difference</th>
+      `).join("")}
+      <th></th>
+    </tr>
+  </thead>`;
+
+  // 4. Build Body Rows HTML
+  let bodyHtml = "<tbody>";
+
+  monthlyRows.forEach(row => {
+    bodyHtml += `<tr>
+      <td class="col-end label-cell"><strong>${row.monthIndex}</strong> &nbsp; <span style="color:var(--ink-faint); font-size:12px;">${monthLabel(row.monthKey)}</span></td>
+      ${loans.map(l => {
+        const d = row.loansData[l.id];
+        return `
+          <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="payment" value="${fmtMoney(d.payment)}"></td>
+          <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="interest" value="${fmtMoney(d.interest)}"></td>
+          <td><input type="text" readonly value="${fmtMoney(d.remaining)}"></td>
+          <td class="col-end col-diff"><input type="text" readonly value="${fmtMoney(d.difference)}"></td>
+        `;
+      }).join("")}
+      <td style="text-align:right; font-weight:700; color:var(--navy);">${row.monthIndex % 12 === 0 ? "Year " + (row.monthIndex / 12) : ""}</td>
+    </tr>`;
+  });
+
+  bodyHtml += "</tbody>";
+  table.innerHTML = headerHtml + bodyHtml;
+}
+
+/* ============================================================
    RENDER: SETTINGS — ACCOUNT LISTS
    ============================================================ */
 
@@ -1422,6 +1797,8 @@ function render(){
   renderBillTable();
   renderPayTable();
   initCompCalculator();
+  renderLoanTracker("privateLoanTable", "privateLoans");
+  renderLoanTracker("federalLoanTable", "federalLoans");
   renderAccountLists();
   updateSyncStatus();
 }
@@ -1750,6 +2127,32 @@ document.addEventListener("DOMContentLoaded", () => {
       const id = target.getAttribute("data-id");
       const acct = state.accounts[group].find(a => a.id === id);
       if(acct){ acct.name = target.value; markDirty(); }
+    } else if(kind === "loan-header-field"){
+      const stateKey = target.getAttribute("data-state");
+      const loanId = target.getAttribute("data-loan");
+      const field = target.getAttribute("data-field");
+      const loanObj = state[stateKey].loans.find(l => l.id === loanId);
+      if(loanObj){
+        loanObj[field] = (field === "name") ? target.value : parseMoney(target.value);
+        markDirty();
+        renderLoanTracker(stateKey === "privateLoans" ? "privateLoanTable" : "federalLoanTable", stateKey);
+      }
+    } else if(kind === "loan-month-field"){
+      const stateKey = target.getAttribute("data-state");
+      const mKey = target.getAttribute("data-month");
+      const loanId = target.getAttribute("data-loan");
+      const field = target.getAttribute("data-field");
+      
+      if(!state[stateKey].monthlyData) state[stateKey].monthlyData = {};
+      if(!state[stateKey].monthlyData[mKey]) state[stateKey].monthlyData[mKey] = {};
+      if(!state[stateKey].monthlyData[mKey][loanId]) state[stateKey].monthlyData[mKey][loanId] = {};
+
+      state[stateKey].monthlyData[mKey][loanId][field] = parseMoney(target.value);
+      if(field === "payment"){
+        state[stateKey].monthlyData[mKey][loanId].isAutoPayChange = true;
+      }
+      markDirty();
+      renderLoanTracker(stateKey === "privateLoans" ? "privateLoanTable" : "federalLoanTable", stateKey);
     }
   });
 
@@ -1757,9 +2160,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("focusout", e => {
     const kind = e.target.getAttribute("data-kind");
     const field = e.target.getAttribute("data-field");
-    if(kind === "balance" || kind === "recur-amount" || kind === "bill-debit" || kind === "bill-credit" || (kind === "pay-field" && (field === "basePay" || field === "myHourly"))){
+    if(kind === "balance" || kind === "recur-amount" || kind === "bill-debit" || kind === "bill-credit" || (kind === "pay-field" && (field === "basePay" || field === "myHourly")) || kind === "loan-header-field" || kind === "loan-month-field"){
       const num = parseMoney(e.target.value);
-      e.target.value = e.target.value.trim() !== "" && num !== 0 ? fmtMoney(num) : "";
+      e.target.value = e.target.value.trim() !== "" && num !== 0 ? fmtMoney(num) : (kind === "loan-month-field" ? "$0.00" : "");
     }
   });
 
