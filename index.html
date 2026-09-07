@@ -1700,34 +1700,34 @@ function renderLoanTracker(tableId, stateKey){
   let headerHtml = `<thead>
     <tr>
       <th rowspan="6" class="col-end" style="vertical-align:bottom; text-align:center;">Month</th>
-      ${loans.map(l => `<th colspan="3" class="loan-group-header col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="name" value="${escapeHtml(l.name)}" style="background:transparent; border:none; font-weight:800; text-align:center; font-family:inherit; color:var(--navy);"></th>`).join("")}
+      ${loans.map(l => `<th colspan="4" class="loan-group-header col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="name" value="${escapeHtml(l.name)}" style="background:transparent; border:none; font-weight:800; text-align:center; font-family:inherit; color:var(--navy);"></th>`).join("")}
       <th class="loan-group-header" style="text-align:right;">Totals</th>
     </tr>
     <tr class="info-row">
       ${loans.map(l => `
         <td class="info-label">Principle</td>
-        <td colspan="2" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="principle" value="${fmtMoney(l.principle)}"></td>
+        <td colspan="3" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="principle" value="${fmtMoney(l.principle)}"></td>
       `).join("")}
       <td style="text-align:right;">${fmtMoney(totalPrinciple)}</td>
     </tr>
     <tr class="info-row">
       ${loans.map(l => `
         <td class="info-label">Starting Amount</td>
-        <td colspan="2" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="startingAmount" value="${fmtMoney(l.startingAmount)}"></td>
+        <td colspan="3" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="startingAmount" value="${fmtMoney(l.startingAmount)}"></td>
       `).join("")}
       <td style="text-align:right;">${fmtMoney(totalStarting)}</td>
     </tr>
     <tr class="info-row">
       ${loans.map(l => `
         <td class="info-label">Auto Pay Amount</td>
-        <td colspan="2" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="autoPayAmount" value="${fmtMoney(l.autoPayAmount)}"></td>
+        <td colspan="3" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="autoPayAmount" value="${fmtMoney(l.autoPayAmount)}"></td>
       `).join("")}
       <td style="text-align:right;">${fmtMoney(totalAutoPay)}</td>
     </tr>
     <tr class="info-row">
       ${loans.map(l => `
         <td class="info-label">Average Interest</td>
-        <td colspan="2" class="col-end"><input type="text" readonly value="${fmtMoney(avgInterestMap[l.id])}"></td>
+        <td colspan="3" class="col-end"><input type="text" readonly value="${fmtMoney(avgInterestMap[l.id])}"></td>
       `).join("")}
       <td style="text-align:right;">${fmtMoney(totalAvgInterest)}</td>
     </tr>
@@ -1735,6 +1735,7 @@ function renderLoanTracker(tableId, stateKey){
       ${loans.map(() => `
         <th>Payment</th>
         <th>Interest</th>
+        <th>Remaining</th>
         <th class="col-end">Difference</th>
       `).join("")}
       <th></th>
@@ -1746,14 +1747,13 @@ function renderLoanTracker(tableId, stateKey){
 
   monthlyRows.forEach(row => {
     bodyHtml += `<tr>
-      <td class="col-end label-cell">
-        <span style="color:var(--ink-faint); font-size:12px;">${monthLabel(row.monthKey)}</span>
-      </td>
+      <td class="col-end label-cell"><strong>${row.monthIndex}</strong> &nbsp; <span style="color:var(--ink-faint); font-size:12px;">${monthLabel(row.monthKey)}</span></td>
       ${loans.map(l => {
         const d = row.loansData[l.id];
         return `
           <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="payment" value="${fmtMoney(d.payment)}"></td>
           <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="interest" value="${fmtMoney(d.interest)}"></td>
+          <td><input type="text" readonly value="${fmtMoney(d.remaining)}"></td>
           <td class="col-end col-diff"><input type="text" readonly value="${fmtMoney(d.difference)}"></td>
         `;
       }).join("")}
