@@ -323,6 +323,12 @@
       "name": "Rent",
       "debit": 0,
       "credit": 0
+    },
+    {
+      "id": "jx98ub7",
+      "name": "Paychec",
+      "debit": 0,
+      "credit": 1588.26
     }
   ],
   "compCalculator": {
