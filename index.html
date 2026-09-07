@@ -85,7 +85,7 @@ h1{
 .top-actions{ display:flex; align-items:center; gap:10px; }
 
 /* NAVIGATION TABS */
-.nav-tabs {
+.nav-tabs, .sub-nav-tabs {
   display: flex;
   gap: 8px;
   border-bottom: 2px solid var(--line);
@@ -93,7 +93,16 @@ h1{
   flex-wrap: wrap;
 }
 
-.nav-tab {
+.sub-nav-tabs {
+  margin-top: -10px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--surface);
+  padding: 6px 12px 0;
+  border-radius: var(--radius-sm);
+}
+
+.nav-tab, .sub-nav-tab {
   padding: 10px 20px;
   font-family: 'Libre Franklin', sans-serif;
   font-weight: 600;
@@ -107,20 +116,26 @@ h1{
   transition: color .15s ease, border-color .15s ease;
 }
 
-.nav-tab:hover {
+.sub-nav-tab {
+  padding: 8px 14px;
+  font-size: 13.5px;
+  margin-bottom: -1px;
+}
+
+.nav-tab:hover, .sub-nav-tab:hover {
   color: var(--navy);
 }
 
-.nav-tab.active {
+.nav-tab.active, .sub-nav-tab.active {
   color: var(--navy);
   border-bottom-color: var(--blue);
 }
 
-.tab-content {
+.tab-content, .sub-tab-content {
   display: none;
 }
 
-.tab-content.active {
+.tab-content.active, .sub-tab-content.active {
   display: block;
 }
 
@@ -285,21 +300,22 @@ table.tiers input:hover, table.tiers input:focus{ border-color:var(--line); back
 .btn-row{ display:flex; gap:10px; flex-wrap:wrap; margin-top:10px; }
 
 /* DATA TABLES */
-.table-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius-sm); }
-table.data{ width:100%; border-collapse:collapse; font-size:13.5px; }
-.month-year-table, #payTable, table.loan-grid{ min-width:900px; }
+.table-scroll{ overflow-x:auto; border:1px solid var(--line); border-radius:var(--radius-sm); width: 100%; }
+table.data{ width:100%; border-collapse:collapse; font-size:13px; }
+.month-year-table, #payTable{ min-width:900px; }
+table.loan-grid{ min-width: 100%; table-layout: auto; }
 table.data th{
   position:sticky; top:0; background:var(--blue-pale); text-align:left; font-weight:600;
   color:var(--navy); font-size:11.5px; text-transform:uppercase; letter-spacing:.03em;
-  padding:8px 10px; border-bottom:1px solid var(--line-strong); white-space:nowrap; z-index:2;
+  padding:6px 8px; border-bottom:1px solid var(--line-strong); white-space:nowrap; z-index:2;
 }
 table.data th.group{ text-align:center; background:var(--blue-soft); }
 
 table.data td{
-  padding:6px 8px; border-bottom:1px solid var(--line); white-space:nowrap;
+  padding:5px 6px; border-bottom:1px solid var(--line); white-space:nowrap;
   font-family:'IBM Plex Mono',monospace; font-variant-numeric:tabular-nums;
 }
-table.data td.label-cell{ font-family:'Source Sans 3'; white-space:normal; min-width:90px; padding-left:8px; padding-right:8px; }
+table.data td.label-cell{ font-family:'Source Sans 3'; white-space:normal; min-width:80px; padding-left:6px; padding-right:6px; }
 table.data th.col-end, table.data td.col-end{ border-right:2px solid var(--line-strong); }
 
 /* NOTES COLUMN WIDE FORMATTING */
@@ -323,8 +339,8 @@ table.data input[type=number] {
 
 /* EXPANDED COLUMN INPUT WIDTHS */
 table.data input[type=number], table.data input[type=text], table.data input[type=date]{
-  width:100%; min-width:80px; border:1px solid var(--line); border-radius:4px; padding:5px 6px;
-  font-family:'IBM Plex Mono',monospace; font-size:13px; background:var(--bg); color:var(--ink);
+  width:100%; min-width:65px; border:1px solid var(--line); border-radius:4px; padding:4px 5px;
+  font-family:'IBM Plex Mono',monospace; font-size:12.5px; background:var(--bg); color:var(--ink);
 }
 
 /* READ-ONLY FIELD STYLING */
@@ -490,13 +506,15 @@ table.loan-grid th.loan-group-header {
   background: var(--blue-soft);
   font-family: 'Libre Franklin', sans-serif;
   font-weight: 800;
-  font-size: 13.5px;
+  font-size: 13px;
   color: var(--navy);
   text-transform: none;
+  padding: 4px 6px;
 }
 table.loan-grid tr.info-row td {
   background: var(--surface);
   font-weight: 600;
+  padding: 4px 6px;
 }
 table.loan-grid tr.info-row td.info-label {
   font-style: italic;
@@ -575,8 +593,7 @@ footer a{ color:var(--ink-faint); }
   <nav class="nav-tabs" role="tablist">
     <button class="nav-tab active" data-tab="tab-month-end" role="tab" aria-selected="true">Month End</button>
     <button class="nav-tab" data-tab="tab-pay-tracker" role="tab" aria-selected="false">Pay Tracker</button>
-    <button class="nav-tab" data-tab="tab-private-loans" role="tab" aria-selected="false">Private Loans</button>
-    <button class="nav-tab" data-tab="tab-federal-loans" role="tab" aria-selected="false">Federal Loans</button>
+    <button class="nav-tab" data-tab="tab-loans" role="tab" aria-selected="false">Loans</button>
   </nav>
 
   <!-- SUBPAGE CONTENT: MONTH END -->
@@ -736,36 +753,96 @@ footer a{ color:var(--ink-faint); }
 
   </div>
 
-  <!-- SUBPAGE CONTENT: PRIVATE LOANS -->
-  <div class="tab-content" id="tab-private-loans" role="tabpanel">
-    <section class="block open" id="privateLoansBlock">
-      <div class="block-head" data-toggle="privateLoansBlock">
-        <h2>Private Student Loans<span class="block-sub">Track payoff schedule and interest across private loans</span></h2>
-        <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="block-body">
-        <div class="table-scroll">
-          <table class="data loan-grid" id="privateLoanTable"></table>
-        </div>
-        <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule. Edit monthly payments or interest individually for custom adjustments.</p>
-      </div>
-    </section>
-  </div>
+  <!-- SUBPAGE CONTENT: COMBINED LOANS TAB -->
+  <div class="tab-content" id="tab-loans" role="tabpanel">
+    
+    <!-- SUB-NAVIGATION FOR LOAN TYPES -->
+    <nav class="sub-nav-tabs" role="tablist" id="loanSubTabs">
+      <button class="sub-nav-tab active" data-subtab="subtab-federal-loans" role="tab" aria-selected="true">Federal Student Loans</button>
+      <button class="sub-nav-tab" data-subtab="subtab-private-loans" role="tab" aria-selected="false">Private Student Loans</button>
+      <button class="sub-nav-tab" data-subtab="subtab-car-loans" role="tab" aria-selected="false">Car Loans</button>
+      <button class="sub-nav-tab" data-subtab="subtab-house-loans" role="tab" aria-selected="false">House Loans</button>
+    </nav>
 
-  <!-- SUBPAGE CONTENT: FEDERAL LOANS -->
-  <div class="tab-content" id="tab-federal-loans" role="tabpanel">
-    <section class="block open" id="federalLoansBlock">
-      <div class="block-head" data-toggle="federalLoansBlock">
-        <h2>Federal Student Loans<span class="block-sub">Track payoff schedule and interest across federal loans</span></h2>
-        <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="block-body">
-        <div class="table-scroll">
-          <table class="data loan-grid" id="federalLoanTable"></table>
+    <!-- SUBTAB: FEDERAL LOANS -->
+    <div class="sub-tab-content active" id="subtab-federal-loans" role="tabpanel">
+      <section class="block open" id="federalLoansBlock">
+        <div class="block-head" data-toggle="federalLoansBlock">
+          <h2>Federal Student Loans<span class="block-sub">Track payoff schedule and interest across federal loans</span></h2>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule. Edit monthly payments or interest individually for custom adjustments.</p>
-      </div>
-    </section>
+        <div class="block-body">
+          <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+            <button class="btn primary" data-action="add-loan-col" data-cat="federalLoans">+ Add Federal Loan</button>
+          </div>
+          <div class="table-scroll">
+            <table class="data loan-grid" id="federalLoanTable"></table>
+          </div>
+          <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule. Edit monthly interest individually for custom adjustments.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- SUBTAB: PRIVATE LOANS -->
+    <div class="sub-tab-content" id="subtab-private-loans" role="tabpanel">
+      <section class="block open" id="privateLoansBlock">
+        <div class="block-head" data-toggle="privateLoansBlock">
+          <h2>Private Student Loans<span class="block-sub">Track payoff schedule and interest across private loans</span></h2>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="block-body">
+          <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+            <button class="btn primary" data-action="add-loan-col" data-cat="privateLoans">+ Add Private Loan</button>
+          </div>
+          <div class="table-scroll">
+            <table class="data loan-grid" id="privateLoanTable"></table>
+          </div>
+          <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule. Edit monthly interest individually for custom adjustments.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- SUBTAB: CAR LOANS -->
+    <div class="sub-tab-content" id="subtab-car-loans" role="tabpanel">
+      <section class="block open" id="carLoansBlock">
+        <div class="block-head" data-toggle="carLoansBlock">
+          <h2>Car Loans<span class="block-sub">Track payoff schedule and interest across car loans</span></h2>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="block-body">
+          <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+            <button class="btn primary" data-action="add-loan-col" data-cat="carLoans">+ Add Car Loan</button>
+          </div>
+          <div class="table-scroll">
+            <table class="data loan-grid" id="carLoanTable"></table>
+          </div>
+          <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- SUBTAB: HOUSE LOANS -->
+    <div class="sub-tab-content" id="subtab-house-loans" role="tabpanel">
+      <section class="block open" id="houseLoansBlock">
+        <div class="block-head" data-toggle="houseLoansBlock">
+          <h2>House Loans / Mortgages<span class="block-sub">Track payoff schedule and interest across mortgages</span></h2>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="block-body">
+          <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+            <button class="btn primary" data-action="add-loan-col" data-cat="houseLoans">+ Add House Loan</button>
+          </div>
+          <div class="table-scroll">
+            <table class="data loan-grid" id="houseLoanTable"></table>
+          </div>
+          <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule.</p>
+        </div>
+      </section>
+    </div>
+
+    <!-- DYNAMICALLY CREATED SUBTABS CONTAINER -->
+    <div id="dynamicLoanSubTabsContainer"></div>
+
   </div>
 
   <footer>
@@ -801,6 +878,12 @@ footer a{ color:var(--ink-faint); }
         </table>
         <div class="btn-row"><button class="btn ghost" id="addCreditAccountBtn">+ Add credit card</button></div>
         <p class="hint">Renaming an account keeps its saved balances. Removing an account deletes its balances from every month.</p>
+      </fieldset>
+
+      <fieldset>
+        <legend>Loan Categories</legend>
+        <p class="hint">Add custom loan sub-groups (e.g. Personal Loans, Boat Loans) to your Loans tab.</p>
+        <div class="btn-row" style="margin-top:0;"><button class="btn ghost" id="addLoanCategoryBtn">+ Add New Loan Subtab Category</button></div>
       </fieldset>
 
       <fieldset>
@@ -866,99 +949,99 @@ const INITIAL_PRIVATE_LOANS = {
   ],
   monthlyData: {
     "2024-12": {
-      p1: { payment: 90.00, interest: 56.10 },
-      p2: { payment: 85.00, interest: 56.71 },
-      p3: { payment: 177.00, interest: 127.26 }
+      p1: { interest: 56.10 },
+      p2: { interest: 56.71 },
+      p3: { interest: 127.26 }
     },
     "2025-01": {
-      p1: { payment: 90.00, interest: 59.34 },
-      p2: { payment: 85.00, interest: 60.05 },
-      p3: { payment: 177.00, interest: 134.89 }
+      p1: { interest: 59.34 },
+      p2: { interest: 60.05 },
+      p3: { interest: 134.89 }
     },
     "2025-02": {
-      p1: { payment: 90.00, interest: 59.15 },
-      p2: { payment: 85.00, interest: 59.87 },
-      p3: { payment: 177.00, interest: 134.56 }
+      p1: { interest: 59.15 },
+      p2: { interest: 59.87 },
+      p3: { interest: 134.56 }
     },
     "2025-03": {
-      p1: { payment: 90.00, interest: 53.26 },
-      p2: { payment: 85.00, interest: 53.92 },
-      p3: { payment: 177.00, interest: 121.22 }
+      p1: { interest: 53.26 },
+      p2: { interest: 53.92 },
+      p3: { interest: 121.22 }
     },
     "2025-04": {
-      p1: { payment: 90.00, interest: 58.73 },
-      p2: { payment: 85.00, interest: 59.47 },
-      p3: { payment: 177.00, interest: 133.75 }
+      p1: { interest: 58.73 },
+      p2: { interest: 59.47 },
+      p3: { interest: 133.75 }
     },
     "2025-05": {
-      p1: { payment: 90.00, interest: 56.66 },
-      p2: { payment: 85.00, interest: 57.37 },
-      p3: { payment: 177.00, interest: 129.09 }
+      p1: { interest: 56.66 },
+      p2: { interest: 57.37 },
+      p3: { interest: 129.09 }
     },
     "2025-06": {
-      p1: { payment: 90.00, interest: 58.33 },
-      p2: { payment: 85.00, interest: 59.10 },
-      p3: { payment: 177.00, interest: 128.71 }
+      p1: { interest: 58.33 },
+      p2: { interest: 59.10 },
+      p3: { interest: 128.71 }
     },
     "2025-07": {
-      p1: { payment: 90.00, interest: 56.27 },
-      p2: { payment: 85.00, interest: 57.01 },
-      p3: { payment: 177.00, interest: 128.37 }
+      p1: { interest: 56.27 },
+      p2: { interest: 57.01 },
+      p3: { interest: 128.37 }
     },
     "2025-08": {
-      p1: { payment: 90.00, interest: 57.94 },
-      p2: { payment: 85.00, interest: 58.71 },
-      p3: { payment: 180.00, interest: 132.24 }
+      p1: { interest: 57.94 },
+      p2: { interest: 58.71 },
+      p3: { interest: 132.24 }
     },
     "2025-09": {
-      p1: { payment: 90.00, interest: 57.74 },
-      p2: { payment: 85.00, interest: 58.52 },
-      p3: { payment: 180.00, interest: 131.86 }
+      p1: { interest: 57.74 },
+      p2: { interest: 58.52 },
+      p3: { interest: 131.86 }
     },
     "2025-10": {
-      p1: { payment: 90.00, interest: 55.68 },
-      p2: { payment: 85.00, interest: 56.45 },
-      p3: { payment: 180.00, interest: 127.22 }
+      p1: { interest: 55.68 },
+      p2: { interest: 56.45 },
+      p3: { interest: 127.22 }
     },
     "2025-11": {
-      p1: { payment: 90.00, interest: 57.33 },
-      p2: { payment: 85.00, interest: 58.13 },
-      p3: { payment: 180.00, interest: 131.03 }
+      p1: { interest: 57.33 },
+      p2: { interest: 58.13 },
+      p3: { interest: 131.03 }
     },
     "2025-12": {
-      p1: { payment: 90.00, interest: 55.29 },
-      p2: { payment: 85.00, interest: 56.07 },
-      p3: { payment: 180.00, interest: 126.41 }
+      p1: { interest: 55.29 },
+      p2: { interest: 56.07 },
+      p3: { interest: 126.41 }
     },
     "2026-01": {
-      p1: { payment: 90.00, interest: 56.91 },
-      p2: { payment: 85.00, interest: 57.73 },
-      p3: { payment: 180.00, interest: 130.19 }
+      p1: { interest: 56.91 },
+      p2: { interest: 57.73 },
+      p3: { interest: 130.19 }
     },
     "2026-02": {
-      p1: { payment: 270.00, interest: 56.71 },
-      p2: { payment: 255.00, interest: 57.54 },
-      p3: { payment: 540.00, interest: 129.79 }
+      p1: { interest: 56.71 },
+      p2: { interest: 57.54 },
+      p3: { interest: 129.79 }
     },
     "2026-03": {
-      p1: { payment: 90.00, interest: 32.24 },
-      p2: { payment: 85.00, interest: 32.67 },
-      p3: { payment: 180.00, interest: 73.61 }
+      p1: { interest: 32.24 },
+      p2: { interest: 32.67 },
+      p3: { interest: 73.61 }
     },
     "2026-04": {
-      p1: { payment: 90.00, interest: 55.16 },
-      p2: { payment: 85.00, interest: 55.89 },
-      p3: { payment: 180.00, interest: 125.89 }
+      p1: { interest: 55.16 },
+      p2: { interest: 55.89 },
+      p3: { interest: 125.89 }
     },
     "2026-05": {
-      p1: { payment: 90.00, interest: 53.17 },
-      p2: { payment: 85.00, interest: 53.89 },
-      p3: { payment: 180.00, interest: 121.41 }
+      p1: { interest: 53.17 },
+      p2: { interest: 53.89 },
+      p3: { interest: 121.41 }
     },
     "2026-06": {
-      p1: { payment: 90.00, interest: 54.72 },
-      p2: { payment: 85.00, interest: 55.46 },
-      p3: { payment: 180.00, interest: 124.98 }
+      p1: { interest: 54.72 },
+      p2: { interest: 55.46 },
+      p3: { interest: 124.98 }
     }
   }
 };
@@ -969,6 +1052,22 @@ const INITIAL_FEDERAL_LOANS = {
     { id: "f1", name: "Federal Direct Subsidized 1", principle: 3500.00, startingAmount: 3500.00, autoPayAmount: 50.00 },
     { id: "f2", name: "Federal Direct Unsubsidized 2", principle: 2000.00, startingAmount: 2150.00, autoPayAmount: 35.00 },
     { id: "f3", name: "Federal Direct Subsidized 3", principle: 4500.00, startingAmount: 4500.00, autoPayAmount: 65.00 }
+  ],
+  monthlyData: {}
+};
+
+const INITIAL_CAR_LOANS = {
+  startMonthYear: "2024-12",
+  loans: [
+    { id: "c1", name: "Auto Loan - Vehicle 1", principle: 18000.00, startingAmount: 18000.00, autoPayAmount: 350.00 }
+  ],
+  monthlyData: {}
+};
+
+const INITIAL_HOUSE_LOANS = {
+  startMonthYear: "2024-12",
+  loans: [
+    { id: "h1", name: "Primary Mortgage", principle: 250000.00, startingAmount: 250000.00, autoPayAmount: 1400.00 }
   ],
   monthlyData: {}
 };
@@ -1003,8 +1102,11 @@ const DEFAULT_STATE = {
     { id: uid(), startMonth: "Mar 2026 - 3.5% annual", positionInfo: "Mayo Clinic / CVRU / CRC", basePay: 27.99, myHourly: 29.29, compRatio: "83.71" },
     { id: uid(), startMonth: "Oct 2026", positionInfo: "Mayo Clinic / CVRU / Cert CRC", basePay: 27.99, myHourly: 30.29, compRatio: "86.58" }
   ],
+  customLoanCategories: [],
   privateLoans: INITIAL_PRIVATE_LOANS,
-  federalLoans: INITIAL_FEDERAL_LOANS
+  federalLoans: INITIAL_FEDERAL_LOANS,
+  carLoans: INITIAL_CAR_LOANS,
+  houseLoans: INITIAL_HOUSE_LOANS
 };
 
 /* ============================================================
@@ -1184,7 +1286,6 @@ function renderMonthTable(){
     return;
   }
 
-  // Group months by year
   const yearGroups = {};
   allMonths.forEach(key => {
     const yr = key.split("-")[0];
@@ -1199,13 +1300,10 @@ function renderMonthTable(){
   let html = "";
 
   sortedYears.forEach(year => {
-    const monthsInYear = yearGroups[year].sort().reverse(); // Dec -> Jan
-    
-    // Ending Net Worth is from the latest month recorded in that year
+    const monthsInYear = yearGroups[year].sort().reverse();
     const latestYearKey = monthsInYear[0];
     const endingNetWorth = monthTotals(latestYearKey).net;
 
-    // Sum of remaining changes for the year
     let yearTotalChange = 0;
     monthsInYear.forEach(key => {
       const idx = allMonths.indexOf(key);
@@ -1219,7 +1317,6 @@ function renderMonthTable(){
     const changeClass = yearTotalChange > 0 ? "pos" : (yearTotalChange < 0 ? "neg" : "");
     const changeSign = yearTotalChange >= 0 ? "+" : "";
 
-    // Keep current year open by default
     const isOpen = year === currentYear ? "open" : "";
 
     html += `
@@ -1287,7 +1384,6 @@ function renderMonthTable(){
 
   container.innerHTML = html;
 
-  // Bind toggle clicks to year accordions
   container.querySelectorAll(".year-head").forEach(head => {
     head.addEventListener("click", () => {
       head.parentElement.classList.toggle("open");
@@ -1456,14 +1552,12 @@ function initCompCalculator(){
     const minVal = parseMoney(minInput.value);
     const maxVal = parseMoney(maxInput.value);
 
-    // Calculate Midpoint: (Min + Max) / 2
     const computedMidpoint = (minVal + maxVal) / 2;
     midpointEl.value = fmtMoney(computedMidpoint);
 
     const payVal = parseMoney(calcPayInput.value);
     const targetRatio = parseMoney(calcRatioInput.value);
 
-    // Calculate Comp-Ratio from Pay
     if(computedMidpoint > 0){
       const computedRatio = (payVal / computedMidpoint) * 100;
       calcRatioOutput.value = computedRatio.toFixed(2);
@@ -1471,7 +1565,6 @@ function initCompCalculator(){
       calcRatioOutput.value = "0.00";
     }
 
-    // Calculate Pay from Comp-Ratio
     if(computedMidpoint > 0){
       const computedPay = (targetRatio / 100) * computedMidpoint;
       calcPayOutput.value = fmtMoney(computedPay);
@@ -1575,7 +1668,7 @@ function renderPayTable(){
 }
 
 /* ============================================================
-   LOAN TRACKER LOGIC & ENGINE
+   LOAN TRACKER LOGIC & ENGINE (ADJUSTED HEADERS & FIT)
    ============================================================ */
 
 function addMonthsToKey(key, count){
@@ -1593,16 +1686,20 @@ function renderLoanTracker(tableId, stateKey){
   if(!table) return;
 
   const data = state[stateKey];
-  if(!data || !data.loans || data.loans.length === 0){
+  if(!data || !data.loans){
     table.innerHTML = `<tbody><tr class="empty-row"><td>No loan data configured.</td></tr></tbody>`;
     return;
   }
 
   const loans = data.loans;
+  if(loans.length === 0){
+    table.innerHTML = `<tbody><tr class="empty-row"><td>No loans added in this sub-tab. Click button above to add a loan column.</td></tr></tbody>`;
+    return;
+  }
+
   const startKey = data.startMonthYear || "2024-12";
   if(!data.monthlyData) data.monthlyData = {};
 
-  // 1. Calculate Average Interest per loan based on historical inputs
   const avgInterestMap = {};
   loans.forEach(loan => {
     let sumInt = 0;
@@ -1620,7 +1717,6 @@ function renderLoanTracker(tableId, stateKey){
     avgInterestMap[loan.id] = countInt > 0 ? (sumInt / countInt) : 50.00;
   });
 
-  // 2. Dynamic Schedule Projection
   const monthlyRows = [];
   let monthIdx = 0;
   const runningBalances = {};
@@ -1631,7 +1727,7 @@ function renderLoanTracker(tableId, stateKey){
     currentAutoPay[loan.id] = parseMoney(loan.autoPayAmount);
   });
 
-  const MAX_MONTHS = 360; // Safety cap (30 yrs)
+  const MAX_MONTHS = 360;
 
   while(monthIdx < MAX_MONTHS){
     const mKey = addMonthsToKey(startKey, monthIdx);
@@ -1640,40 +1736,28 @@ function renderLoanTracker(tableId, stateKey){
 
     loans.forEach(loan => {
       const prevBal = runningBalances[loan.id];
-
-      // Check for user-driven override of Auto Pay (carried forward if modified)
       const storedEntry = data.monthlyData[mKey]?.[loan.id];
       
       let payAmt = currentAutoPay[loan.id];
-      let isCustomPayment = false;
 
       if(storedEntry && storedEntry.payment !== undefined && storedEntry.payment !== ""){
         payAmt = parseMoney(storedEntry.payment);
-        if(storedEntry.isAutoPayChange){
-          currentAutoPay[loan.id] = payAmt;
-        } else {
-          isCustomPayment = true;
-        }
       }
 
-      // Check interest (inputted or calculated average)
       let intAmt = avgInterestMap[loan.id];
       if(storedEntry && storedEntry.interest !== undefined && storedEntry.interest !== ""){
         intAmt = parseMoney(storedEntry.interest);
       }
 
-      // Remaining Balance Calculation = Last Month Balance - Payment + Interest
       let remBal = prevBal - payAmt + intAmt;
       if(remBal < 0) remBal = 0;
 
-      const diff = payAmt - intAmt; // Amount to principal
+      const diff = payAmt - intAmt;
 
       rowLoanData[loan.id] = {
-        payment: payAmt,
         interest: intAmt,
         remaining: remBal,
-        difference: diff,
-        isCustomPayment
+        difference: diff
       };
 
       runningBalances[loan.id] = remBal;
@@ -1686,12 +1770,10 @@ function renderLoanTracker(tableId, stateKey){
       loansData: rowLoanData
     });
 
-    // Check stop condition: if all loans zeroed out
     if(totalAllBalances <= 0) break;
     monthIdx++;
   }
 
-  // 3. Build Header HTML
   let totalPrinciple = loans.reduce((sum, l) => sum + parseMoney(l.principle), 0);
   let totalStarting = loans.reduce((sum, l) => sum + parseMoney(l.startingAmount), 0);
   let totalAutoPay = loans.reduce((sum, l) => sum + parseMoney(l.autoPayAmount), 0);
@@ -1700,40 +1782,44 @@ function renderLoanTracker(tableId, stateKey){
   let headerHtml = `<thead>
     <tr>
       <th rowspan="5" class="col-end" style="vertical-align:bottom; text-align:center;">Month</th>
-      ${loans.map(l => `<th colspan="4" class="loan-group-header col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="name" value="${escapeHtml(l.name)}" style="background:transparent; border:none; font-weight:800; text-align:center; font-family:inherit; color:var(--navy);"></th>`).join("")}
+      ${loans.map(l => `<th colspan="3" class="loan-group-header col-end">
+        <div style="display:flex; align-items:center; justify-content:center; gap:4px;">
+          <input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="name" value="${escapeHtml(l.name)}" style="background:transparent; border:none; font-weight:800; text-align:center; font-family:inherit; color:var(--navy);">
+          <button class="btn small danger" data-action="delete-loan-col" data-state="${stateKey}" data-loan="${l.id}" title="Remove Loan" style="padding:1px 5px; font-size:10px;">✕</button>
+        </div>
+      </th>`).join("")}
       <th class="loan-group-header" style="text-align:right;">Totals</th>
     </tr>
     <tr class="info-row">
       ${loans.map(l => `
         <td class="info-label">Principle</td>
-        <td colspan="3" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="principle" value="${fmtMoney(l.principle)}"></td>
+        <td colspan="2" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="principle" value="${fmtMoney(l.principle)}"></td>
       `).join("")}
       <td style="text-align:right;">${fmtMoney(totalPrinciple)}</td>
     </tr>
     <tr class="info-row">
       ${loans.map(l => `
         <td class="info-label">Starting Amount</td>
-        <td colspan="3" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="startingAmount" value="${fmtMoney(l.startingAmount)}"></td>
+        <td colspan="2" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="startingAmount" value="${fmtMoney(l.startingAmount)}"></td>
       `).join("")}
       <td style="text-align:right;">${fmtMoney(totalStarting)}</td>
     </tr>
     <tr class="info-row">
       ${loans.map(l => `
         <td class="info-label">Auto Pay Amount</td>
-        <td colspan="3" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="autoPayAmount" value="${fmtMoney(l.autoPayAmount)}"></td>
+        <td colspan="2" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="autoPayAmount" value="${fmtMoney(l.autoPayAmount)}"></td>
       `).join("")}
       <td style="text-align:right;">${fmtMoney(totalAutoPay)}</td>
     </tr>
     <tr class="info-row">
       ${loans.map(l => `
         <td class="info-label">Average Interest</td>
-        <td colspan="3" class="col-end"><input type="text" readonly value="${fmtMoney(avgInterestMap[l.id])}"></td>
+        <td colspan="2" class="col-end"><input type="text" readonly value="${fmtMoney(avgInterestMap[l.id])}"></td>
       `).join("")}
       <td style="text-align:right;">${fmtMoney(totalAvgInterest)}</td>
     </tr>
     <tr>
       ${loans.map(() => `
-        <th>Payment</th>
         <th>Interest</th>
         <th>Remaining</th>
         <th class="col-end">Difference</th>
@@ -1742,27 +1828,100 @@ function renderLoanTracker(tableId, stateKey){
     </tr>
   </thead>`;
 
-  // 4. Build Body Rows HTML
   let bodyHtml = "<tbody>";
 
   monthlyRows.forEach(row => {
     bodyHtml += `<tr>
-      <td class="col-end label-cell"><strong>${row.monthIndex}</strong> &nbsp; <span style="color:var(--ink-faint); font-size:12px;">${monthLabel(row.monthKey)}</span></td>
+      <td class="col-end label-cell"><strong>${row.monthIndex}</strong> &nbsp; <span style="color:var(--ink-faint); font-size:11px;">${monthLabel(row.monthKey)}</span></td>
       ${loans.map(l => {
         const d = row.loansData[l.id];
         return `
-          <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="payment" value="${fmtMoney(d.payment)}"></td>
           <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="interest" value="${fmtMoney(d.interest)}"></td>
           <td><input type="text" readonly value="${fmtMoney(d.remaining)}"></td>
           <td class="col-end col-diff"><input type="text" readonly value="${fmtMoney(d.difference)}"></td>
         `;
       }).join("")}
-      <td style="text-align:right; font-weight:700; color:var(--navy);">${row.monthIndex % 12 === 0 ? "Year " + (row.monthIndex / 12) : ""}</td>
+      <td style="text-align:right; font-weight:700; color:var(--navy); font-size:12px;">${row.monthIndex % 12 === 0 ? "Year " + (row.monthIndex / 12) : ""}</td>
     </tr>`;
   });
 
   bodyHtml += "</tbody>";
   table.innerHTML = headerHtml + bodyHtml;
+}
+
+function renderAllLoanTables(){
+  renderLoanTracker("federalLoanTable", "federalLoans");
+  renderLoanTracker("privateLoanTable", "privateLoans");
+  renderLoanTracker("carLoanTable", "carLoans");
+  renderLoanTracker("houseLoanTable", "houseLoans");
+
+  if(state.customLoanCategories){
+    state.customLoanCategories.forEach(cat => {
+      renderLoanTracker(`loanTable_${cat.id}`, cat.id);
+    });
+  }
+}
+
+function renderDynamicLoanSubTabs(){
+  const navContainer = document.getElementById("loanSubTabs");
+  const contentContainer = document.getElementById("dynamicLoanSubTabsContainer");
+  if(!navContainer || !contentContainer) return;
+
+  if(!state.customLoanCategories) state.customLoanCategories = [];
+
+  navContainer.querySelectorAll(".custom-subtab-btn").forEach(b => b.remove());
+  contentContainer.innerHTML = "";
+
+  state.customLoanCategories.forEach(cat => {
+    const btn = document.createElement("button");
+    btn.className = "sub-nav-tab custom-subtab-btn";
+    btn.setAttribute("data-subtab", `subtab-${cat.id}`);
+    btn.setAttribute("role", "tab");
+    btn.setAttribute("aria-selected", "false");
+    btn.textContent = cat.name;
+
+    btn.addEventListener("click", () => {
+      navContainer.querySelectorAll(".sub-nav-tab").forEach(t => {
+        t.classList.remove("active");
+        t.setAttribute("aria-selected", "false");
+      });
+      document.querySelectorAll(".sub-tab-content").forEach(c => c.classList.remove("active"));
+      btn.classList.add("active");
+      btn.setAttribute("aria-selected", "true");
+      document.getElementById(`subtab-${cat.id}`).classList.add("active");
+    });
+
+    navContainer.appendChild(btn);
+
+    const subTabDiv = document.createElement("div");
+    subTabDiv.className = "sub-tab-content";
+    subTabDiv.id = `subtab-${cat.id}`;
+    subTabDiv.setAttribute("role", "tabpanel");
+
+    subTabDiv.innerHTML = `
+      <section class="block open" id="${cat.id}Block">
+        <div class="block-head" data-toggle="${cat.id}Block">
+          <h2>${escapeHtml(cat.name)}<span class="block-sub">Track payoff schedule and interest</span></h2>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="block-body">
+          <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+            <button class="btn primary" data-action="add-loan-col" data-cat="${cat.id}">+ Add Loan</button>
+            <button class="btn danger small" data-action="delete-loan-category" data-cat="${cat.id}" style="margin-left:auto;">Delete Category</button>
+          </div>
+          <div class="table-scroll">
+            <table class="data loan-grid" id="loanTable_${cat.id}"></table>
+          </div>
+        </div>
+      </section>
+    `;
+
+    contentContainer.appendChild(subTabDiv);
+
+    subTabDiv.querySelector(".block-head").addEventListener("click", () => {
+      subTabDiv.querySelector(".block").classList.toggle("open");
+    });
+  });
 }
 
 /* ============================================================
@@ -1797,8 +1956,8 @@ function render(){
   renderBillTable();
   renderPayTable();
   initCompCalculator();
-  renderLoanTracker("privateLoanTable", "privateLoans");
-  renderLoanTracker("federalLoanTable", "federalLoans");
+  renderDynamicLoanSubTabs();
+  renderAllLoanTables();
   renderAccountLists();
   updateSyncStatus();
 }
@@ -2019,6 +2178,24 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Sub-tab Navigation Switching
+  document.querySelectorAll(".sub-nav-tab").forEach(subTab => {
+    subTab.addEventListener("click", () => {
+      const parentNav = subTab.closest(".sub-nav-tabs");
+      parentNav.querySelectorAll(".sub-nav-tab").forEach(st => {
+        st.classList.remove("active");
+        st.setAttribute("aria-selected", "false");
+      });
+      document.querySelectorAll(".sub-tab-content").forEach(c => c.classList.remove("active"));
+
+      subTab.classList.add("active");
+      subTab.setAttribute("aria-selected", "true");
+      const targetId = subTab.getAttribute("data-subtab");
+      const targetContent = document.getElementById(targetId);
+      if(targetContent) targetContent.classList.add("active");
+    });
+  });
+
   // Toggle Section Collapse
   document.querySelectorAll(".block-head").forEach(head => {
     head.addEventListener("click", () => {
@@ -2067,7 +2244,7 @@ document.addEventListener("DOMContentLoaded", () => {
     renderPayTable();
   });
 
-  // Add Accounts (Settings)
+  // Add Bank / Credit Card Accounts
   document.getElementById("addBankAccountBtn").addEventListener("click", () => {
     const name = prompt("Enter bank account name:");
     if(!name) return;
@@ -2080,6 +2257,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const name = prompt("Enter credit card name:");
     if(!name) return;
     state.accounts.credit.push({ id: uid(), name });
+    markDirty();
+    render();
+  });
+
+  // Add Custom Loan Category (Sub-tab)
+  document.getElementById("addLoanCategoryBtn").addEventListener("click", () => {
+    const name = prompt("Enter Loan Subtab Category Name (e.g. Personal Loans, Boat Loans):");
+    if(!name) return;
+    const catId = "loan_cat_" + uid();
+    if(!state.customLoanCategories) state.customLoanCategories = [];
+    state.customLoanCategories.push({ id: catId, name });
+    state[catId] = {
+      startMonthYear: "2024-12",
+      loans: [],
+      monthlyData: {}
+    };
     markDirty();
     render();
   });
@@ -2098,7 +2291,7 @@ document.addEventListener("DOMContentLoaded", () => {
       state.months[key].balances[acct] = rawVal;
       markDirty();
       renderHero();
-      renderMonthTable(); // Rerender to update year metrics and month diffs
+      renderMonthTable();
       if(acct === "savings"){
         renderBillTable();
       }
@@ -2135,7 +2328,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if(loanObj){
         loanObj[field] = (field === "name") ? target.value : parseMoney(target.value);
         markDirty();
-        renderLoanTracker(stateKey === "privateLoans" ? "privateLoanTable" : "federalLoanTable", stateKey);
+        renderLoanTracker(stateKey.startsWith("loan_cat_") ? `loanTable_${stateKey}` : `${stateKey}Table`, stateKey);
       }
     } else if(kind === "loan-month-field"){
       const stateKey = target.getAttribute("data-state");
@@ -2148,11 +2341,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if(!state[stateKey].monthlyData[mKey][loanId]) state[stateKey].monthlyData[mKey][loanId] = {};
 
       state[stateKey].monthlyData[mKey][loanId][field] = parseMoney(target.value);
-      if(field === "payment"){
-        state[stateKey].monthlyData[mKey][loanId].isAutoPayChange = true;
-      }
       markDirty();
-      renderLoanTracker(stateKey === "privateLoans" ? "privateLoanTable" : "federalLoanTable", stateKey);
+      renderLoanTracker(stateKey.startsWith("loan_cat_") ? `loanTable_${stateKey}` : `${stateKey}Table`, stateKey);
     }
   });
 
@@ -2194,6 +2384,38 @@ document.addEventListener("DOMContentLoaded", () => {
         Object.keys(state.months).forEach(m => {
           delete state.months[m].balances[id];
         });
+        markDirty();
+        render();
+      }
+    } else if(action === "add-loan-col"){
+      const catKey = btn.getAttribute("data-cat");
+      const name = prompt("Enter Loan Name (e.g. Auto Loan, Student Loan #1):");
+      if(!name) return;
+      if(!state[catKey]) {
+        state[catKey] = { startMonthYear: "2024-12", loans: [], monthlyData: {} };
+      }
+      state[catKey].loans.push({
+        id: uid(),
+        name: name,
+        principle: 10000.00,
+        startingAmount: 10000.00,
+        autoPayAmount: 150.00
+      });
+      markDirty();
+      renderAllLoanTables();
+    } else if(action === "delete-loan-col"){
+      const stateKey = btn.getAttribute("data-state");
+      const loanId = btn.getAttribute("data-loan");
+      if(confirm("Remove this loan column?")){
+        state[stateKey].loans = state[stateKey].loans.filter(l => l.id !== loanId);
+        markDirty();
+        renderAllLoanTables();
+      }
+    } else if(action === "delete-loan-category"){
+      const catId = btn.getAttribute("data-cat");
+      if(confirm("Delete this entire loan subtab category?")){
+        state.customLoanCategories = state.customLoanCategories.filter(c => c.id !== catId);
+        delete state[catId];
         markDirty();
         render();
       }
