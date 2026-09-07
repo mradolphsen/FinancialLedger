@@ -1699,7 +1699,7 @@ function renderLoanTracker(tableId, stateKey){
 
   let headerHtml = `<thead>
     <tr>
-      <th rowspan="5" class="col-end" style="vertical-align:bottom; text-align:center;">Month</th>
+      <th rowspan="6" class="col-end" style="vertical-align:bottom; text-align:center;">Month</th>
       ${loans.map(l => `<th colspan="3" class="loan-group-header col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="name" value="${escapeHtml(l.name)}" style="background:transparent; border:none; font-weight:800; text-align:center; font-family:inherit; color:var(--navy);"></th>`).join("")}
       <th class="loan-group-header" style="text-align:right;">Totals</th>
     </tr>
