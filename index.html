@@ -376,12 +376,18 @@ table.pay-grid input[type=text].highlight-hourly { font-weight: 800; }
   display: flex;
   gap: 16px;
   align-items: center;
+  flex-wrap: wrap;
   background: var(--surface);
   border: 1px solid var(--line);
-  padding: 8px 12px;
+  padding: 10px 14px;
   border-radius: var(--radius-sm);
   margin-bottom: 16px;
   font-size: 13px;
+}
+.comp-ref-bar .range-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 .comp-ref-bar label {
   font-weight: 600;
@@ -452,15 +458,18 @@ footer a{ color:var(--ink-faint); }
     </div>
   </header>
 
+  <!-- NAVIGATION TABS -->
   <nav class="nav-tabs" role="tablist">
     <button class="nav-tab active" data-tab="tab-month-end" role="tab" aria-selected="true">Month End</button>
     <button class="nav-tab" data-tab="tab-pay-tracker" role="tab" aria-selected="false">Pay Tracker</button>
   </nav>
 
+  <!-- SUBPAGE CONTENT: MONTH END -->
   <div class="tab-content active" id="tab-month-end" role="tabpanel">
 
     <div class="hero" id="hero"></div>
 
+    <!-- ===================== MONTH END ===================== -->
     <section class="block open" id="monthBlock">
       <div class="block-head" data-toggle="monthBlock">
         <h2>Month End<span class="block-sub">End-of-month account balances</span></h2>
@@ -474,8 +483,10 @@ footer a{ color:var(--ink-faint); }
       </div>
     </section>
 
+    <!-- ===================== SIDE-BY-SIDE MODULES ===================== -->
     <div class="modules-grid">
       
+      <!-- RECURRING EXPENSES -->
       <section class="block open" id="recurBlock">
         <div class="block-head" data-toggle="recurBlock">
           <h2>Recurring Expenses<span class="block-sub">Expenses that come up regularly</span></h2>
@@ -491,6 +502,7 @@ footer a{ color:var(--ink-faint); }
         </div>
       </section>
 
+      <!-- BILL PAYMENT PLANNER -->
       <section class="block open" id="billBlock">
         <div class="block-head" data-toggle="billBlock">
           <h2>Bill Payment Planner<span class="block-sub">Drag rows to line bills up with paydays</span></h2>
@@ -515,22 +527,50 @@ footer a{ color:var(--ink-faint); }
 
   </div>
 
+  <!-- SUBPAGE CONTENT: PAY TRACKER -->
   <div class="tab-content" id="tab-pay-tracker" role="tabpanel">
     
+    <!-- 1. PAY TRACKER HISTORY TABLE (FIRST) -->
+    <section class="block open" id="payTrackerBlock">
+      <div class="block-head" data-toggle="payTrackerBlock">
+        <h2>Pay Tracker History<span class="block-sub">Career pay progression and calculated earnings</span></h2>
+        <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="block-body">
+        <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+          <button class="btn primary" id="addPayRowBtn">+ Add pay record</button>
+        </div>
+        <div class="table-scroll">
+          <table class="data pay-grid" id="payTable"></table>
+        </div>
+        <p class="hint">Calculations: Yearly Pre-Tax = Hourly × 2080 hrs | Yearly Post-Tax = 70% of Pre-Tax | Paycheck = Hourly × 80 hrs | Comp-Ratio is manually set.</p>
+      </div>
+    </section>
+
+    <!-- 2. COMP-RATIO CALCULATOR SECTION (BELOW HISTORY) -->
     <section class="block open" id="compCalcBlock">
       <div class="block-head" data-toggle="compCalcBlock">
-        <h2>Comp-Ratio Interactive Calculator<span class="block-sub">Calculate compensation ratio from hourly pay or target required pay</span></h2>
+        <h2>Comp-Ratio Calculator<span class="block-sub">Calculate compensation ratio from pay or target required pay</span></h2>
         <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="block-body">
         
+        <!-- Position Pay Range Midpoint Calculation -->
         <div class="comp-ref-bar">
-          <label for="compMidpointInput">Position Pay Range Midpoint (100% Comp):</label>
-          <input type="text" id="compMidpointInput" value="$34.99" placeholder="$34.99">
-          <span style="font-size:12px; color:var(--ink-faint);">(Derived from salary range midpoint)</span>
+          <label>Position Pay Range:</label>
+          <div class="range-inputs">
+            <input type="text" id="compMinInput" value="$27.99" placeholder="Min Pay">
+            <span>to</span>
+            <input type="text" id="compMaxInput" value="$41.98" placeholder="Max Pay">
+          </div>
+          <div style="margin-left: auto; display: flex; align-items: center; gap: 8px;">
+            <label for="compMidpointInput">Calculated Midpoint (100% Comp):</label>
+            <input type="text" id="compMidpointInput" readonly value="$34.99" style="font-weight:700; color:var(--navy); background:transparent; border-color:transparent;">
+          </div>
         </div>
 
         <div class="comp-calc-grid">
+          <!-- CARD 1: Pay to Comp-Ratio -->
           <div class="comp-card">
             <h3>Calculate Comp-Ratio from Hourly Pay</h3>
             <div class="comp-card-row">
@@ -546,6 +586,7 @@ footer a{ color:var(--ink-faint); }
             </div>
           </div>
 
+          <!-- CARD 2: Comp-Ratio to Pay -->
           <div class="comp-card">
             <h3>Calculate Required Pay from Comp-Ratio</h3>
             <div class="comp-card-row">
@@ -565,21 +606,6 @@ footer a{ color:var(--ink-faint); }
       </div>
     </section>
 
-    <section class="block open" id="payTrackerBlock">
-      <div class="block-head" data-toggle="payTrackerBlock">
-        <h2>Pay Tracker History<span class="block-sub">Career pay progression and calculated earnings</span></h2>
-        <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="block-body">
-        <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
-          <button class="btn primary" id="addPayRowBtn">+ Add pay record</button>
-        </div>
-        <div class="table-scroll">
-          <table class="data pay-grid" id="payTable"></table>
-        </div>
-        <p class="hint">Calculations: Yearly Pre-Tax = Hourly × 2080 hrs | Yearly Post-Tax = 70% of Pre-Tax | Paycheck = Hourly × 80 hrs | Comp-Ratio is manually set.</p>
-      </div>
-    </section>
   </div>
 
   <footer>
@@ -589,6 +615,7 @@ footer a{ color:var(--ink-faint); }
 
 </div>
 
+<!-- ==================== SETTINGS MODAL ==================== -->
 <div class="modal-overlay" id="settingsOverlay">
   <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="settingsModalTitle">
     <div class="modal-head">
@@ -688,7 +715,8 @@ const DEFAULT_STATE = {
   recurring:[],
   bills:[],
   compCalculator: {
-    midpoint: 34.99,
+    minPay: 27.99,
+    maxPay: 41.98,
     calcPay: 29.29,
     calcRatio: 86.58
   },
@@ -1032,58 +1060,71 @@ function bindBillDragEvents(){
 }
 
 /* ============================================================
-   COMP-RATIO CALCULATOR LOGIC
+   COMP-RATIO CALCULATOR LOGIC (WITH RANGE MIDPOINT)
    ============================================================ */
 
 function initCompCalculator(){
   if(!state.compCalculator) {
-    state.compCalculator = { midpoint: 34.99, calcPay: 29.29, calcRatio: 86.58 };
+    state.compCalculator = { minPay: 27.99, maxPay: 41.98, calcPay: 29.29, calcRatio: 86.58 };
   }
 
+  const minInput = document.getElementById("compMinInput");
+  const maxInput = document.getElementById("compMaxInput");
   const midpointEl = document.getElementById("compMidpointInput");
+
   const calcPayInput = document.getElementById("calcPayInput");
   const calcRatioOutput = document.getElementById("calcRatioOutput");
   const calcRatioInput = document.getElementById("calcRatioInput");
   const calcPayOutput = document.getElementById("calcPayOutput");
 
-  if(!midpointEl) return;
+  if(!minInput || !maxInput) return;
 
-  midpointEl.value = fmtMoney(state.compCalculator.midpoint);
+  minInput.value = fmtMoney(state.compCalculator.minPay);
+  maxInput.value = fmtMoney(state.compCalculator.maxPay);
   calcPayInput.value = fmtMoney(state.compCalculator.calcPay);
   calcRatioInput.value = state.compCalculator.calcRatio;
 
   function updateCalculations(){
-    const midpoint = parseMoney(midpointEl.value);
+    const minVal = parseMoney(minInput.value);
+    const maxVal = parseMoney(maxInput.value);
+
+    // Calculate Midpoint: (Min + Max) / 2
+    const computedMidpoint = (minVal + maxVal) / 2;
+    midpointEl.value = fmtMoney(computedMidpoint);
+
     const payVal = parseMoney(calcPayInput.value);
     const targetRatio = parseMoney(calcRatioInput.value);
 
-    // Calculate Ratio from Pay
-    if(midpoint > 0){
-      const computedRatio = (payVal / midpoint) * 100;
+    // Calculate Comp-Ratio from Pay
+    if(computedMidpoint > 0){
+      const computedRatio = (payVal / computedMidpoint) * 100;
       calcRatioOutput.value = computedRatio.toFixed(2);
     } else {
       calcRatioOutput.value = "0.00";
     }
 
-    // Calculate Pay from Ratio
-    if(midpoint > 0){
-      const computedPay = (targetRatio / 100) * midpoint;
+    // Calculate Pay from Comp-Ratio
+    if(computedMidpoint > 0){
+      const computedPay = (targetRatio / 100) * computedMidpoint;
       calcPayOutput.value = fmtMoney(computedPay);
     } else {
       calcPayOutput.value = "$0.00";
     }
 
-    state.compCalculator.midpoint = midpoint;
+    state.compCalculator.minPay = minVal;
+    state.compCalculator.maxPay = maxVal;
     state.compCalculator.calcPay = payVal;
     state.compCalculator.calcRatio = targetRatio;
     markDirty();
   }
 
-  midpointEl.addEventListener("input", updateCalculations);
+  minInput.addEventListener("input", updateCalculations);
+  maxInput.addEventListener("input", updateCalculations);
   calcPayInput.addEventListener("input", updateCalculations);
   calcRatioInput.addEventListener("input", updateCalculations);
 
-  midpointEl.addEventListener("focusout", () => midpointEl.value = fmtMoney(parseMoney(midpointEl.value)));
+  minInput.addEventListener("focusout", () => minInput.value = fmtMoney(parseMoney(minInput.value)));
+  maxInput.addEventListener("focusout", () => maxInput.value = fmtMoney(parseMoney(maxInput.value)));
   calcPayInput.addEventListener("focusout", () => calcPayInput.value = fmtMoney(parseMoney(calcPayInput.value)));
 
   updateCalculations();
@@ -1195,8 +1236,8 @@ function render(){
   renderMonthTable();
   renderRecurTable();
   renderBillTable();
-  initCompCalculator();
   renderPayTable();
+  initCompCalculator();
   renderAccountLists();
   updateSyncStatus();
 }
