@@ -338,6 +338,64 @@ table.ledger-grid td.label-cell {
 table.pay-grid th.group { font-style: italic; font-weight: 700; text-transform: none; font-size: 13px; }
 table.pay-grid input[type=text].highlight-hourly { font-weight: 800; }
 
+/* COMP-RATIO CALCULATOR CARDS */
+.comp-calc-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.comp-card {
+  background: var(--blue-pale);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+}
+.comp-card h3 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-family: 'Libre Franklin', sans-serif;
+  color: var(--navy);
+  font-weight: 700;
+}
+.comp-card-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.comp-card-row .field {
+  flex: 1;
+}
+.comp-card-row .equals-sign {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--navy);
+  padding-top: 18px;
+}
+.comp-ref-bar {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+  font-size: 13px;
+}
+.comp-ref-bar label {
+  font-weight: 600;
+  color: var(--navy);
+}
+.comp-ref-bar input {
+  width: 90px;
+  padding: 4px 6px;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 13px;
+  border: 1px solid var(--line);
+  border-radius: 4px;
+}
+
 /* MODALS */
 .modal-overlay{
   position:fixed; inset:0; background:rgba(27,36,34,0.45); display:none;
@@ -359,6 +417,7 @@ footer a{ color:var(--ink-faint); }
 @media (max-width:1024px){
   .modules-grid { grid-template-columns:1fr; }
   .modules-grid section.block { margin-bottom:20px; }
+  .comp-calc-grid { grid-template-columns: 1fr; }
 }
 
 @media (max-width:760px){
@@ -457,9 +516,58 @@ footer a{ color:var(--ink-faint); }
   </div>
 
   <div class="tab-content" id="tab-pay-tracker" role="tabpanel">
+    
+    <section class="block open" id="compCalcBlock">
+      <div class="block-head" data-toggle="compCalcBlock">
+        <h2>Comp-Ratio Interactive Calculator<span class="block-sub">Calculate compensation ratio from hourly pay or target required pay</span></h2>
+        <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <div class="block-body">
+        
+        <div class="comp-ref-bar">
+          <label for="compMidpointInput">Position Pay Range Midpoint (100% Comp):</label>
+          <input type="text" id="compMidpointInput" value="$34.99" placeholder="$34.99">
+          <span style="font-size:12px; color:var(--ink-faint);">(Derived from salary range midpoint)</span>
+        </div>
+
+        <div class="comp-calc-grid">
+          <div class="comp-card">
+            <h3>Calculate Comp-Ratio from Hourly Pay</h3>
+            <div class="comp-card-row">
+              <div class="field">
+                <label for="calcPayInput">Hourly Pay</label>
+                <input type="text" id="calcPayInput" value="$29.29" placeholder="$0.00">
+              </div>
+              <span class="equals-sign">→</span>
+              <div class="field">
+                <label>Comp-Ratio</label>
+                <input type="text" id="calcRatioOutput" readonly value="83.71" style="font-weight:700; color:var(--navy);">
+              </div>
+            </div>
+          </div>
+
+          <div class="comp-card">
+            <h3>Calculate Required Pay from Comp-Ratio</h3>
+            <div class="comp-card-row">
+              <div class="field">
+                <label for="calcRatioInput">Target Comp-Ratio</label>
+                <input type="text" id="calcRatioInput" value="86.58" placeholder="86.58">
+              </div>
+              <span class="equals-sign">→</span>
+              <div class="field">
+                <label>Required Hourly Pay</label>
+                <input type="text" id="calcPayOutput" readonly value="$30.29" style="font-weight:700; color:var(--navy);">
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
     <section class="block open" id="payTrackerBlock">
       <div class="block-head" data-toggle="payTrackerBlock">
-        <h2>Pay Tracker<span class="block-sub">Career pay progression and calculated earnings</span></h2>
+        <h2>Pay Tracker History<span class="block-sub">Career pay progression and calculated earnings</span></h2>
         <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="block-body">
@@ -579,11 +687,17 @@ const DEFAULT_STATE = {
   months:{},
   recurring:[],
   bills:[],
+  compCalculator: {
+    midpoint: 34.99,
+    calcPay: 29.29,
+    calcRatio: 86.58
+  },
   payTracker:[
     { id: uid(), startMonth: "Jul 2024", positionInfo: "Mayo Clinic / CVRU / ACRC", basePay: 23.48, myHourly: 23.77, compRatio: "82.74" },
     { id: uid(), startMonth: "Mar 2025 - 4% annual", positionInfo: "Mayo Clinic / CVRU / ACRC", basePay: 24.07, myHourly: 24.72, compRatio: "83.94" },
     { id: uid(), startMonth: "Aug 2025", positionInfo: "Mayo Clinic / CVRU / CRC", basePay: 27.44, myHourly: 28.30, compRatio: "82.51" },
-    { id: uid(), startMonth: "Mar 2026 - 3.5% annual", positionInfo: "Mayo Clinic / CVRU / CRC", basePay: 27.99, myHourly: 29.29, compRatio: "83.71" }
+    { id: uid(), startMonth: "Mar 2026 - 3.5% annual", positionInfo: "Mayo Clinic / CVRU / CRC", basePay: 27.99, myHourly: 29.29, compRatio: "83.71" },
+    { id: uid(), startMonth: "Oct 2026", positionInfo: "Mayo Clinic / CVRU / Cert CRC", basePay: 27.99, myHourly: 30.29, compRatio: "86.58" }
   ]
 };
 
@@ -643,10 +757,8 @@ function isMonthEditable(key){
   const curM = now.getMonth() + 1; // 1-12
   const curKey = curY + "-" + String(curM).padStart(2, "0");
 
-  // Current month is always editable
   if(key === curKey) return true;
 
-  // Calculate previous month's key
   let prevY = curY;
   let prevM = curM - 1;
   if(prevM === 0){
@@ -655,7 +767,6 @@ function isMonthEditable(key){
   }
   const prevKey = prevY + "-" + String(prevM).padStart(2, "0");
 
-  // Previous month is editable ONLY for the first 4 days of the current month (days 1-4)
   if(key === prevKey && now.getDate() <= 4) {
     return true;
   }
@@ -831,14 +942,13 @@ function renderRecurTable(){
 }
 
 /* ============================================================
-   RENDER: BILL PAYMENT PLANNER (RUNNING LEDGER)
+   RENDER: BILL PAYMENT PLANNER
    ============================================================ */
 
 function getPreviousSavingsBalance(){
   const months = sortedMonths();
   const curKey = currentMonthKey();
   
-  // Find key directly preceding current month in history
   const prevKeyIdx = months.findIndex(k => k < curKey);
   if(prevKeyIdx !== -1){
     const prevKey = months[prevKeyIdx];
@@ -922,6 +1032,64 @@ function bindBillDragEvents(){
 }
 
 /* ============================================================
+   COMP-RATIO CALCULATOR LOGIC
+   ============================================================ */
+
+function initCompCalculator(){
+  if(!state.compCalculator) {
+    state.compCalculator = { midpoint: 34.99, calcPay: 29.29, calcRatio: 86.58 };
+  }
+
+  const midpointEl = document.getElementById("compMidpointInput");
+  const calcPayInput = document.getElementById("calcPayInput");
+  const calcRatioOutput = document.getElementById("calcRatioOutput");
+  const calcRatioInput = document.getElementById("calcRatioInput");
+  const calcPayOutput = document.getElementById("calcPayOutput");
+
+  if(!midpointEl) return;
+
+  midpointEl.value = fmtMoney(state.compCalculator.midpoint);
+  calcPayInput.value = fmtMoney(state.compCalculator.calcPay);
+  calcRatioInput.value = state.compCalculator.calcRatio;
+
+  function updateCalculations(){
+    const midpoint = parseMoney(midpointEl.value);
+    const payVal = parseMoney(calcPayInput.value);
+    const targetRatio = parseMoney(calcRatioInput.value);
+
+    // Calculate Ratio from Pay
+    if(midpoint > 0){
+      const computedRatio = (payVal / midpoint) * 100;
+      calcRatioOutput.value = computedRatio.toFixed(2);
+    } else {
+      calcRatioOutput.value = "0.00";
+    }
+
+    // Calculate Pay from Ratio
+    if(midpoint > 0){
+      const computedPay = (targetRatio / 100) * midpoint;
+      calcPayOutput.value = fmtMoney(computedPay);
+    } else {
+      calcPayOutput.value = "$0.00";
+    }
+
+    state.compCalculator.midpoint = midpoint;
+    state.compCalculator.calcPay = payVal;
+    state.compCalculator.calcRatio = targetRatio;
+    markDirty();
+  }
+
+  midpointEl.addEventListener("input", updateCalculations);
+  calcPayInput.addEventListener("input", updateCalculations);
+  calcRatioInput.addEventListener("input", updateCalculations);
+
+  midpointEl.addEventListener("focusout", () => midpointEl.value = fmtMoney(parseMoney(midpointEl.value)));
+  calcPayInput.addEventListener("focusout", () => calcPayInput.value = fmtMoney(parseMoney(calcPayInput.value)));
+
+  updateCalculations();
+}
+
+/* ============================================================
    RENDER: PAY TRACKER TABLE
    ============================================================ */
 
@@ -940,6 +1108,7 @@ function renderPayTable(){
       <th colspan="5" class="group col-end">Hourly Earnings</th>
       <th colspan="2" class="group col-end">Yearly Earnings</th>
       <th colspan="2" class="group col-end">Paycheck Earnings</th>
+      <th rowspan="2" style="width:30px;"></th>
     </tr>
     <tr>
       <th>Base Pay</th>
@@ -956,13 +1125,12 @@ function renderPayTable(){
 
   let rows = "";
   if(state.payTracker.length === 0){
-    rows = `<tr class="empty-row"><td colspan="11">No pay records tracked yet.</td></tr>`;
+    rows = `<tr class="empty-row"><td colspan="12">No pay records tracked yet.</td></tr>`;
   } else {
     state.payTracker.forEach((row, idx) => {
       const basePay = parseMoney(row.basePay);
       const myHourly = parseMoney(row.myHourly);
 
-      // Calculations
       const pctAboveBase = basePay > 0 ? ((myHourly - basePay) / basePay) * 100 : 0;
       
       const prevHourly = idx > 0 ? parseMoney(state.payTracker[idx - 1].myHourly) : myHourly;
@@ -989,6 +1157,7 @@ function renderPayTable(){
         <td class="col-end"><input type="text" readonly value="${fmtMoney(yearlyPost)}"></td>
         <td><input type="text" readonly value="${fmtMoney(paycheckTotal)}"></td>
         <td class="col-end"><input type="text" readonly value="${fmtMoney(paycheckDiff)}"></td>
+        <td class="actions-cell"><button class="btn small danger" data-action="delete-pay" data-id="${row.id}" title="Remove">✕</button></td>
       </tr>`;
     });
   }
@@ -1026,6 +1195,7 @@ function render(){
   renderMonthTable();
   renderRecurTable();
   renderBillTable();
+  initCompCalculator();
   renderPayTable();
   renderAccountLists();
   updateSyncStatus();
@@ -1329,7 +1499,6 @@ document.addEventListener("DOMContentLoaded", () => {
         const totalCell = monthRow.querySelector(".total-cell");
         if(totalCell) totalCell.textContent = fmtMoney(totals.net);
       }
-      // If savings balance changed, re-render bill table starting amount
       if(acct === "savings"){
         renderBillTable();
       }
@@ -1386,6 +1555,11 @@ document.addEventListener("DOMContentLoaded", () => {
       state.bills = state.bills.filter(b => b.id !== id);
       markDirty();
       renderBillTable();
+    } else if(action === "delete-pay"){
+      const id = btn.getAttribute("data-id");
+      state.payTracker = state.payTracker.filter(p => p.id !== id);
+      markDirty();
+      renderPayTable();
     } else if(action === "delete-acct"){
       const group = btn.getAttribute("data-group");
       const id = btn.getAttribute("data-id");
