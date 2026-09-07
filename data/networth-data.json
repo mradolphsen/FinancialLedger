@@ -467,7 +467,6 @@
       "compRatio": "86.58"
     }
   ],
-  "customLoanCategories": [],
   "privateLoans": {
     "startMonthYear": "2024-12",
     "loans": [
@@ -789,6 +788,7 @@
     ],
     "monthlyData": {}
   },
+  "customLoanCategories": [],
   "carLoans": {
     "startMonthYear": "2024-12",
     "loans": [
