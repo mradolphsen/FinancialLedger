@@ -320,7 +320,9 @@
   "compCalculator": {
     "midpoint": 34.99,
     "calcPay": 29.29,
-    "calcRatio": 86.58
+    "calcRatio": 86.58,
+    "minPay": 0,
+    "maxPay": 0
   },
   "payTracker": [
     {
