@@ -1706,28 +1706,28 @@ function renderLoanTracker(tableId, stateKey){
     <tr class="info-row">
       ${loans.map(l => `
         <td class="info-label">Principle</td>
-        <td colspan="3" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="principle" value="${fmtMoney(l.principle)}"></td>
+        <td colspan="2" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="principle" value="${fmtMoney(l.principle)}"></td>
       `).join("")}
       <td style="text-align:right;">${fmtMoney(totalPrinciple)}</td>
     </tr>
     <tr class="info-row">
       ${loans.map(l => `
         <td class="info-label">Starting Amount</td>
-        <td colspan="3" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="startingAmount" value="${fmtMoney(l.startingAmount)}"></td>
+        <td colspan="2" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="startingAmount" value="${fmtMoney(l.startingAmount)}"></td>
       `).join("")}
       <td style="text-align:right;">${fmtMoney(totalStarting)}</td>
     </tr>
     <tr class="info-row">
       ${loans.map(l => `
         <td class="info-label">Auto Pay Amount</td>
-        <td colspan="3" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="autoPayAmount" value="${fmtMoney(l.autoPayAmount)}"></td>
+        <td colspan="2" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="autoPayAmount" value="${fmtMoney(l.autoPayAmount)}"></td>
       `).join("")}
       <td style="text-align:right;">${fmtMoney(totalAutoPay)}</td>
     </tr>
     <tr class="info-row">
       ${loans.map(l => `
         <td class="info-label">Average Interest</td>
-        <td colspan="3" class="col-end"><input type="text" readonly value="${fmtMoney(avgInterestMap[l.id])}"></td>
+        <td colspan="2" class="col-end"><input type="text" readonly value="${fmtMoney(avgInterestMap[l.id])}"></td>
       `).join("")}
       <td style="text-align:right;">${fmtMoney(totalAvgInterest)}</td>
     </tr>
