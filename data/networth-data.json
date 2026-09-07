@@ -467,6 +467,7 @@
       "compRatio": "86.58"
     }
   ],
+  "customLoanCategories": [],
   "privateLoans": {
     "startMonthYear": "2024-12",
     "loans": [
@@ -784,6 +785,32 @@
         "principle": 4500,
         "startingAmount": 4500,
         "autoPayAmount": 65
+      }
+    ],
+    "monthlyData": {}
+  },
+  "carLoans": {
+    "startMonthYear": "2024-12",
+    "loans": [
+      {
+        "id": "c1",
+        "name": "Auto Loan - Vehicle 1",
+        "principle": 18000,
+        "startingAmount": 18000,
+        "autoPayAmount": 350
+      }
+    ],
+    "monthlyData": {}
+  },
+  "houseLoans": {
+    "startMonthYear": "2024-12",
+    "loans": [
+      {
+        "id": "h1",
+        "name": "Primary Mortgage",
+        "principle": 250000,
+        "startingAmount": 250000,
+        "autoPayAmount": 1400
       }
     ],
     "monthlyData": {}
