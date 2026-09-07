@@ -6,7 +6,7 @@
 
 <title>Financial Ledger</title>
 
-<meta name="theme-color" content="#012D61">
+<meta name="theme-color" content="#0B3D2E">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,35 +23,35 @@
    ============================================================ */
 
 :root{
-  --bg:#F3F6F9;
+  --bg:#F3F5F2;
   --surface:#FFFFFF;
 
-  --ink:#14181C;
-  --ink-muted:#5B6570;
-  --ink-faint:#8A939C;
+  --ink:#12201B;
+  --ink-muted:#57665D;
+  --ink-faint:#8C9992;
 
-  --line:#DBE2E8;
-  --line-strong:#BEC8D1;
+  --line:#DCE3DC;
+  --line-strong:#BEC9BF;
 
-  --navy:#012D61;
-  --blue:#0067B1;
-  --blue-soft:#E3EEF8;
-  --blue-pale:#F1F6FA;
+  --navy:#0B3D2E;
+  --blue:#0F6E7A;
+  --blue-soft:#DEEEEF;
+  --blue-pale:#EFF6F7;
 
-  --amber:#C48A00;
-  --amber-soft:#FFF6DE;
+  --amber:#96751F;
+  --amber-soft:#FAF1DC;
 
-  --danger:#AB2328;
-  --danger-soft:#F8E2E2;
+  --danger:#9E3131;
+  --danger-soft:#F6E3E1;
 
-  --success:#2E7D5B;
-  --success-soft:#E1F0E9;
+  --success:#1F7A4D;
+  --success-soft:#E0F0E6;
 
   --radius-sm:6px;
   --radius-md:10px;
 
-  --shadow: 0 1px 2px rgba(1,45,97,0.08);
-  --shadow-hover: 0 3px 10px rgba(1,45,97,0.10);
+  --shadow: 0 1px 2px rgba(11,61,46,0.08);
+  --shadow-hover: 0 3px 10px rgba(11,61,46,0.10);
 }
 
 *{ box-sizing:border-box; }
@@ -390,8 +390,8 @@ table.ledger-grid th {
   text-transform: none;
   font-size: 13px;
   font-weight: 700;
-  background: #E8EEF3;
-  color: #000;
+  background: var(--blue-soft);
+  color: var(--navy);
   text-align: center;
 }
 table.ledger-grid td {
@@ -571,6 +571,14 @@ footer a{ color:var(--ink-faint); }
           <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div class="block-body">
+
+          <div class="bill-header-group">
+            <div class="bill-header-card ending-card">
+              <span class="bill-header-title">Total</span>
+              <span class="bill-header-value" id="recurTotalAmount">$0.00</span>
+            </div>
+          </div>
+
           <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
             <button class="btn primary" id="addRecurBtn">+ Add expense</button>
           </div>
@@ -1113,10 +1121,12 @@ function renderRecurTable(){
       <th>Expense</th><th>Est. Due</th><th>Amount</th><th></th>
     </tr></thead>`;
   let rows = "";
+  let total = 0;
   if(state.recurring.length === 0){
     rows = `<tr class="empty-row"><td colspan="4">No recurring expenses yet.</td></tr>`;
   }else{
     state.recurring.forEach(item => {
+      total += parseMoney(item.amount);
       rows += `<tr data-id="${item.id}">
         <td class="label-cell"><input type="text" data-kind="recur-name" data-id="${item.id}" value="${escapeHtml(item.name)}" placeholder="e.g. Car insurance"></td>
         <td><input type="text" data-kind="recur-due" data-id="${item.id}" value="${escapeHtml(item.dueEstimate)}" placeholder="e.g. 15th"></td>
@@ -1126,6 +1136,9 @@ function renderRecurTable(){
     });
   }
   table.innerHTML = head + "<tbody>" + rows + "</tbody>";
+
+  const totalEl = document.getElementById("recurTotalAmount");
+  if(totalEl) totalEl.textContent = fmtMoney(total);
 }
 
 /* ============================================================
