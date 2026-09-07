@@ -467,6 +467,327 @@
       "compRatio": "86.58"
     }
   ],
+  "privateLoans": {
+    "startMonthYear": "2024-12",
+    "loans": [
+      {
+        "id": "p1",
+        "name": "College Ave - 360021657718",
+        "principle": 8000,
+        "startingAmount": 9690.55,
+        "autoPayAmount": 90
+      },
+      {
+        "id": "p2",
+        "name": "College Ave - 360021753920",
+        "principle": 7200,
+        "startingAmount": 8461.19,
+        "autoPayAmount": 85
+      },
+      {
+        "id": "p3",
+        "name": "College Ave - 360021898853",
+        "principle": 15000,
+        "startingAmount": 16537.31,
+        "autoPayAmount": 180
+      }
+    ],
+    "monthlyData": {
+      "2024-12": {
+        "p1": {
+          "payment": 90,
+          "interest": 56.1
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 56.71
+        },
+        "p3": {
+          "payment": 177,
+          "interest": 127.26
+        }
+      },
+      "2025-01": {
+        "p1": {
+          "payment": 90,
+          "interest": 59.34
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 60.05
+        },
+        "p3": {
+          "payment": 177,
+          "interest": 134.89
+        }
+      },
+      "2025-02": {
+        "p1": {
+          "payment": 90,
+          "interest": 59.15
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 59.87
+        },
+        "p3": {
+          "payment": 177,
+          "interest": 134.56
+        }
+      },
+      "2025-03": {
+        "p1": {
+          "payment": 90,
+          "interest": 53.26
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 53.92
+        },
+        "p3": {
+          "payment": 177,
+          "interest": 121.22
+        }
+      },
+      "2025-04": {
+        "p1": {
+          "payment": 90,
+          "interest": 58.73
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 59.47
+        },
+        "p3": {
+          "payment": 177,
+          "interest": 133.75
+        }
+      },
+      "2025-05": {
+        "p1": {
+          "payment": 90,
+          "interest": 56.66
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 57.37
+        },
+        "p3": {
+          "payment": 177,
+          "interest": 129.09
+        }
+      },
+      "2025-06": {
+        "p1": {
+          "payment": 90,
+          "interest": 58.33
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 59.1
+        },
+        "p3": {
+          "payment": 177,
+          "interest": 128.71
+        }
+      },
+      "2025-07": {
+        "p1": {
+          "payment": 90,
+          "interest": 56.27
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 57.01
+        },
+        "p3": {
+          "payment": 177,
+          "interest": 128.37
+        }
+      },
+      "2025-08": {
+        "p1": {
+          "payment": 90,
+          "interest": 57.94
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 58.71
+        },
+        "p3": {
+          "payment": 180,
+          "interest": 132.24
+        }
+      },
+      "2025-09": {
+        "p1": {
+          "payment": 90,
+          "interest": 57.74
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 58.52
+        },
+        "p3": {
+          "payment": 180,
+          "interest": 131.86
+        }
+      },
+      "2025-10": {
+        "p1": {
+          "payment": 90,
+          "interest": 55.68
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 56.45
+        },
+        "p3": {
+          "payment": 180,
+          "interest": 127.22
+        }
+      },
+      "2025-11": {
+        "p1": {
+          "payment": 90,
+          "interest": 57.33
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 58.13
+        },
+        "p3": {
+          "payment": 180,
+          "interest": 131.03
+        }
+      },
+      "2025-12": {
+        "p1": {
+          "payment": 90,
+          "interest": 55.29
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 56.07
+        },
+        "p3": {
+          "payment": 180,
+          "interest": 126.41
+        }
+      },
+      "2026-01": {
+        "p1": {
+          "payment": 90,
+          "interest": 56.91
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 57.73
+        },
+        "p3": {
+          "payment": 180,
+          "interest": 130.19
+        }
+      },
+      "2026-02": {
+        "p1": {
+          "payment": 270,
+          "interest": 56.71
+        },
+        "p2": {
+          "payment": 255,
+          "interest": 57.54
+        },
+        "p3": {
+          "payment": 540,
+          "interest": 129.79
+        }
+      },
+      "2026-03": {
+        "p1": {
+          "payment": 90,
+          "interest": 32.24
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 32.67
+        },
+        "p3": {
+          "payment": 180,
+          "interest": 73.61
+        }
+      },
+      "2026-04": {
+        "p1": {
+          "payment": 90,
+          "interest": 55.16
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 55.89
+        },
+        "p3": {
+          "payment": 180,
+          "interest": 125.89
+        }
+      },
+      "2026-05": {
+        "p1": {
+          "payment": 90,
+          "interest": 53.17
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 53.89
+        },
+        "p3": {
+          "payment": 180,
+          "interest": 121.41
+        }
+      },
+      "2026-06": {
+        "p1": {
+          "payment": 90,
+          "interest": 54.72
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 55.46
+        },
+        "p3": {
+          "payment": 180,
+          "interest": 124.98
+        }
+      }
+    }
+  },
+  "federalLoans": {
+    "startMonthYear": "2024-12",
+    "loans": [
+      {
+        "id": "f1",
+        "name": "Federal Direct Subsidized 1",
+        "principle": 3500,
+        "startingAmount": 3500,
+        "autoPayAmount": 50
+      },
+      {
+        "id": "f2",
+        "name": "Federal Direct Unsubsidized 2",
+        "principle": 2000,
+        "startingAmount": 2150,
+        "autoPayAmount": 35
+      },
+      {
+        "id": "f3",
+        "name": "Federal Direct Subsidized 3",
+        "principle": 4500,
+        "startingAmount": 4500,
+        "autoPayAmount": 65
+      }
+    ],
+    "monthlyData": {}
+  },
   "loanCategories": [
     {
       "id": "cat_private",
@@ -798,327 +1119,6 @@
       }
     }
   ],
-  "privateLoans": {
-    "startMonthYear": "2024-12",
-    "loans": [
-      {
-        "id": "p1",
-        "name": "College Ave - 360021657718",
-        "principle": 8000,
-        "startingAmount": 9690.55,
-        "autoPayAmount": 90
-      },
-      {
-        "id": "p2",
-        "name": "College Ave - 360021753920",
-        "principle": 7200,
-        "startingAmount": 8461.19,
-        "autoPayAmount": 85
-      },
-      {
-        "id": "p3",
-        "name": "College Ave - 360021898853",
-        "principle": 15000,
-        "startingAmount": 16537.31,
-        "autoPayAmount": 180
-      }
-    ],
-    "monthlyData": {
-      "2024-12": {
-        "p1": {
-          "payment": 90,
-          "interest": 56.1
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 56.71
-        },
-        "p3": {
-          "payment": 177,
-          "interest": 127.26
-        }
-      },
-      "2025-01": {
-        "p1": {
-          "payment": 90,
-          "interest": 59.34
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 60.05
-        },
-        "p3": {
-          "payment": 177,
-          "interest": 134.89
-        }
-      },
-      "2025-02": {
-        "p1": {
-          "payment": 90,
-          "interest": 59.15
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 59.87
-        },
-        "p3": {
-          "payment": 177,
-          "interest": 134.56
-        }
-      },
-      "2025-03": {
-        "p1": {
-          "payment": 90,
-          "interest": 53.26
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 53.92
-        },
-        "p3": {
-          "payment": 177,
-          "interest": 121.22
-        }
-      },
-      "2025-04": {
-        "p1": {
-          "payment": 90,
-          "interest": 58.73
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 59.47
-        },
-        "p3": {
-          "payment": 177,
-          "interest": 133.75
-        }
-      },
-      "2025-05": {
-        "p1": {
-          "payment": 90,
-          "interest": 56.66
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 57.37
-        },
-        "p3": {
-          "payment": 177,
-          "interest": 129.09
-        }
-      },
-      "2025-06": {
-        "p1": {
-          "payment": 90,
-          "interest": 58.33
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 59.1
-        },
-        "p3": {
-          "payment": 177,
-          "interest": 128.71
-        }
-      },
-      "2025-07": {
-        "p1": {
-          "payment": 90,
-          "interest": 56.27
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 57.01
-        },
-        "p3": {
-          "payment": 177,
-          "interest": 128.37
-        }
-      },
-      "2025-08": {
-        "p1": {
-          "payment": 90,
-          "interest": 57.94
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 58.71
-        },
-        "p3": {
-          "payment": 180,
-          "interest": 132.24
-        }
-      },
-      "2025-09": {
-        "p1": {
-          "payment": 90,
-          "interest": 57.74
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 58.52
-        },
-        "p3": {
-          "payment": 180,
-          "interest": 131.86
-        }
-      },
-      "2025-10": {
-        "p1": {
-          "payment": 90,
-          "interest": 55.68
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 56.45
-        },
-        "p3": {
-          "payment": 180,
-          "interest": 127.22
-        }
-      },
-      "2025-11": {
-        "p1": {
-          "payment": 90,
-          "interest": 57.33
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 58.13
-        },
-        "p3": {
-          "payment": 180,
-          "interest": 131.03
-        }
-      },
-      "2025-12": {
-        "p1": {
-          "payment": 90,
-          "interest": 55.29
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 56.07
-        },
-        "p3": {
-          "payment": 180,
-          "interest": 126.41
-        }
-      },
-      "2026-01": {
-        "p1": {
-          "payment": 90,
-          "interest": 56.91
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 57.73
-        },
-        "p3": {
-          "payment": 180,
-          "interest": 130.19
-        }
-      },
-      "2026-02": {
-        "p1": {
-          "payment": 270,
-          "interest": 56.71
-        },
-        "p2": {
-          "payment": 255,
-          "interest": 57.54
-        },
-        "p3": {
-          "payment": 540,
-          "interest": 129.79
-        }
-      },
-      "2026-03": {
-        "p1": {
-          "payment": 90,
-          "interest": 32.24
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 32.67
-        },
-        "p3": {
-          "payment": 180,
-          "interest": 73.61
-        }
-      },
-      "2026-04": {
-        "p1": {
-          "payment": 90,
-          "interest": 55.16
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 55.89
-        },
-        "p3": {
-          "payment": 180,
-          "interest": 125.89
-        }
-      },
-      "2026-05": {
-        "p1": {
-          "payment": 90,
-          "interest": 53.17
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 53.89
-        },
-        "p3": {
-          "payment": 180,
-          "interest": 121.41
-        }
-      },
-      "2026-06": {
-        "p1": {
-          "payment": 90,
-          "interest": 54.72
-        },
-        "p2": {
-          "payment": 85,
-          "interest": 55.46
-        },
-        "p3": {
-          "payment": 180,
-          "interest": 124.98
-        }
-      }
-    }
-  },
-  "federalLoans": {
-    "startMonthYear": "2024-12",
-    "loans": [
-      {
-        "id": "f1",
-        "name": "Federal Direct Subsidized 1",
-        "principle": 3500,
-        "startingAmount": 3500,
-        "autoPayAmount": 50
-      },
-      {
-        "id": "f2",
-        "name": "Federal Direct Unsubsidized 2",
-        "principle": 2000,
-        "startingAmount": 2150,
-        "autoPayAmount": 35
-      },
-      {
-        "id": "f3",
-        "name": "Federal Direct Subsidized 3",
-        "principle": 4500,
-        "startingAmount": 4500,
-        "autoPayAmount": 65
-      }
-    ],
-    "monthlyData": {}
-  },
   "monthOrder": [],
   "savedAt": "2026-09-06T01:32:42.827Z"
 }
