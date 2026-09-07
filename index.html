@@ -1732,7 +1732,7 @@ function renderLoanTracker(tableId, stateKey){
       <td style="text-align:right;">${fmtMoney(totalAvgInterest)}</td>
     </tr>
     <tr>
-      ${loans.map(() =>
+      ${loans.map(() => `
         <th>Payment</th>
         <th>Interest</th>
         <th class="col-end">Difference</th>
