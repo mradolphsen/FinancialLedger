@@ -314,7 +314,8 @@
       "dueDate": "",
       "payDate": "",
       "paid": false,
-      "notes": ""
+      "notes": "",
+      "debit": 100
     }
   ],
   "compCalculator": {
