@@ -315,7 +315,8 @@
       "payDate": "",
       "paid": false,
       "notes": "",
-      "debit": 100
+      "debit": 100,
+      "credit": 0
     },
     {
       "id": "nc2ve8d",
