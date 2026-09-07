@@ -1735,8 +1735,7 @@ function renderLoanTracker(tableId, stateKey){
       ${loans.map(() => `
         <th>Payment</th>
         <th>Interest</th>
-        <th>Remaining</th>
-        <th class="col-end">Difference</th>
+        <th class="col-end">Remaining</th>
       `).join("")}
       <th></th>
     </tr>
@@ -1753,8 +1752,7 @@ function renderLoanTracker(tableId, stateKey){
         return `
           <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="payment" value="${fmtMoney(d.payment)}"></td>
           <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="interest" value="${fmtMoney(d.interest)}"></td>
-          <td><input type="text" readonly value="${fmtMoney(d.remaining)}"></td>
-          <td class="col-end col-diff"><input type="text" readonly value="${fmtMoney(d.difference)}"></td>
+          <td class="col-end col-diff"><input type="text" readonly value="${fmtMoney(d.remaining)}"></td>
         `;
       }).join("")}
       <td style="text-align:right; font-weight:700; color:var(--navy);">${row.monthIndex % 12 === 0 ? "Year " + (row.monthIndex / 12) : ""}</td>
