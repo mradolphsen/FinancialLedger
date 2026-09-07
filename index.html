@@ -186,10 +186,8 @@ section.block{
 section.block.open .block-head .chev{ transform:rotate(90deg); }
 .block-body{ padding:0 12px 14px; display:none; }
 section.block.open .block-body{ display:block; }
-.block-actions{ display:flex; gap:8px; }
 
 /* SETTINGS / FORM FIELDS */
-.grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:14px; margin-bottom:16px; }
 .field label{ display:block; font-size:12.5px; color:var(--ink-muted); margin-bottom:5px; }
 .field input, .field select, .field textarea{
   width:100%; padding:8px 10px; border:1px solid var(--line); border-radius:var(--radius-sm);
@@ -284,7 +282,7 @@ table.data input[readonly]:focus{
 table.data td.label-cell input[type=text]{ font-family:inherit; }
 table.data textarea{
   width:100%; min-width:110px; min-height:38px; border:1px solid var(--line); border-radius:4px;
-  padding:5px 6px; font-family:inherit; font-size:13px; background:var(--bg); color:var(--ink); resize:vertical;
+  padding:5px 6px; font-family:inherit; font-size:13.5px; background:var(--bg); color:var(--ink); resize:vertical;
 }
 
 td.total-cell{ font-weight:700; color:var(--navy); padding-left:10px; padding-right:10px; min-width:110px; }
@@ -294,8 +292,47 @@ td.diff-cell.neg{ color:var(--danger); font-weight:700; }
 td.actions-cell{ text-align:center; padding-left:4px; padding-right:4px; }
 td.drag-cell{ cursor:grab; color:var(--ink-faint); text-align:center; width:18px; }
 tr.dragging{ opacity:.4; }
-input[type=checkbox]{ width:16px; height:16px; cursor:pointer; }
 .empty-row td{ text-align:center; color:var(--ink-faint); font-family:'Source Sans 3'; padding:16px; }
+
+/* BILL PLANNER LEDGER SPECIFIC STYLES */
+.bill-header-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 2px solid var(--line-strong);
+  border-radius: var(--radius-sm);
+  padding: 8px 16px;
+  background: var(--surface);
+  margin-bottom: 12px;
+  font-family: 'Source Sans 3', sans-serif;
+}
+.bill-header-title {
+  font-weight: 700;
+  font-size: 15px;
+}
+.bill-header-value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+table.ledger-grid th {
+  text-transform: none;
+  font-size: 13px;
+  font-weight: 700;
+  background: #E8EEF3;
+  color: #000;
+  text-align: center;
+}
+table.ledger-grid td {
+  text-align: right;
+  font-family: 'IBM Plex Mono', monospace;
+}
+table.ledger-grid td.label-cell {
+  text-align: left;
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 500;
+}
 
 /* PAY TRACKER SPECIFIC STYLES */
 table.pay-grid th.group { font-style: italic; font-weight: 700; text-transform: none; font-size: 13px; }
@@ -374,7 +411,7 @@ footer a{ color:var(--ink-faint); }
         <div class="table-scroll" style="margin-top:12px;">
           <table class="data" id="monthTable"></table>
         </div>
-        <p class="hint">Net worth = total bank account balances minus total credit card balances for that month. Balances lock automatically after 10 days into the new month. Notes remain permanently editable.</p>
+        <p class="hint">Net worth = total bank account balances minus total credit card balances for that month. Balances lock automatically after 4 days into the new month. Notes remain permanently editable.</p>
       </div>
     </section>
 
@@ -401,13 +438,17 @@ footer a{ color:var(--ink-faint); }
           <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div class="block-body">
+          <div class="bill-header-card">
+            <span class="bill-header-title">Starting Amount</span>
+            <span class="bill-header-value" id="billStartAmount">$0.00</span>
+          </div>
           <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
-            <button class="btn primary" id="addBillBtn">+ Add bill</button>
+            <button class="btn primary" id="addBillBtn">+ Add transaction</button>
           </div>
           <div class="table-scroll">
-            <table class="data" id="billTable"></table>
+            <table class="data ledger-grid" id="billTable"></table>
           </div>
-          <p class="hint">Drag the ⠿ handle to reorder rows relative to paychecks.</p>
+          <p class="hint">Starting amount automatically pulled from prior month's Savings balance. Drag ⠿ handle to reorder rows.</p>
         </div>
       </section>
 
@@ -614,8 +655,8 @@ function isMonthEditable(key){
   }
   const prevKey = prevY + "-" + String(prevM).padStart(2, "0");
 
-  // Previous month is editable ONLY for the first 10 days of the current month (days 1-10)
-  if(key === prevKey && now.getDate() <= 10) {
+  // Previous month is editable ONLY for the first 4 days of the current month (days 1-4)
+  if(key === prevKey && now.getDate() <= 4) {
     return true;
   }
 
@@ -790,31 +831,64 @@ function renderRecurTable(){
 }
 
 /* ============================================================
-   RENDER: BILL PAYMENT PLANNER
+   RENDER: BILL PAYMENT PLANNER (RUNNING LEDGER)
    ============================================================ */
+
+function getPreviousSavingsBalance(){
+  const months = sortedMonths();
+  const curKey = currentMonthKey();
+  
+  // Find key directly preceding current month in history
+  const prevKeyIdx = months.findIndex(k => k < curKey);
+  if(prevKeyIdx !== -1){
+    const prevKey = months[prevKeyIdx];
+    const prevEntry = state.months[prevKey];
+    if(prevEntry && prevEntry.balances && prevEntry.balances["savings"] !== undefined){
+      return parseMoney(prevEntry.balances["savings"]);
+    }
+  }
+  return 0;
+}
 
 function renderBillTable(){
   const table = document.getElementById("billTable");
+  const startAmount = getPreviousSavingsBalance();
+  
+  const startEl = document.getElementById("billStartAmount");
+  if(startEl) startEl.textContent = fmtMoney(startAmount);
+
   let head = `<thead><tr>
-      <th></th><th>Bill</th><th>Amount</th><th>Due Date</th><th>Pay Date</th><th>Paid</th><th>Notes</th><th></th>
+      <th style="width:24px;"></th>
+      <th style="text-align:left;">Expense</th>
+      <th>Debit</th>
+      <th>Credit</th>
+      <th>Remaining</th>
+      <th style="width:30px;"></th>
     </tr></thead>`;
+
   let rows = "";
-  if(state.bills.length === 0){
-    rows = `<tr class="empty-row"><td colspan="8">No bills planned yet.</td></tr>`;
-  }else{
+  let running = startAmount;
+
+  if(!state.bills || state.bills.length === 0){
+    rows = `<tr class="empty-row"><td colspan="6">No planned transactions yet.</td></tr>`;
+  } else {
     state.bills.forEach(item => {
+      const debit = parseMoney(item.debit);
+      const credit = parseMoney(item.credit);
+      
+      running = running - debit + credit;
+
       rows += `<tr data-id="${item.id}" draggable="true">
         <td class="drag-cell" title="Drag to reorder">⠿</td>
-        <td class="label-cell"><input type="text" data-kind="bill-name" data-id="${item.id}" value="${escapeHtml(item.name)}" placeholder="e.g. Rent"></td>
-        <td><input type="text" data-kind="bill-amount" data-id="${item.id}" value="${item.amount !== undefined && item.amount !== "" ? fmtMoney(item.amount) : ""}" placeholder="$0.00"></td>
-        <td><input type="date" data-kind="bill-due" data-id="${item.id}" value="${item.dueDate || ""}"></td>
-        <td><input type="date" data-kind="bill-pay" data-id="${item.id}" value="${item.payDate || ""}"></td>
-        <td class="actions-cell"><input type="checkbox" data-kind="bill-paid" data-id="${item.id}" ${item.paid ? "checked" : ""}></td>
-        <td><textarea data-kind="bill-notes" data-id="${item.id}" placeholder="Notes…">${escapeHtml(item.notes || "")}</textarea></td>
+        <td class="label-cell"><input type="text" data-kind="bill-name" data-id="${item.id}" value="${escapeHtml(item.name || "")}" placeholder="e.g. Paycheck or Rent"></td>
+        <td><input type="text" data-kind="bill-debit" data-id="${item.id}" value="${item.debit !== undefined && item.debit !== "" && item.debit !== 0 ? fmtMoney(item.debit) : ""}" placeholder="$0.00"></td>
+        <td><input type="text" data-kind="bill-credit" data-id="${item.id}" value="${item.credit !== undefined && item.credit !== "" && item.credit !== 0 ? fmtMoney(item.credit) : ""}" placeholder="$0.00"></td>
+        <td><input type="text" readonly value="${fmtMoney(running)}"></td>
         <td class="actions-cell"><button class="btn small danger" data-action="delete-bill" data-id="${item.id}" title="Remove">✕</button></td>
       </tr>`;
     });
   }
+
   table.innerHTML = head + "<tbody>" + rows + "</tbody>";
   bindBillDragEvents();
 }
@@ -977,7 +1051,31 @@ function updateRecur(id, field, value){
 
 function updateBill(id, field, value){
   const item = state.bills.find(b => b.id === id);
-  if(item){ item[field] = value; markDirty(); }
+  if(!item) return;
+
+  item[field] = (field === "debit" || field === "credit") ? parseMoney(value) : value;
+  markDirty();
+
+  recalculateLedger();
+}
+
+function recalculateLedger(){
+  const startAmount = getPreviousSavingsBalance();
+  let running = startAmount;
+
+  const rows = document.querySelectorAll("#billTable tbody tr[data-id]");
+  rows.forEach(tr => {
+    const id = tr.getAttribute("data-id");
+    const item = state.bills.find(b => b.id === id);
+    if(item){
+      const debit = parseMoney(item.debit);
+      const credit = parseMoney(item.credit);
+      running = running - debit + credit;
+
+      const remainingInput = tr.querySelector("input[readonly]");
+      if(remainingInput) remainingInput.value = fmtMoney(running);
+    }
+  });
 }
 
 function updatePayRecord(id, field, value){
@@ -1173,7 +1271,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // Add Bill
   document.getElementById("addBillBtn").addEventListener("click", () => {
-    state.bills.push({ id: uid(), name: "", amount: 0, dueDate: "", payDate: "", paid: false, notes: "" });
+    if(!state.bills) state.bills = [];
+    state.bills.push({ id: uid(), name: "", debit: 0, credit: 0 });
     markDirty();
     renderBillTable();
   });
@@ -1230,6 +1329,10 @@ document.addEventListener("DOMContentLoaded", () => {
         const totalCell = monthRow.querySelector(".total-cell");
         if(totalCell) totalCell.textContent = fmtMoney(totals.net);
       }
+      // If savings balance changed, re-render bill table starting amount
+      if(acct === "savings"){
+        renderBillTable();
+      }
     } else if(kind === "notes"){
       const key = target.getAttribute("data-month");
       state.months[key].notes = target.value;
@@ -1242,16 +1345,10 @@ document.addEventListener("DOMContentLoaded", () => {
       updateRecur(target.getAttribute("data-id"), "amount", parseMoney(target.value));
     } else if(kind === "bill-name"){
       updateBill(target.getAttribute("data-id"), "name", target.value);
-    } else if(kind === "bill-amount"){
-      updateBill(target.getAttribute("data-id"), "amount", parseMoney(target.value));
-    } else if(kind === "bill-due"){
-      updateBill(target.getAttribute("data-id"), "dueDate", target.value);
-    } else if(kind === "bill-pay"){
-      updateBill(target.getAttribute("data-id"), "payDate", target.value);
-    } else if(kind === "bill-paid"){
-      updateBill(target.getAttribute("data-id"), "paid", target.checked);
-    } else if(kind === "bill-notes"){
-      updateBill(target.getAttribute("data-id"), "notes", target.value);
+    } else if(kind === "bill-debit"){
+      updateBill(target.getAttribute("data-id"), "debit", target.value);
+    } else if(kind === "bill-credit"){
+      updateBill(target.getAttribute("data-id"), "credit", target.value);
     } else if(kind === "pay-field"){
       const field = target.getAttribute("data-field");
       const id = target.getAttribute("data-id");
@@ -1268,9 +1365,9 @@ document.addEventListener("DOMContentLoaded", () => {
   document.addEventListener("focusout", e => {
     const kind = e.target.getAttribute("data-kind");
     const field = e.target.getAttribute("data-field");
-    if(kind === "balance" || kind === "recur-amount" || kind === "bill-amount" || (kind === "pay-field" && (field === "basePay" || field === "myHourly"))){
+    if(kind === "balance" || kind === "recur-amount" || kind === "bill-debit" || kind === "bill-credit" || (kind === "pay-field" && (field === "basePay" || field === "myHourly"))){
       const num = parseMoney(e.target.value);
-      e.target.value = e.target.value.trim() !== "" ? fmtMoney(num) : "";
+      e.target.value = e.target.value.trim() !== "" && num !== 0 ? fmtMoney(num) : "";
     }
   });
 
@@ -1359,5 +1456,3 @@ document.addEventListener("DOMContentLoaded", () => {
 </script>
 </body>
 </html>
-
-```
