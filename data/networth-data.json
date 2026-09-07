@@ -391,16 +391,16 @@
       "credit": 1550
     },
     {
-      "id": "3w8vfk1",
-      "name": "Paycheck",
-      "debit": 0,
-      "credit": 1550
-    },
-    {
       "id": "icin7h7",
       "name": "US Bank",
       "debit": 606.34,
       "credit": 0
+    },
+    {
+      "id": "3w8vfk1",
+      "name": "Paycheck",
+      "debit": 0,
+      "credit": 1550
     }
   ],
   "compCalculator": {
