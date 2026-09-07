@@ -317,6 +317,11 @@
       "notes": ""
     }
   ],
+  "compCalculator": {
+    "midpoint": 34.99,
+    "calcPay": 29.29,
+    "calcRatio": 86.58
+  },
   "payTracker": [
     {
       "id": "f2v05zx",
