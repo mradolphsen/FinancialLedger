@@ -316,6 +316,12 @@
       "paid": false,
       "notes": "",
       "debit": 100
+    },
+    {
+      "id": "nc2ve8d",
+      "name": "",
+      "debit": 0,
+      "credit": 0
     }
   ],
   "compCalculator": {
