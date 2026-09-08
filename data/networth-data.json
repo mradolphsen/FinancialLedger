@@ -482,7 +482,7 @@
         "name": "360021753920",
         "principle": 7200,
         "startingAmount": 8461.19,
-        "autoPayAmount": 85
+        "autoPayAmount": 0
       },
       {
         "id": "p3",
