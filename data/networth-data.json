@@ -480,8 +480,8 @@
       {
         "id": "p2",
         "name": "360021753920",
-        "principle": 7200,
-        "startingAmount": 8461.19,
+        "principle": 0,
+        "startingAmount": 0,
         "autoPayAmount": 0
       },
       {
