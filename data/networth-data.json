@@ -755,8 +755,9 @@
       },
       "2026-06": {
         "p1": {
-          "payment": 90,
-          "interest": 54.72
+          "payment": 0,
+          "interest": 54.72,
+          "isAutoPayChange": true
         },
         "p2": {
           "payment": 85,
