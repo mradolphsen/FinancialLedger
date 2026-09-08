@@ -648,7 +648,7 @@
       },
       "2025-09": {
         "p1": {
-          "payment": 0,
+          "payment": 90,
           "interest": 0,
           "isAutoPayChange": true
         },
