@@ -615,8 +615,9 @@
       },
       "2025-08": {
         "p1": {
-          "payment": 90,
-          "interest": 0
+          "payment": 0,
+          "interest": 0,
+          "isAutoPayChange": true
         },
         "p2": {
           "payment": 85,
@@ -629,8 +630,9 @@
       },
       "2025-09": {
         "p1": {
-          "payment": 90,
-          "interest": 0
+          "payment": 0,
+          "interest": 0,
+          "isAutoPayChange": true
         },
         "p2": {
           "payment": 85,
@@ -643,8 +645,9 @@
       },
       "2025-10": {
         "p1": {
-          "payment": 90,
-          "interest": 0
+          "payment": 0,
+          "interest": 0,
+          "isAutoPayChange": true
         },
         "p2": {
           "payment": 85,
@@ -657,8 +660,9 @@
       },
       "2025-11": {
         "p1": {
-          "payment": 90,
-          "interest": 0
+          "payment": 0,
+          "interest": 0,
+          "isAutoPayChange": true
         },
         "p2": {
           "payment": 85,
