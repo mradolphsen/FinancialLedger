@@ -790,7 +790,8 @@
       "2024-12": {
         "f1": {
           "payment": 141,
-          "isAutoPayChange": true
+          "isAutoPayChange": true,
+          "interest": 141
         },
         "f2": {
           "payment": 62,
