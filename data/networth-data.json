@@ -584,7 +584,7 @@
       "2025-06": {
         "p1": {
           "payment": 90,
-          "interest": 58.33
+          "interest": 0
         },
         "p2": {
           "payment": 85,
@@ -598,7 +598,7 @@
       "2025-07": {
         "p1": {
           "payment": 90,
-          "interest": 56.27
+          "interest": 0
         },
         "p2": {
           "payment": 85,
