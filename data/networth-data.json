@@ -796,6 +796,12 @@
           "payment": 62,
           "isAutoPayChange": true
         }
+      },
+      "2025-01": {
+        "f1": {
+          "payment": 4,
+          "isAutoPayChange": true
+        }
       }
     }
   },
