@@ -522,7 +522,7 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 0,
+          "payment": 180,
           "interest": 0,
           "isAutoPayChange": true
         }
@@ -539,7 +539,7 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 0,
+          "payment": 180,
           "interest": 0,
           "isAutoPayChange": true
         }
@@ -556,7 +556,7 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 0,
+          "payment": 180,
           "interest": 0,
           "isAutoPayChange": true
         }
@@ -573,7 +573,7 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 0,
+          "payment": 180,
           "interest": 0,
           "isAutoPayChange": true
         }
@@ -590,7 +590,7 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 0,
+          "payment": 180,
           "interest": 0,
           "isAutoPayChange": true
         }
@@ -607,7 +607,7 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 0,
+          "payment": 180,
           "interest": 128.71,
           "isAutoPayChange": true
         }
@@ -624,7 +624,7 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 0,
+          "payment": 180,
           "interest": 128.37,
           "isAutoPayChange": true
         }
@@ -641,7 +641,7 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 0,
+          "payment": 180,
           "interest": 132.24,
           "isAutoPayChange": true
         }
@@ -658,7 +658,7 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 0,
+          "payment": 180,
           "interest": 131.86,
           "isAutoPayChange": true
         }
@@ -675,7 +675,7 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 0,
+          "payment": 180,
           "interest": 127.22,
           "isAutoPayChange": true
         }
