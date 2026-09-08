@@ -500,8 +500,9 @@
           "isAutoPayChange": true
         },
         "p2": {
-          "payment": 85,
-          "interest": 56.71
+          "payment": 0,
+          "interest": 56.71,
+          "isAutoPayChange": true
         },
         "p3": {
           "payment": 177,
@@ -515,8 +516,9 @@
           "isAutoPayChange": true
         },
         "p2": {
-          "payment": 85,
-          "interest": 60.05
+          "payment": 0,
+          "interest": 60.05,
+          "isAutoPayChange": true
         },
         "p3": {
           "payment": 177,
@@ -530,8 +532,9 @@
           "isAutoPayChange": true
         },
         "p2": {
-          "payment": 85,
-          "interest": 59.87
+          "payment": 0,
+          "interest": 59.87,
+          "isAutoPayChange": true
         },
         "p3": {
           "payment": 177,
@@ -545,8 +548,9 @@
           "isAutoPayChange": true
         },
         "p2": {
-          "payment": 85,
-          "interest": 53.92
+          "payment": 0,
+          "interest": 53.92,
+          "isAutoPayChange": true
         },
         "p3": {
           "payment": 177,
@@ -560,8 +564,9 @@
           "isAutoPayChange": true
         },
         "p2": {
-          "payment": 85,
-          "interest": 59.47
+          "payment": 0,
+          "interest": 59.47,
+          "isAutoPayChange": true
         },
         "p3": {
           "payment": 177,
@@ -575,8 +580,9 @@
           "isAutoPayChange": true
         },
         "p2": {
-          "payment": 85,
-          "interest": 57.37
+          "payment": 0,
+          "interest": 57.37,
+          "isAutoPayChange": true
         },
         "p3": {
           "payment": 177,
@@ -590,8 +596,9 @@
           "isAutoPayChange": true
         },
         "p2": {
-          "payment": 85,
-          "interest": 59.1
+          "payment": 0,
+          "interest": 59.1,
+          "isAutoPayChange": true
         },
         "p3": {
           "payment": 177,
@@ -605,8 +612,9 @@
           "isAutoPayChange": true
         },
         "p2": {
-          "payment": 85,
-          "interest": 57.01
+          "payment": 0,
+          "interest": 57.01,
+          "isAutoPayChange": true
         },
         "p3": {
           "payment": 177,
@@ -620,8 +628,9 @@
           "isAutoPayChange": true
         },
         "p2": {
-          "payment": 85,
-          "interest": 58.71
+          "payment": 0,
+          "interest": 58.71,
+          "isAutoPayChange": true
         },
         "p3": {
           "payment": 180,
@@ -635,8 +644,9 @@
           "isAutoPayChange": true
         },
         "p2": {
-          "payment": 85,
-          "interest": 58.52
+          "payment": 0,
+          "interest": 58.52,
+          "isAutoPayChange": true
         },
         "p3": {
           "payment": 180,
@@ -650,8 +660,9 @@
           "isAutoPayChange": true
         },
         "p2": {
-          "payment": 85,
-          "interest": 56.45
+          "payment": 0,
+          "interest": 56.45,
+          "isAutoPayChange": true
         },
         "p3": {
           "payment": 180,
@@ -665,8 +676,9 @@
           "isAutoPayChange": true
         },
         "p2": {
-          "payment": 85,
-          "interest": 58.13
+          "payment": 0,
+          "interest": 58.13,
+          "isAutoPayChange": true
         },
         "p3": {
           "payment": 180,
