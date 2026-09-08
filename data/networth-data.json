@@ -773,7 +773,7 @@
       },
       {
         "id": "f2",
-        "name": "Federal Direct Unsubsidized 2",
+        "name": "02",
         "principle": 2000,
         "startingAmount": 2150,
         "autoPayAmount": 35
