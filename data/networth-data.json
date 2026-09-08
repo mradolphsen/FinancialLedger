@@ -900,24 +900,24 @@
     "loans": [
       {
         "id": "f1",
-        "name": "01",
-        "principle": 4500,
-        "startingAmount": 4648.23,
-        "autoPayAmount": 47
+        "name": "",
+        "principle": 0,
+        "startingAmount": 0,
+        "autoPayAmount": 0
       },
       {
         "id": "f2",
-        "name": "02",
-        "principle": 5500,
-        "startingAmount": 5518.91,
-        "autoPayAmount": 61
+        "name": "",
+        "principle": 0,
+        "startingAmount": 0,
+        "autoPayAmount": 0
       },
       {
         "id": "f3",
-        "name": "03",
-        "principle": 2559,
-        "startingAmount": 2577.87,
-        "autoPayAmount": 29
+        "name": "",
+        "principle": 0,
+        "startingAmount": 0,
+        "autoPayAmount": 0
       }
     ],
     "monthlyData": {
@@ -933,7 +933,7 @@
           "interest": 183
         },
         "f3": {
-          "interest": 87,
+          "interest": 0,
           "payment": 87,
           "isAutoPayChange": true
         }
