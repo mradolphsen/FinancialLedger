@@ -735,8 +735,9 @@
       },
       "2026-04": {
         "p1": {
-          "payment": 90,
-          "interest": 55.16
+          "payment": 0,
+          "interest": 55.16,
+          "isAutoPayChange": true
         },
         "p2": {
           "payment": 85,
