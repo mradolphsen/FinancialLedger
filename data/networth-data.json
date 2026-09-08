@@ -1003,7 +1003,8 @@
           "interest": 141
         },
         "f2": {
-          "payment": 183
+          "payment": 183,
+          "interest": 183
         }
       }
     }
