@@ -124,6 +124,34 @@ h1{
   display: block;
 }
 
+/* SUBTABS — secondary tab bar nested inside a top-level tab panel */
+.subtab-nav {
+  display: flex;
+  gap: 4px;
+  border-bottom: 2px solid var(--line);
+  margin-bottom: 16px;
+}
+.subtab {
+  padding: 8px 16px;
+  font-family: 'Source Sans 3', sans-serif;
+  font-weight: 600;
+  font-size: 13.5px;
+  color: var(--ink-muted);
+  background: transparent;
+  border: none;
+  border-bottom: 3px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: color .15s ease, border-color .15s ease;
+}
+.subtab:hover { color: var(--navy); }
+.subtab.active {
+  color: var(--navy);
+  border-bottom-color: var(--blue);
+}
+.subtab-content { display: none; }
+.subtab-content.active { display: block; }
+
 /* SYNC PILL */
 .sync-pill{
   display:inline-flex; align-items:center; gap:6px; font-size:12.5px;
@@ -627,8 +655,7 @@ footer a{ color:var(--ink-faint); }
   <nav class="nav-tabs" role="tablist">
     <button class="nav-tab active" data-tab="tab-month-end" role="tab" aria-selected="true">Month End</button>
     <button class="nav-tab" data-tab="tab-pay-tracker" role="tab" aria-selected="false">Pay Tracker</button>
-    <button class="nav-tab" data-tab="tab-private-loans" role="tab" aria-selected="false">Private Loans</button>
-    <button class="nav-tab" data-tab="tab-federal-loans" role="tab" aria-selected="false">Federal Loans</button>
+    <button class="nav-tab" data-tab="tab-loans" role="tab" aria-selected="false">Loans</button>
   </nav>
 
   <!-- SUBPAGE CONTENT: MONTH END -->
@@ -788,44 +815,55 @@ footer a{ color:var(--ink-faint); }
 
   </div>
 
-  <!-- SUBPAGE CONTENT: PRIVATE LOANS -->
-  <div class="tab-content" id="tab-private-loans" role="tabpanel">
-    <section class="block open" id="privateLoansBlock">
-      <div class="block-head" data-toggle="privateLoansBlock">
-        <h2>Private Student Loans<span class="block-sub">Track payoff schedule and interest across private loans</span></h2>
-        <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="block-body">
-        <div class="loan-toolbar">
-          <label for="privateStartMonthInput">Payment Starting Month:</label>
-          <input type="month" id="privateStartMonthInput" data-state="privateLoans">
-        </div>
-        <div class="table-scroll">
-          <table class="data loan-grid" id="privateLoanTable"></table>
-        </div>
-        <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule. Edit monthly payments or interest individually for custom adjustments.</p>
-      </div>
-    </section>
-  </div>
+  <!-- SUBPAGE CONTENT: LOANS (contains Private + Federal subtabs) -->
+  <div class="tab-content" id="tab-loans" role="tabpanel">
 
-  <!-- SUBPAGE CONTENT: FEDERAL LOANS -->
-  <div class="tab-content" id="tab-federal-loans" role="tabpanel">
-    <section class="block open" id="federalLoansBlock">
-      <div class="block-head" data-toggle="federalLoansBlock">
-        <h2>Federal Student Loans<span class="block-sub">Track payoff schedule and interest across federal loans</span></h2>
-        <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      </div>
-      <div class="block-body">
-        <div class="loan-toolbar">
-          <label for="federalStartMonthInput">Payment Starting Month:</label>
-          <input type="month" id="federalStartMonthInput" data-state="federalLoans">
+    <!-- Subtab bar -->
+    <nav class="subtab-nav" role="tablist" aria-label="Loan type">
+      <button class="subtab active" data-subtab="subtab-private-loans" role="tab" aria-selected="true">Private Loans</button>
+      <button class="subtab" data-subtab="subtab-federal-loans" role="tab" aria-selected="false">Federal Loans</button>
+    </nav>
+
+    <!-- Subtab: Private Loans -->
+    <div class="subtab-content active" id="subtab-private-loans" role="tabpanel">
+      <section class="block open" id="privateLoansBlock">
+        <div class="block-head" data-toggle="privateLoansBlock">
+          <h2>Private Student Loans<span class="block-sub">Track payoff schedule and interest across private loans</span></h2>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
-        <div class="table-scroll">
-          <table class="data loan-grid" id="federalLoanTable"></table>
+        <div class="block-body">
+          <div class="loan-toolbar">
+            <label for="privateStartMonthInput">Payment Starting Month:</label>
+            <input type="month" id="privateStartMonthInput" data-state="privateLoans">
+          </div>
+          <div class="table-scroll">
+            <table class="data loan-grid" id="privateLoanTable"></table>
+          </div>
+          <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule. Edit monthly payments or interest individually for custom adjustments.</p>
         </div>
-        <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule. Edit monthly payments or interest individually for custom adjustments.</p>
-      </div>
-    </section>
+      </section>
+    </div>
+
+    <!-- Subtab: Federal Loans -->
+    <div class="subtab-content" id="subtab-federal-loans" role="tabpanel">
+      <section class="block open" id="federalLoansBlock">
+        <div class="block-head" data-toggle="federalLoansBlock">
+          <h2>Federal Student Loans<span class="block-sub">Track payoff schedule and interest across federal loans</span></h2>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="block-body">
+          <div class="loan-toolbar">
+            <label for="federalStartMonthInput">Payment Starting Month:</label>
+            <input type="month" id="federalStartMonthInput" data-state="federalLoans">
+          </div>
+          <div class="table-scroll">
+            <table class="data loan-grid" id="federalLoanTable"></table>
+          </div>
+          <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule. Edit monthly payments or interest individually for custom adjustments.</p>
+        </div>
+      </section>
+    </div>
+
   </div>
 
   <footer>
@@ -2053,6 +2091,26 @@ document.addEventListener("DOMContentLoaded", () => {
       tab.classList.add("active");
       tab.setAttribute("aria-selected", "true");
       const targetId = tab.getAttribute("data-tab");
+      const targetContent = document.getElementById(targetId);
+      if(targetContent) targetContent.classList.add("active");
+    });
+  });
+
+  // Subtab Switching (Loans: Private / Federal)
+  document.querySelectorAll(".subtab").forEach(subtab => {
+    subtab.addEventListener("click", () => {
+      const nav = subtab.closest(".subtab-nav");
+      const panel = nav.closest(".tab-content");
+
+      nav.querySelectorAll(".subtab").forEach(t => {
+        t.classList.remove("active");
+        t.setAttribute("aria-selected", "false");
+      });
+      panel.querySelectorAll(".subtab-content").forEach(c => c.classList.remove("active"));
+
+      subtab.classList.add("active");
+      subtab.setAttribute("aria-selected", "true");
+      const targetId = subtab.getAttribute("data-subtab");
       const targetContent = document.getElementById(targetId);
       if(targetContent) targetContent.classList.add("active");
     });
