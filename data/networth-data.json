@@ -496,7 +496,7 @@
       "2024-12": {
         "p1": {
           "payment": 0,
-          "interest": 56.1,
+          "interest": 0,
           "isAutoPayChange": true
         },
         "p2": {
@@ -511,7 +511,7 @@
       "2025-01": {
         "p1": {
           "payment": 0,
-          "interest": 59.34,
+          "interest": 0,
           "isAutoPayChange": true
         },
         "p2": {
@@ -526,7 +526,7 @@
       "2025-02": {
         "p1": {
           "payment": 0,
-          "interest": 59.15,
+          "interest": 0,
           "isAutoPayChange": true
         },
         "p2": {
@@ -570,7 +570,7 @@
       "2025-05": {
         "p1": {
           "payment": 90,
-          "interest": 56.66
+          "interest": 0
         },
         "p2": {
           "payment": 85,
