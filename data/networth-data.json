@@ -740,8 +740,9 @@
           "isAutoPayChange": true
         },
         "p2": {
-          "payment": 85,
-          "interest": 32.67
+          "payment": 0,
+          "interest": 32.67,
+          "isAutoPayChange": true
         },
         "p3": {
           "payment": 180,
