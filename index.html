@@ -536,6 +536,37 @@ table.loan-grid tr.year-summary-row td {
   color: var(--navy);
 }
 
+/* Give editable text inputs an explicit baseline color so the
+   future-month override below has something predictable to win against */
+table.data input[type=text], table.data input[type=number]{ color:var(--ink); }
+
+/* CURRENT MONTH ROW — reused across data tables (loan tracker, net worth, etc.) */
+table.data tr.current-month td.label-cell span{
+  color:var(--navy);
+  font-weight:800;
+}
+
+/* FUTURE MONTH ROWS — values read as lighter / italic projections */
+table.data tr.future-month input,
+table.data tr.future-month td.label-cell span{
+  color:var(--ink-faint);
+  font-style:italic;
+  font-weight:400;
+}
+table.data tr.future-month td.col-diff input{
+  color:var(--ink-faint);
+}
+
+/* LOAN PAID OFF — once a loan's remaining balance hits zero, every
+   subsequent month for that loan is blacked out with no values shown */
+table.loan-grid td.loan-closed-cell{
+  background:var(--ink);
+  border-bottom:1px solid var(--ink);
+}
+table.loan-grid tr:hover td.loan-closed-cell{
+  background:var(--ink);
+}
+
 /* MODALS */
 .modal-overlay{
   position:fixed; inset:0; background:rgba(27,36,34,0.45); display:none;
@@ -1720,11 +1751,36 @@ function renderLoanTracker(tableId, stateKey){
   // 4. Build Body Rows HTML
   let bodyHtml = "<tbody>";
 
+  // Determine "today" relative to the projected schedule so we can highlight
+  // the current month and dim future months
+  const now = new Date();
+  const curKey = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
+
+  // Track, per loan, whether it has already hit a zero balance in an earlier
+  // row — once true, every following month for that loan is blacked out
+  const paidOffTracker = {};
+  loans.forEach(l => { paidOffTracker[l.id] = false; });
+
   monthlyRows.forEach(row => {
-    bodyHtml += `<tr>
+    let rowClass = "";
+    if(row.monthKey === curKey) rowClass = "current-month";
+    else if(row.monthKey > curKey) rowClass = "future-month";
+
+    bodyHtml += `<tr class="${rowClass}">
       <td class="col-end label-cell"><span style="color:var(--ink-regular); font-size:14px; font-weight:600;">${monthLabel(row.monthKey)}</span></td>
       ${loans.map(l => {
         const d = row.loansData[l.id];
+
+        // Loan already closed out in an earlier row — blacked-out, no values
+        if(paidOffTracker[l.id]){
+          return `<td colspan="3" class="col-end loan-closed-cell"></td>`;
+        }
+
+        // This row is the one where the loan reaches a zero balance —
+        // show the final numbers, then close it out for subsequent rows
+        const isZero = d.remaining <= 0.005;
+        if(isZero) paidOffTracker[l.id] = true;
+
         return `
           <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="payment" value="${fmtMoney(d.payment)}"></td>
           <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="interest" value="${fmtMoney(d.interest)}"></td>
