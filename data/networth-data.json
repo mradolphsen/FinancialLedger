@@ -760,8 +760,9 @@
           "isAutoPayChange": true
         },
         "p2": {
-          "payment": 85,
-          "interest": 55.89
+          "payment": 0,
+          "interest": 55.89,
+          "isAutoPayChange": true
         },
         "p3": {
           "payment": 180,
@@ -775,8 +776,9 @@
           "isAutoPayChange": true
         },
         "p2": {
-          "payment": 85,
-          "interest": 53.89
+          "payment": 0,
+          "interest": 53.89,
+          "isAutoPayChange": true
         },
         "p3": {
           "payment": 180,
@@ -870,6 +872,11 @@
         }
       },
       "2054-10": {
+        "p1": {
+          "interest": 0
+        }
+      },
+      "2027-07": {
         "p1": {
           "interest": 0
         }
