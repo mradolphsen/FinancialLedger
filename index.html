@@ -1614,11 +1614,9 @@ function renderLoanTracker(tableId, stateKey){
   const monthlyRows = [];
   let monthIdx = 0;
   const runningBalances = {};
-  const currentAutoPay = {};
 
   loans.forEach(loan => {
     runningBalances[loan.id] = parseMoney(loan.startingAmount);
-    currentAutoPay[loan.id] = parseMoney(loan.autoPayAmount);
   });
 
   const MAX_MONTHS = 360; // Safety cap (30 yrs)
@@ -1631,19 +1629,15 @@ function renderLoanTracker(tableId, stateKey){
     loans.forEach(loan => {
       const prevBal = runningBalances[loan.id];
 
-      // Check for user-driven override of Auto Pay (carried forward if modified)
+      // Default payment to Auto Pay Amount unless specifically overridden for this month
       const storedEntry = data.monthlyData[mKey]?.[loan.id];
       
-      let payAmt = currentAutoPay[loan.id];
+      let payAmt = parseMoney(loan.autoPayAmount);
       let isCustomPayment = false;
 
       if(storedEntry && storedEntry.payment !== undefined && storedEntry.payment !== ""){
         payAmt = parseMoney(storedEntry.payment);
-        if(storedEntry.isAutoPayChange){
-          currentAutoPay[loan.id] = payAmt;
-        } else {
-          isCustomPayment = true;
-        }
+        isCustomPayment = true;
       }
 
       // Check interest (inputted or calculated average)
@@ -1732,8 +1726,8 @@ function renderLoanTracker(tableId, stateKey){
       ${loans.map(l => {
         const d = row.loansData[l.id];
         return `
-          <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="payment" value="${d.payment ? fmtMoney(d.payment) : '$0.00'}"></td>
-          <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="interest" value="${d.interest ? fmtMoney(d.interest) : '$0.00'}"></td>
+          <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="payment" value="${fmtMoney(d.payment)}"></td>
+          <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="interest" value="${fmtMoney(d.interest)}"></td>
           <td class="col-end col-diff"><input type="text" readonly value="${fmtMoney(d.remaining)}"></td>
         `;
       }).join("")}
@@ -2142,9 +2136,6 @@ document.addEventListener("DOMContentLoaded", () => {
       if(!state[stateKey].monthlyData[mKey][loanId]) state[stateKey].monthlyData[mKey][loanId] = {};
 
       state[stateKey].monthlyData[mKey][loanId][field] = parseMoney(target.value);
-      if(field === "payment"){
-        state[stateKey].monthlyData[mKey][loanId].isAutoPayChange = true;
-      }
       markDirty();
       renderLoanTracker(stateKey === "privateLoans" ? "privateLoanTable" : "federalLoanTable", stateKey);
     }
