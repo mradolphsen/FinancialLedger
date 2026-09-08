@@ -794,7 +794,7 @@
       },
       "2026-06": {
         "p1": {
-          "payment": 0,
+          "payment": 90,
           "interest": 0,
           "isAutoPayChange": true
         },
