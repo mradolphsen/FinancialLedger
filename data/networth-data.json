@@ -730,7 +730,7 @@
       },
       "2026-02": {
         "p1": {
-          "payment": 90,
+          "payment": 270,
           "interest": 56.71,
           "isAutoPayChange": true
         },
