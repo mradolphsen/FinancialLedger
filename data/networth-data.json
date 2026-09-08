@@ -923,14 +923,14 @@
     "monthlyData": {
       "2024-12": {
         "f1": {
-          "payment": 141,
+          "payment": 0,
           "isAutoPayChange": true,
-          "interest": 141
+          "interest": 0
         },
         "f2": {
-          "payment": 183,
+          "payment": 0,
           "isAutoPayChange": true,
-          "interest": 183
+          "interest": 0
         },
         "f3": {
           "interest": 0,
