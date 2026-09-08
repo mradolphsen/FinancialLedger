@@ -804,6 +804,11 @@
           "isAutoPayChange": true,
           "interest": 11.97
         }
+      },
+      "2025-02": {
+        "f1": {
+          "interest": 12.75
+        }
       }
     }
   },
