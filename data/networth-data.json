@@ -675,8 +675,9 @@
       },
       "2025-12": {
         "p1": {
-          "payment": 90,
-          "interest": 55.29
+          "payment": 0,
+          "interest": 55.29,
+          "isAutoPayChange": true
         },
         "p2": {
           "payment": 85,
