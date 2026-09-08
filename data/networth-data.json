@@ -603,7 +603,7 @@
         },
         "p2": {
           "payment": 85,
-          "interest": 0,
+          "interest": 59.1,
           "isAutoPayChange": true
         },
         "p3": {
