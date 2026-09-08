@@ -795,7 +795,8 @@
         },
         "f2": {
           "payment": 183,
-          "isAutoPayChange": true
+          "isAutoPayChange": true,
+          "interest": 183
         }
       },
       "2025-01": {
