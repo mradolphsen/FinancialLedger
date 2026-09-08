@@ -573,7 +573,7 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 180,
+          "payment": 177,
           "interest": 0,
           "isAutoPayChange": true
         }
@@ -590,7 +590,7 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 180,
+          "payment": 177,
           "interest": 0,
           "isAutoPayChange": true
         }
@@ -607,7 +607,7 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 180,
+          "payment": 177,
           "interest": 128.71,
           "isAutoPayChange": true
         }
