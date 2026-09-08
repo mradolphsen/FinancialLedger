@@ -934,7 +934,7 @@
         },
         "f3": {
           "interest": 0,
-          "payment": 87,
+          "payment": 0,
           "isAutoPayChange": true
         }
       },
