@@ -505,8 +505,9 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 177,
-          "interest": 127.26
+          "payment": 0,
+          "interest": 0,
+          "isAutoPayChange": true
         }
       },
       "2025-01": {
