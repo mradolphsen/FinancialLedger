@@ -774,7 +774,7 @@
       {
         "id": "f2",
         "name": "02",
-        "principle": 2000,
+        "principle": 5500,
         "startingAmount": 2150,
         "autoPayAmount": 35
       },
