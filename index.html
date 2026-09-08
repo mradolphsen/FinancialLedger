@@ -322,7 +322,7 @@ table.data input[type=number] {
 }
 
 /* EXPANDED COLUMN INPUT WIDTHS */
-table.data input[type=number], table.data input[type=text], table.data input[type=date]{
+table.data input[type=number], table.data input[type=text], table.data input[type=date], table.data input[type=month]{
   width:100%; min-width:80px; border:1px solid var(--line); border-radius:4px; padding:5px 6px;
   font-family:'IBM Plex Mono',monospace; font-size:13px; background:var(--bg); color:var(--ink);
 }
@@ -485,6 +485,27 @@ table.pay-grid input[type=text].highlight-hourly { font-weight: 800; }
 }
 
 /* LOAN TRACKER SPECIFIC STYLES */
+.loan-toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+  background: var(--blue-pale);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line-strong);
+}
+.loan-toolbar label {
+  font-weight: 700;
+  color: var(--navy);
+  font-size: 13.5px;
+}
+.loan-toolbar input[type=month] {
+  width: 160px;
+  background: var(--surface);
+  font-weight: 600;
+}
+
 table.loan-grid th.loan-group-header {
   text-align: center;
   background: var(--blue-soft);
@@ -744,6 +765,10 @@ footer a{ color:var(--ink-faint); }
         <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="block-body">
+        <div class="loan-toolbar">
+          <label for="privateStartMonthInput">Payment Starting Month:</label>
+          <input type="month" id="privateStartMonthInput" data-state="privateLoans">
+        </div>
         <div class="table-scroll">
           <table class="data loan-grid" id="privateLoanTable"></table>
         </div>
@@ -760,6 +785,10 @@ footer a{ color:var(--ink-faint); }
         <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
       </div>
       <div class="block-body">
+        <div class="loan-toolbar">
+          <label for="federalStartMonthInput">Payment Starting Month:</label>
+          <input type="month" id="federalStartMonthInput" data-state="federalLoans">
+        </div>
         <div class="table-scroll">
           <table class="data loan-grid" id="federalLoanTable"></table>
         </div>
@@ -860,115 +889,19 @@ function uid(){ return Math.random().toString(36).slice(2,9); }
 const INITIAL_PRIVATE_LOANS = {
   startMonthYear: "2024-12",
   loans: [
-    { id: "p1", name: "College Ave - 360021657718", principle: 8000.00, startingAmount: 9690.55, autoPayAmount: 90.00 },
-    { id: "p2", name: "College Ave - 360021753920", principle: 7200.00, startingAmount: 8461.19, autoPayAmount: 85.00 },
-    { id: "p3", name: "College Ave - 360021898853", principle: 15000.00, startingAmount: 16537.31, autoPayAmount: 180.00 }
+    { id: "p1", name: "College Ave - 360021657718", principle: 8000.00, startingAmount: 9690.55, autoPayAmount: 0.00 },
+    { id: "p2", name: "College Ave - 360021753920", principle: 7200.00, startingAmount: 8461.19, autoPayAmount: 0.00 },
+    { id: "p3", name: "College Ave - 360021898853", principle: 15000.00, startingAmount: 16537.31, autoPayAmount: 0.00 }
   ],
-  monthlyData: {
-    "2024-12": {
-      p1: { payment: 90.00, interest: 56.10 },
-      p2: { payment: 85.00, interest: 56.71 },
-      p3: { payment: 177.00, interest: 127.26 }
-    },
-    "2025-01": {
-      p1: { payment: 90.00, interest: 59.34 },
-      p2: { payment: 85.00, interest: 60.05 },
-      p3: { payment: 177.00, interest: 134.89 }
-    },
-    "2025-02": {
-      p1: { payment: 90.00, interest: 59.15 },
-      p2: { payment: 85.00, interest: 59.87 },
-      p3: { payment: 177.00, interest: 134.56 }
-    },
-    "2025-03": {
-      p1: { payment: 90.00, interest: 53.26 },
-      p2: { payment: 85.00, interest: 53.92 },
-      p3: { payment: 177.00, interest: 121.22 }
-    },
-    "2025-04": {
-      p1: { payment: 90.00, interest: 58.73 },
-      p2: { payment: 85.00, interest: 59.47 },
-      p3: { payment: 177.00, interest: 133.75 }
-    },
-    "2025-05": {
-      p1: { payment: 90.00, interest: 56.66 },
-      p2: { payment: 85.00, interest: 57.37 },
-      p3: { payment: 177.00, interest: 129.09 }
-    },
-    "2025-06": {
-      p1: { payment: 90.00, interest: 58.33 },
-      p2: { payment: 85.00, interest: 59.10 },
-      p3: { payment: 177.00, interest: 128.71 }
-    },
-    "2025-07": {
-      p1: { payment: 90.00, interest: 56.27 },
-      p2: { payment: 85.00, interest: 57.01 },
-      p3: { payment: 177.00, interest: 128.37 }
-    },
-    "2025-08": {
-      p1: { payment: 90.00, interest: 57.94 },
-      p2: { payment: 85.00, interest: 58.71 },
-      p3: { payment: 180.00, interest: 132.24 }
-    },
-    "2025-09": {
-      p1: { payment: 90.00, interest: 57.74 },
-      p2: { payment: 85.00, interest: 58.52 },
-      p3: { payment: 180.00, interest: 131.86 }
-    },
-    "2025-10": {
-      p1: { payment: 90.00, interest: 55.68 },
-      p2: { payment: 85.00, interest: 56.45 },
-      p3: { payment: 180.00, interest: 127.22 }
-    },
-    "2025-11": {
-      p1: { payment: 90.00, interest: 57.33 },
-      p2: { payment: 85.00, interest: 58.13 },
-      p3: { payment: 180.00, interest: 131.03 }
-    },
-    "2025-12": {
-      p1: { payment: 90.00, interest: 55.29 },
-      p2: { payment: 85.00, interest: 56.07 },
-      p3: { payment: 180.00, interest: 126.41 }
-    },
-    "2026-01": {
-      p1: { payment: 90.00, interest: 56.91 },
-      p2: { payment: 85.00, interest: 57.73 },
-      p3: { payment: 180.00, interest: 130.19 }
-    },
-    "2026-02": {
-      p1: { payment: 270.00, interest: 56.71 },
-      p2: { payment: 255.00, interest: 57.54 },
-      p3: { payment: 540.00, interest: 129.79 }
-    },
-    "2026-03": {
-      p1: { payment: 90.00, interest: 32.24 },
-      p2: { payment: 85.00, interest: 32.67 },
-      p3: { payment: 180.00, interest: 73.61 }
-    },
-    "2026-04": {
-      p1: { payment: 90.00, interest: 55.16 },
-      p2: { payment: 85.00, interest: 55.89 },
-      p3: { payment: 180.00, interest: 125.89 }
-    },
-    "2026-05": {
-      p1: { payment: 90.00, interest: 53.17 },
-      p2: { payment: 85.00, interest: 53.89 },
-      p3: { payment: 180.00, interest: 121.41 }
-    },
-    "2026-06": {
-      p1: { payment: 90.00, interest: 54.72 },
-      p2: { payment: 85.00, interest: 55.46 },
-      p3: { payment: 180.00, interest: 124.98 }
-    }
-  }
+  monthlyData: {}
 };
 
 const INITIAL_FEDERAL_LOANS = {
   startMonthYear: "2024-12",
   loans: [
-    { id: "f1", name: "Federal Direct Subsidized 1", principle: 3500.00, startingAmount: 3500.00, autoPayAmount: 50.00 },
-    { id: "f2", name: "Federal Direct Unsubsidized 2", principle: 2000.00, startingAmount: 2150.00, autoPayAmount: 35.00 },
-    { id: "f3", name: "Federal Direct Subsidized 3", principle: 4500.00, startingAmount: 4500.00, autoPayAmount: 65.00 }
+    { id: "f1", name: "Federal Direct Subsidized 1", principle: 3500.00, startingAmount: 3500.00, autoPayAmount: 0.00 },
+    { id: "f2", name: "Federal Direct Unsubsidized 2", principle: 2000.00, startingAmount: 2150.00, autoPayAmount: 0.00 },
+    { id: "f3", name: "Federal Direct Subsidized 3", principle: 4500.00, startingAmount: 4500.00, autoPayAmount: 0.00 }
   ],
   monthlyData: {}
 };
@@ -1085,6 +1018,7 @@ function isMonthEditable(key){
    ============================================================ */
 
 function monthLabel(key){
+  if(!key) return "";
   const [y,m] = key.split("-").map(Number);
   return new Date(Date.UTC(y, m-1, 1)).toLocaleDateString(undefined,{month:"short", year:"numeric", timeZone:"UTC"});
 }
@@ -1232,11 +1166,11 @@ function renderMonthTable(){
           <div class="year-metrics">
             <div class="year-metric-item">
               <span class="year-metric-label">Ending Net Worth:</span>
-              <span class="year-metric-value">${fmtMoney(endingNetWorth)}</span>
+              <span class="year-metric-value year-ending-net">${fmtMoney(endingNetWorth)}</span>
             </div>
             <div class="year-metric-item">
               <span class="year-metric-label">Total Change:</span>
-              <span class="year-metric-value ${changeClass}">${changeSign}${fmtMoney(yearTotalChange)}</span>
+              <span class="year-metric-value year-total-change ${changeClass}">${changeSign}${fmtMoney(yearTotalChange)}</span>
             </div>
           </div>
         </div>
@@ -1293,6 +1227,55 @@ function renderMonthTable(){
       head.parentElement.classList.toggle("open");
     });
   });
+}
+
+function updateMonthRowCalculations(mKey){
+  const row = document.querySelector(`tr[data-month="${mKey}"]`);
+  if(!row) return;
+
+  const allMonths = sortedMonths();
+  const totals = monthTotals(mKey);
+  const idx = allMonths.indexOf(mKey);
+  const prevTotals = idx < allMonths.length - 1 ? monthTotals(allMonths[idx + 1]) : null;
+  const diff = prevTotals ? totals.net - prevTotals.net : null;
+
+  const totalCell = row.querySelector(".total-cell");
+  const diffCell = row.querySelector(".diff-cell");
+
+  if(totalCell) totalCell.textContent = fmtMoney(totals.net);
+  if(diffCell){
+    diffCell.className = "diff-cell col-end " + (diff === null ? "" : (diff > 0 ? "pos" : (diff < 0 ? "neg" : "")));
+    diffCell.textContent = diff === null ? "—" : (diff >= 0 ? "+" : "") + fmtMoney(diff);
+  }
+
+  // Update year metrics header without full DOM rebuild
+  const yr = mKey.split("-")[0];
+  const yearBlock = document.querySelector(`.year-block[data-year="${yr}"]`);
+  if(yearBlock){
+    const monthsInYear = allMonths.filter(m => m.startsWith(yr)).sort().reverse();
+    const latestYearKey = monthsInYear[0];
+    const endingNetWorth = monthTotals(latestYearKey).net;
+
+    let yearTotalChange = 0;
+    monthsInYear.forEach(key => {
+      const kIdx = allMonths.indexOf(key);
+      const kTotals = monthTotals(key);
+      const kPrevTotals = kIdx < allMonths.length - 1 ? monthTotals(allMonths[kIdx + 1]) : null;
+      if(kPrevTotals !== null){
+        yearTotalChange += (kTotals.net - kPrevTotals.net);
+      }
+    });
+
+    const endingEl = yearBlock.querySelector(".year-ending-net");
+    const changeEl = yearBlock.querySelector(".year-total-change");
+    if(endingEl) endingEl.textContent = fmtMoney(endingNetWorth);
+    if(changeEl){
+      const changeClass = yearTotalChange > 0 ? "pos" : (yearTotalChange < 0 ? "neg" : "");
+      const changeSign = yearTotalChange >= 0 ? "+" : "";
+      changeEl.className = `year-metric-value year-total-change ${changeClass}`;
+      changeEl.textContent = `${changeSign}${fmtMoney(yearTotalChange)}`;
+    }
+  }
 }
 
 /* ============================================================
@@ -1598,6 +1581,13 @@ function renderLoanTracker(tableId, stateKey){
     return;
   }
 
+  // Sync toolbar input value
+  const inputId = stateKey === "privateLoans" ? "privateStartMonthInput" : "federalStartMonthInput";
+  const monthInput = document.getElementById(inputId);
+  if(monthInput && data.startMonthYear){
+    monthInput.value = data.startMonthYear;
+  }
+
   const loans = data.loans;
   const startKey = data.startMonthYear || "2024-12";
   if(!data.monthlyData) data.monthlyData = {};
@@ -1617,7 +1607,7 @@ function renderLoanTracker(tableId, stateKey){
         }
       }
     });
-    avgInterestMap[loan.id] = countInt > 0 ? (sumInt / countInt) : 50.00;
+    avgInterestMap[loan.id] = countInt > 0 ? (sumInt / countInt) : 0.00;
   });
 
   // 2. Dynamic Schedule Projection
@@ -1695,7 +1685,6 @@ function renderLoanTracker(tableId, stateKey){
   let totalPrinciple = loans.reduce((sum, l) => sum + parseMoney(l.principle), 0);
   let totalStarting = loans.reduce((sum, l) => sum + parseMoney(l.startingAmount), 0);
   let totalAutoPay = loans.reduce((sum, l) => sum + parseMoney(l.autoPayAmount), 0);
-  let totalAvgInterest = loans.reduce((sum, l) => sum + avgInterestMap[l.id], 0);
 
   let headerHtml = `<thead>
     <tr>
@@ -1743,8 +1732,8 @@ function renderLoanTracker(tableId, stateKey){
       ${loans.map(l => {
         const d = row.loansData[l.id];
         return `
-          <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="payment" value="${d.payment ? fmtMoney(d.payment) : ''}"></td>
-          <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="interest" value="${d.interest ? fmtMoney(d.interest) : ''}"></td>
+          <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="payment" value="${d.payment ? fmtMoney(d.payment) : '$0.00'}"></td>
+          <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="interest" value="${d.interest ? fmtMoney(d.interest) : '$0.00'}"></td>
           <td class="col-end col-diff"><input type="text" readonly value="${fmtMoney(d.remaining)}"></td>
         `;
       }).join("")}
@@ -2018,6 +2007,20 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
+  // Loan Starting Month Listeners
+  ["privateStartMonthInput", "federalStartMonthInput"].forEach(id => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener("change", e => {
+      const stateKey = e.target.getAttribute("data-state");
+      if(stateKey && state[stateKey]){
+        state[stateKey].startMonthYear = e.target.value;
+        markDirty();
+        renderLoanTracker(stateKey === "privateLoans" ? "privateLoanTable" : "federalLoanTable", stateKey);
+      }
+    });
+  });
+
   // Settings Modal
   const modal = document.getElementById("settingsOverlay");
   document.getElementById("settingsToggleBtn").addEventListener("click", () => {
@@ -2089,9 +2092,9 @@ document.addEventListener("DOMContentLoaded", () => {
       state.months[key].balances[acct] = rawVal;
       markDirty();
       renderHero();
-      renderMonthTable(); // Rerender to update year metrics and month diffs
+      updateMonthRowCalculations(key);
       if(acct === "savings"){
-        renderBillTable();
+        recalculateLedger();
       }
     } else if(kind === "notes"){
       const key = target.getAttribute("data-month");
