@@ -797,6 +797,11 @@
           "payment": 183,
           "isAutoPayChange": true,
           "interest": 183
+        },
+        "f3": {
+          "interest": 87,
+          "payment": 87,
+          "isAutoPayChange": true
         }
       },
       "2025-01": {
@@ -809,6 +814,10 @@
           "payment": 61,
           "isAutoPayChange": true,
           "interest": 61
+        },
+        "f3": {
+          "payment": 2,
+          "isAutoPayChange": true
         }
       },
       "2025-02": {
