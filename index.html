@@ -1632,7 +1632,16 @@ function renderLoanTracker(tableId, stateKey){
       const entry = data.monthlyData[mKey]?.[loan.id];
       if(entry && entry.interest !== undefined && entry.interest !== ""){
         const val = parseMoney(entry.interest);
-        if(val > 0){
+
+        // Effective payment for that month — the explicit override if one
+        // was entered, otherwise the loan's default auto-pay amount
+        const payVal = (entry.payment !== undefined && entry.payment !== "")
+          ? parseMoney(entry.payment)
+          : parseMoney(loan.autoPayAmount);
+
+        // Skip months where interest equals the payment amount — these are
+        // placeholder/unset entries, not a real recorded interest charge
+        if(val > 0 && val !== payVal){
           sumInt += val;
           countInt++;
         }
