@@ -538,7 +538,7 @@
       "2025-03": {
         "p1": {
           "payment": 90,
-          "interest": 53.26
+          "interest": 0
         },
         "p2": {
           "payment": 85,
