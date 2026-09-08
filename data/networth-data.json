@@ -801,7 +801,8 @@
       "2025-01": {
         "f1": {
           "payment": 47,
-          "isAutoPayChange": true
+          "isAutoPayChange": true,
+          "interest": 11.97
         }
       }
     }
