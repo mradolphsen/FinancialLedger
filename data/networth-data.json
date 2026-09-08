@@ -803,6 +803,10 @@
           "payment": 47,
           "isAutoPayChange": true,
           "interest": 11.97
+        },
+        "f2": {
+          "payment": 6,
+          "isAutoPayChange": true
         }
       },
       "2025-02": {
