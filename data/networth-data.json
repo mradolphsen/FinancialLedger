@@ -791,6 +791,10 @@
         "f1": {
           "payment": 141,
           "isAutoPayChange": true
+        },
+        "f2": {
+          "payment": 62,
+          "isAutoPayChange": true
         }
       }
     }
