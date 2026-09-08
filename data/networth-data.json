@@ -786,7 +786,14 @@
         "autoPayAmount": 29
       }
     ],
-    "monthlyData": {}
+    "monthlyData": {
+      "2024-12": {
+        "f1": {
+          "payment": 141,
+          "isAutoPayChange": true
+        }
+      }
+    }
   },
   "customLoanCategories": [],
   "carLoans": {
