@@ -597,7 +597,7 @@
         },
         "p2": {
           "payment": 0,
-          "interest": 59.1,
+          "interest": 0,
           "isAutoPayChange": true
         },
         "p3": {
@@ -613,7 +613,7 @@
         },
         "p2": {
           "payment": 0,
-          "interest": 57.01,
+          "interest": 0,
           "isAutoPayChange": true
         },
         "p3": {
@@ -629,7 +629,7 @@
         },
         "p2": {
           "payment": 0,
-          "interest": 58.71,
+          "interest": 0,
           "isAutoPayChange": true
         },
         "p3": {
@@ -645,7 +645,7 @@
         },
         "p2": {
           "payment": 0,
-          "interest": 58.52,
+          "interest": 0,
           "isAutoPayChange": true
         },
         "p3": {
