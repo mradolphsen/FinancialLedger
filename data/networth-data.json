@@ -472,10 +472,10 @@
     "loans": [
       {
         "id": "p1",
-        "name": " 360021657718",
+        "name": "",
         "principle": 0,
-        "startingAmount": 9690.55,
-        "autoPayAmount": 90
+        "startingAmount": 0,
+        "autoPayAmount": 0
       },
       {
         "id": "p2",
@@ -495,8 +495,9 @@
     "monthlyData": {
       "2024-12": {
         "p1": {
-          "payment": 90,
-          "interest": 56.1
+          "payment": 0,
+          "interest": 56.1,
+          "isAutoPayChange": true
         },
         "p2": {
           "payment": 85,
@@ -509,8 +510,9 @@
       },
       "2025-01": {
         "p1": {
-          "payment": 90,
-          "interest": 59.34
+          "payment": 0,
+          "interest": 59.34,
+          "isAutoPayChange": true
         },
         "p2": {
           "payment": 85,
@@ -523,8 +525,9 @@
       },
       "2025-02": {
         "p1": {
-          "payment": 90,
-          "interest": 59.15
+          "payment": 0,
+          "interest": 59.15,
+          "isAutoPayChange": true
         },
         "p2": {
           "payment": 85,
@@ -537,8 +540,9 @@
       },
       "2025-03": {
         "p1": {
-          "payment": 90,
-          "interest": 0
+          "payment": 0,
+          "interest": 0,
+          "isAutoPayChange": true
         },
         "p2": {
           "payment": 85,
