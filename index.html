@@ -1746,7 +1746,7 @@ function renderLoanTracker(tableId, stateKey){
 
   monthlyRows.forEach(row => {
     bodyHtml += `<tr>
-      <td class="col-end label-cell"><strong>${row.monthIndex}</strong> &nbsp; <span style="color:var(--ink-faint); font-size:12px;">${monthLabel(row.monthKey)}</span></td>
+      <td class="col-end label-cell"><span style="color:var(--ink-faint); font-size:12px;">${monthLabel(row.monthKey)}</span></td>
       ${loans.map(l => {
         const d = row.loansData[l.id];
         return `
