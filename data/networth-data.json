@@ -995,6 +995,12 @@
         "f3": {
           "interest": 9.61
         }
+      },
+      "2026-03": {
+        "f1": {
+          "payment": 4,
+          "isAutoPayChange": true
+        }
       }
     }
   },
