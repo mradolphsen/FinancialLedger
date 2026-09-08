@@ -505,7 +505,7 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 0,
+          "payment": 180,
           "interest": 0,
           "isAutoPayChange": true
         }
