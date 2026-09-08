@@ -807,7 +807,8 @@
         },
         "f2": {
           "payment": 61,
-          "isAutoPayChange": true
+          "isAutoPayChange": true,
+          "interest": 61
         }
       },
       "2025-02": {
