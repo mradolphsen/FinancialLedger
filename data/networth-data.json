@@ -624,8 +624,9 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 177,
-          "interest": 128.37
+          "payment": 0,
+          "interest": 128.37,
+          "isAutoPayChange": true
         }
       },
       "2025-08": {
@@ -640,8 +641,9 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 180,
-          "interest": 132.24
+          "payment": 0,
+          "interest": 132.24,
+          "isAutoPayChange": true
         }
       },
       "2025-09": {
@@ -656,8 +658,9 @@
           "isAutoPayChange": true
         },
         "p3": {
-          "payment": 180,
-          "interest": 131.86
+          "payment": 0,
+          "interest": 131.86,
+          "isAutoPayChange": true
         }
       },
       "2025-10": {
