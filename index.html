@@ -16,6 +16,8 @@
   rel="stylesheet"
 >
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+
 <style>
 
 /* ============================================================
@@ -595,6 +597,38 @@ table.loan-grid tr:hover td.loan-closed-cell{
   background:var(--ink);
 }
 
+/* GRAPHS TAB */
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  padding: 16px 18px 12px;
+  box-shadow: var(--shadow);
+}
+.chart-container {
+  position: relative;
+  width: 100%;
+  height: 420px;
+}
+.chart-legend-note {
+  font-size: 12.5px;
+  color: var(--ink-muted);
+  margin-top: 10px;
+  line-height: 1.5;
+}
+.chart-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 420px;
+  color: var(--ink-faint);
+  font-size: 13.5px;
+  text-align: center;
+}
+@media (max-width:760px){
+  .chart-container, .chart-empty{ height: 300px; }
+}
+
 /* MODALS */
 .modal-overlay{
   position:fixed; inset:0; background:rgba(27,36,34,0.45); display:none;
@@ -656,6 +690,7 @@ footer a{ color:var(--ink-faint); }
     <button class="nav-tab active" data-tab="tab-month-end" role="tab" aria-selected="true">Month End</button>
     <button class="nav-tab" data-tab="tab-pay-tracker" role="tab" aria-selected="false">Pay Tracker</button>
     <button class="nav-tab" data-tab="tab-loans" role="tab" aria-selected="false">Loans</button>
+    <button class="nav-tab" data-tab="tab-graphs" role="tab" aria-selected="false">Graphs</button>
   </nav>
 
   <!-- SUBPAGE CONTENT: MONTH END -->
@@ -860,6 +895,90 @@ footer a{ color:var(--ink-faint); }
             <table class="data loan-grid" id="federalLoanTable"></table>
           </div>
           <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule. Edit monthly payments or interest individually for custom adjustments.</p>
+        </div>
+      </section>
+    </div>
+
+  </div>
+
+  <!-- SUBPAGE CONTENT: GRAPHS -->
+  <div class="tab-content" id="tab-graphs" role="tabpanel">
+
+    <!-- Subtab bar -->
+    <nav class="subtab-nav" role="tablist" aria-label="Graph type">
+      <button class="subtab active" data-subtab="subtab-graph-monthend" role="tab" aria-selected="true">Month End</button>
+      <button class="subtab" data-subtab="subtab-graph-private" role="tab" aria-selected="false">Private Loans</button>
+      <button class="subtab" data-subtab="subtab-graph-federal" role="tab" aria-selected="false">Federal Loans</button>
+      <button class="subtab" data-subtab="subtab-graph-pay" role="tab" aria-selected="false">Pay History</button>
+    </nav>
+
+    <!-- Subtab: Month End Graph -->
+    <div class="subtab-content active" id="subtab-graph-monthend" role="tabpanel">
+      <section class="block open" id="monthEndChartBlock">
+        <div class="block-head" data-toggle="monthEndChartBlock">
+          <h2>Month End — Net Worth<span class="block-sub">Net worth over time, pulled from the Month-End table</span></h2>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="block-body">
+          <div class="chart-card">
+            <div class="chart-container"><canvas id="monthEndChart"></canvas></div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Subtab: Private Loan Graph -->
+    <div class="subtab-content" id="subtab-graph-private" role="tabpanel">
+      <section class="block open" id="privateChartBlock">
+        <div class="block-head" data-toggle="privateChartBlock">
+          <h2>Private Student Loans<span class="block-sub">Combined remaining balance across all three loans — actual vs. projected payoff</span></h2>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="block-body">
+          <div class="chart-card">
+            <div class="chart-container"><canvas id="privateLoanChart"></canvas></div>
+            <p class="chart-legend-note">
+              <strong>Actual</strong> plots only the months with recorded payment/interest entries in the Private Loans table.
+              <strong>Projected Payoff</strong> runs the full schedule using each loan's Auto Pay Amount (hardcoded minimum payment)
+              and its historical average interest, extended out to a $0 balance — edit those values in the Loans tab to adjust it.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Subtab: Federal Loan Graph -->
+    <div class="subtab-content" id="subtab-graph-federal" role="tabpanel">
+      <section class="block open" id="federalChartBlock">
+        <div class="block-head" data-toggle="federalChartBlock">
+          <h2>Federal Student Loans<span class="block-sub">Combined remaining balance across all three loans — actual vs. projected payoff</span></h2>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="block-body">
+          <div class="chart-card">
+            <div class="chart-container"><canvas id="federalLoanChart"></canvas></div>
+            <p class="chart-legend-note">
+              <strong>Actual</strong> plots only the months with recorded payment/interest entries in the Federal Loans table.
+              <strong>Projected Payoff</strong> runs the full schedule using each loan's Auto Pay Amount (hardcoded minimum payment)
+              and its historical average interest, extended out to a $0 balance — edit those values in the Loans tab to adjust it.
+            </p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Subtab: Pay Graph -->
+    <div class="subtab-content" id="subtab-graph-pay" role="tabpanel">
+      <section class="block open" id="payChartBlock">
+        <div class="block-head" data-toggle="payChartBlock">
+          <h2>Pay History<span class="block-sub">My Hourly Rate across every position held</span></h2>
+          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div>
+        <div class="block-body">
+          <div class="chart-card">
+            <div class="chart-container"><canvas id="payChart"></canvas></div>
+            <p class="chart-legend-note">Each step corresponds to a row in the Pay Tracker History table. Hover a point to see the start month and position details.</p>
+          </div>
         </div>
       </section>
     </div>
@@ -1640,21 +1759,10 @@ function addMonthsToKey(key, count){
   return y + "-" + String(m).padStart(2, "0");
 }
 
-function renderLoanTracker(tableId, stateKey){
-  const table = document.getElementById(tableId);
-  if(!table) return;
-
+function computeLoanSchedule(stateKey){
   const data = state[stateKey];
   if(!data || !data.loans || data.loans.length === 0){
-    table.innerHTML = `<tbody><tr class="empty-row"><td>No loan data configured.</td></tr></tbody>`;
-    return;
-  }
-
-  // Sync toolbar input value
-  const inputId = stateKey === "privateLoans" ? "privateStartMonthInput" : "federalStartMonthInput";
-  const monthInput = document.getElementById(inputId);
-  if(monthInput && data.startMonthYear){
-    monthInput.value = data.startMonthYear;
+    return { loans: [], monthlyRows: [], avgInterestMap: {} };
   }
 
   const loans = data.loans;
@@ -1703,6 +1811,7 @@ function renderLoanTracker(tableId, stateKey){
     const mKey = addMonthsToKey(startKey, monthIdx);
     const rowLoanData = {};
     let totalAllBalances = 0;
+    let hasActualEntry = false;
 
     loans.forEach(loan => {
       const prevBal = runningBalances[loan.id];
@@ -1716,12 +1825,14 @@ function renderLoanTracker(tableId, stateKey){
       if(storedEntry && storedEntry.payment !== undefined && storedEntry.payment !== ""){
         payAmt = parseMoney(storedEntry.payment);
         isCustomPayment = true;
+        hasActualEntry = true;
       }
 
       // Check interest (inputted or calculated average)
       let intAmt = avgInterestMap[loan.id];
       if(storedEntry && storedEntry.interest !== undefined && storedEntry.interest !== ""){
         intAmt = parseMoney(storedEntry.interest);
+        hasActualEntry = true;
       }
 
       // Remaining Balance Calculation = Last Month Balance - Payment + Interest
@@ -1745,13 +1856,38 @@ function renderLoanTracker(tableId, stateKey){
     monthlyRows.push({
       monthIndex: monthIdx + 1,
       monthKey: mKey,
-      loansData: rowLoanData
+      loansData: rowLoanData,
+      totalRemaining: totalAllBalances,
+      hasActualEntry
     });
 
     // Check stop condition: if all loans zeroed out
     if(totalAllBalances <= 0) break;
     monthIdx++;
   }
+
+  return { loans, monthlyRows, avgInterestMap };
+}
+
+function renderLoanTracker(tableId, stateKey){
+  const table = document.getElementById(tableId);
+  if(!table) return;
+
+  const data = state[stateKey];
+  if(!data || !data.loans || data.loans.length === 0){
+    table.innerHTML = `<tbody><tr class="empty-row"><td>No loan data configured.</td></tr></tbody>`;
+    return;
+  }
+
+  // Sync toolbar input value
+  const inputId = stateKey === "privateLoans" ? "privateStartMonthInput" : "federalStartMonthInput";
+  const monthInput = document.getElementById(inputId);
+  if(monthInput && data.startMonthYear){
+    monthInput.value = data.startMonthYear;
+  }
+
+  const loans = data.loans;
+  const { monthlyRows } = computeLoanSchedule(stateKey);
 
   // 3. Build Header HTML
   let totalPrinciple = loans.reduce((sum, l) => sum + parseMoney(l.principle), 0);
@@ -1843,6 +1979,210 @@ function renderLoanTracker(tableId, stateKey){
 }
 
 /* ============================================================
+   RENDER: GRAPHS
+   ============================================================ */
+
+const charts = { monthEnd: null, private: null, federal: null, pay: null };
+
+const CHART_COLORS = {
+  navy: "#0B3D2E",
+  blue: "#0F6E7A",
+  amber: "#96751F",
+  success: "#1F7A4D",
+  inkMuted: "#57665D",
+  line: "#DCE3DC"
+};
+
+function baseChartOptions(yLabel){
+  return {
+    responsive: true,
+    maintainAspectRatio: false,
+    interaction: { mode: "index", intersect: false },
+    plugins: {
+      legend: {
+        position: "top",
+        labels: { color: CHART_COLORS.navy, font: { family: "'Source Sans 3', sans-serif", weight: 600, size: 12.5 }, boxWidth: 14 }
+      },
+      tooltip: {
+        callbacks: {
+          label: ctx => {
+            const val = ctx.parsed.y;
+            if(val === null || val === undefined) return undefined;
+            return `${ctx.dataset.label}: ${fmtMoney(val)}`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: {
+        grid: { color: CHART_COLORS.line },
+        ticks: { color: CHART_COLORS.inkMuted, font: { size: 11 }, maxRotation: 0, autoSkipPadding: 12 }
+      },
+      y: {
+        grid: { color: CHART_COLORS.line },
+        ticks: { color: CHART_COLORS.inkMuted, font: { size: 11 }, callback: v => fmtMoney(v) },
+        title: { display: !!yLabel, text: yLabel || "", color: CHART_COLORS.navy, font: { family: "'Libre Franklin', sans-serif", weight: 700, size: 12.5 } }
+      }
+    }
+  };
+}
+
+function showChartEmptyState(canvas, message){
+  canvas.style.display = "none";
+  let msgEl = canvas.parentElement.querySelector(".chart-empty");
+  if(!msgEl){
+    msgEl = document.createElement("div");
+    msgEl.className = "chart-empty";
+    canvas.parentElement.appendChild(msgEl);
+  }
+  msgEl.textContent = message;
+  msgEl.style.display = "flex";
+}
+
+function hideChartEmptyState(canvas){
+  canvas.style.display = "";
+  const msgEl = canvas.parentElement.querySelector(".chart-empty");
+  if(msgEl) msgEl.style.display = "none";
+}
+
+function renderMonthEndChart(){
+  const canvas = document.getElementById("monthEndChart");
+  if(!canvas || typeof Chart === "undefined") return;
+
+  const months = sortedMonths().slice().reverse(); // ascending, oldest -> newest
+  if(months.length === 0){
+    showChartEmptyState(canvas, "No monthly data tracked yet.");
+    return;
+  }
+
+  hideChartEmptyState(canvas);
+  const labels = months.map(monthLabel);
+  const data = months.map(k => monthTotals(k).net);
+
+  if(charts.monthEnd) charts.monthEnd.destroy();
+  charts.monthEnd = new Chart(canvas.getContext("2d"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "Net Worth",
+        data,
+        borderColor: CHART_COLORS.blue,
+        backgroundColor: "rgba(15,110,122,0.12)",
+        fill: true,
+        tension: 0.25,
+        pointRadius: 3,
+        pointHoverRadius: 5,
+        pointBackgroundColor: CHART_COLORS.blue
+      }]
+    },
+    options: baseChartOptions("Amount")
+  });
+}
+
+function renderLoanGraph(chartKey, canvasId, stateKey, actualColor, projectedColor){
+  const canvas = document.getElementById(canvasId);
+  if(!canvas || typeof Chart === "undefined") return;
+
+  const { monthlyRows } = computeLoanSchedule(stateKey);
+  if(monthlyRows.length === 0){
+    showChartEmptyState(canvas, "No loan data configured.");
+    return;
+  }
+
+  hideChartEmptyState(canvas);
+  const labels = monthlyRows.map(r => monthLabel(r.monthKey));
+  const projectedData = monthlyRows.map(r => r.totalRemaining);
+  const actualData = monthlyRows.map(r => r.hasActualEntry ? r.totalRemaining : null);
+
+  if(charts[chartKey]) charts[chartKey].destroy();
+  charts[chartKey] = new Chart(canvas.getContext("2d"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Actual Remaining Balance",
+          data: actualData,
+          borderColor: actualColor,
+          backgroundColor: actualColor,
+          pointRadius: 3,
+          pointHoverRadius: 5,
+          spanGaps: false,
+          tension: 0.2
+        },
+        {
+          label: "Projected Payoff (min. payment + avg. interest)",
+          data: projectedData,
+          borderColor: projectedColor,
+          backgroundColor: projectedColor,
+          borderDash: [6, 4],
+          pointRadius: 0,
+          pointHoverRadius: 4,
+          tension: 0.2
+        }
+      ]
+    },
+    options: baseChartOptions("Remaining Amount")
+  });
+}
+
+function renderPrivateLoanChart(){
+  renderLoanGraph("private", "privateLoanChart", "privateLoans", CHART_COLORS.blue, CHART_COLORS.amber);
+}
+
+function renderFederalLoanChart(){
+  renderLoanGraph("federal", "federalLoanChart", "federalLoans", CHART_COLORS.success, CHART_COLORS.amber);
+}
+
+function renderPayChart(){
+  const canvas = document.getElementById("payChart");
+  if(!canvas || typeof Chart === "undefined") return;
+
+  const rows = state.payTracker || [];
+  if(rows.length === 0){
+    showChartEmptyState(canvas, "No pay records tracked yet.");
+    return;
+  }
+
+  hideChartEmptyState(canvas);
+  const labels = rows.map(r => [r.startMonth || "", r.positionInfo || ""]);
+  const data = rows.map(r => parseMoney(r.myHourly));
+
+  if(charts.pay) charts.pay.destroy();
+  charts.pay = new Chart(canvas.getContext("2d"), {
+    type: "line",
+    data: {
+      labels,
+      datasets: [{
+        label: "My Hourly Rate",
+        data,
+        borderColor: CHART_COLORS.navy,
+        backgroundColor: "rgba(11,61,46,0.12)",
+        stepped: "before",
+        fill: true,
+        tension: 0,
+        pointRadius: 4,
+        pointHoverRadius: 6,
+        pointBackgroundColor: CHART_COLORS.navy
+      }]
+    },
+    options: (() => {
+      const opts = baseChartOptions("My Hourly Rate");
+      opts.scales.x.ticks.autoSkip = false;
+      return opts;
+    })()
+  });
+}
+
+function renderAllCharts(){
+  renderMonthEndChart();
+  renderPrivateLoanChart();
+  renderFederalLoanChart();
+  renderPayChart();
+}
+
+/* ============================================================
    RENDER: SETTINGS — ACCOUNT LISTS
    ============================================================ */
 
@@ -1877,6 +2217,7 @@ function render(){
   renderLoanTracker("privateLoanTable", "privateLoans");
   renderLoanTracker("federalLoanTable", "federalLoans");
   renderAccountLists();
+  renderAllCharts();
   updateSyncStatus();
 }
 
@@ -2093,6 +2434,12 @@ document.addEventListener("DOMContentLoaded", () => {
       const targetId = tab.getAttribute("data-tab");
       const targetContent = document.getElementById(targetId);
       if(targetContent) targetContent.classList.add("active");
+
+      // Charts need their container visible/sized before Chart.js can lay
+      // out correctly, so (re)draw whichever graph is currently in view
+      if(targetId === "tab-graphs"){
+        renderAllCharts();
+      }
     });
   });
 
@@ -2113,6 +2460,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const targetId = subtab.getAttribute("data-subtab");
       const targetContent = document.getElementById(targetId);
       if(targetContent) targetContent.classList.add("active");
+
+      // Redraw the newly-visible graph so Chart.js sizes against a
+      // container that's actually on screen
+      if(targetId === "subtab-graph-monthend") renderMonthEndChart();
+      else if(targetId === "subtab-graph-private") renderPrivateLoanChart();
+      else if(targetId === "subtab-graph-federal") renderFederalLoanChart();
+      else if(targetId === "subtab-graph-pay") renderPayChart();
     });
   });
 
