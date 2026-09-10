@@ -916,7 +916,7 @@
     "loans": [
       {
         "id": "f1",
-        "name": "EdFinancial 1-01\t\t\t",
+        "name": "EdFinancial 1-01",
         "principle": 4500,
         "startingAmount": 4648.23,
         "autoPayAmount": 47
