@@ -908,7 +908,7 @@ footer a{ color:var(--ink-faint); }
           <div class="table-scroll">
             <table class="data loan-grid" id="privateLoanTable"></table>
           </div>
-          <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule. Edit monthly payments or interest individually for custom adjustments.</p>
+          <p class="hint">Each loan has an Actual line and an associated Projected line. Projected Payment is hardcoded from the loan-specific Monthly Change; projected interest uses the loan's historical average.</p>
         </div>
       </section>
     </div>
@@ -928,7 +928,7 @@ footer a{ color:var(--ink-faint); }
           <div class="table-scroll">
             <table class="data loan-grid" id="federalLoanTable"></table>
           </div>
-          <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule. Edit monthly payments or interest individually for custom adjustments.</p>
+          <p class="hint">Each loan has an Actual line and an associated Projected line. Projected Payment is hardcoded from the loan-specific Monthly Change; projected interest uses the loan's historical average.</p>
         </div>
       </section>
     </div>
@@ -965,8 +965,8 @@ footer a{ color:var(--ink-faint); }
         <div class="chart-container"><canvas id="privateLoanChart"></canvas></div>
         <p class="chart-legend-note">
           <strong>Actual</strong> plots only the months with recorded payment/interest entries in the Private Loans table.
-          <strong>Projected Payoff</strong> runs the full schedule using each loan's Auto Pay Amount (hardcoded minimum payment)
-          and its historical average interest, extended out to a $0 balance — edit those values in the Loans tab to adjust it.
+          <strong>Projected Payoff</strong> runs the full schedule using each loan's hardcoded Monthly Change as the projected payment
+          and its historical average interest, extended out to a $0 balance.
         </p>
       </div>
     </div>
@@ -980,8 +980,8 @@ footer a{ color:var(--ink-faint); }
         <div class="chart-container"><canvas id="federalLoanChart"></canvas></div>
         <p class="chart-legend-note">
           <strong>Actual</strong> plots only the months with recorded payment/interest entries in the Federal Loans table.
-          <strong>Projected Payoff</strong> runs the full schedule using each loan's Auto Pay Amount (hardcoded minimum payment)
-          and its historical average interest, extended out to a $0 balance — edit those values in the Loans tab to adjust it.
+          <strong>Projected Payoff</strong> runs the full schedule using each loan's hardcoded Monthly Change as the projected payment
+          and its historical average interest, extended out to a $0 balance.
         </p>
       </div>
     </div>
@@ -1091,9 +1091,9 @@ function uid(){ return Math.random().toString(36).slice(2,9); }
 const INITIAL_PRIVATE_LOANS = {
   startMonthYear: "2024-12",
   loans: [
-    { id: "p1", name: "College Ave - 360021657718", principle: 8000.00, startingAmount: 9690.55, autoPayAmount: 0.00 },
-    { id: "p2", name: "College Ave - 360021753920", principle: 7200.00, startingAmount: 8461.19, autoPayAmount: 0.00 },
-    { id: "p3", name: "College Ave - 360021898853", principle: 15000.00, startingAmount: 16537.31, autoPayAmount: 0.00 }
+    { id: "p1", name: "College Ave - 360021657718", principle: 8000.00, startingAmount: 9690.55, autoPayAmount: 0.00, monthlyChange: -34.63 },
+    { id: "p2", name: "College Ave - 360021753920", principle: 7200.00, startingAmount: 8461.19, autoPayAmount: 0.00, monthlyChange: -28.14 },
+    { id: "p3", name: "College Ave - 360021898853", principle: 15000.00, startingAmount: 16537.31, autoPayAmount: 0.00, monthlyChange: -50.63 }
   ],
   monthlyData: {}
 };
@@ -1101,11 +1101,23 @@ const INITIAL_PRIVATE_LOANS = {
 const INITIAL_FEDERAL_LOANS = {
   startMonthYear: "2024-12",
   loans: [
-    { id: "f1", name: "Federal Direct Subsidized 1", principle: 3500.00, startingAmount: 3500.00, autoPayAmount: 0.00 },
-    { id: "f2", name: "Federal Direct Unsubsidized 2", principle: 2000.00, startingAmount: 2150.00, autoPayAmount: 0.00 },
-    { id: "f3", name: "Federal Direct Subsidized 3", principle: 4500.00, startingAmount: 4500.00, autoPayAmount: 0.00 }
+    { id: "f1", name: "EdFinancial 1-01", principle: 3500.00, startingAmount: 3500.00, autoPayAmount: 0.00, monthlyChange: -34.41 },
+    { id: "f2", name: "EdFinancial 1-02", principle: 2000.00, startingAmount: 2150.00, autoPayAmount: 0.00, monthlyChange: -39.17 },
+    { id: "f3", name: "EdFinancial 1-03", principle: 4500.00, startingAmount: 4500.00, autoPayAmount: 0.00, monthlyChange: -15.13 }
   ],
   monthlyData: {}
+};
+
+// Fallback for anyone whose loan data was saved before the Monthly Change
+// field existed — backfilled by id (which never changes via the UI) so it
+// survives even if the loan's display name has since been edited.
+const LOAN_MONTHLY_CHANGE_DEFAULTS = {
+  p1: -34.63,
+  p2: -28.14,
+  p3: -50.63,
+  f1: -34.41,
+  f2: -39.17,
+  f3: -15.13
 };
 
 const DEFAULT_STATE = {
@@ -1149,6 +1161,19 @@ const DEFAULT_STATE = {
 let state   = loadJSON(LS_STATE, DEFAULT_STATE);
 let ghToken = localStorage.getItem(LS_TOKEN) || "";
 let ghSha   = localStorage.getItem(LS_SHA) || null;
+
+// Backfill the hardcoded projected-payment values for existing saved ledgers.
+["privateLoans", "federalLoans"].forEach(stateKey => {
+  const loanData = state[stateKey];
+  if(loanData && Array.isArray(loanData.loans)){
+    loanData.loans.forEach(loan => {
+      if(loan.monthlyChange === undefined || loan.monthlyChange === null){
+        loan.monthlyChange = LOAN_MONTHLY_CHANGE_DEFAULTS[loan.id] || 0;
+      }
+    });
+  }
+});
+
 let dirty   = false;
 let saveTimer = null;
 
@@ -1783,24 +1808,17 @@ function computeLoanSchedule(stateKey){
   const startKey = data.startMonthYear || "2024-12";
   if(!data.monthlyData) data.monthlyData = {};
 
-  // 1. Calculate Average Interest per loan based on historical inputs
+  // Historical average interest is used only for projections.
   const avgInterestMap = {};
   loans.forEach(loan => {
-    let sumInt = 0;
-    let countInt = 0;
+    let sumInt = 0, countInt = 0;
     Object.keys(data.monthlyData).forEach(mKey => {
       const entry = data.monthlyData[mKey]?.[loan.id];
       if(entry && entry.interest !== undefined && entry.interest !== ""){
         const val = parseMoney(entry.interest);
-
-        // Effective payment for that month — the explicit override if one
-        // was entered, otherwise the loan's default auto-pay amount
         const payVal = (entry.payment !== undefined && entry.payment !== "")
           ? parseMoney(entry.payment)
           : parseMoney(loan.autoPayAmount);
-
-        // Skip months where interest equals the payment amount — these are
-        // placeholder/unset entries, not a real recorded interest charge
         if(val > 0 && val !== payVal){
           sumInt += val;
           countInt++;
@@ -1810,73 +1828,93 @@ function computeLoanSchedule(stateKey){
     avgInterestMap[loan.id] = countInt > 0 ? (sumInt / countInt) : 0.00;
   });
 
-  // 2. Dynamic Schedule Projection
+  // Actual and projected balances are kept separate so the projected line
+  // always follows the hardcoded monthly change for that individual loan.
   const monthlyRows = [];
   let monthIdx = 0;
-  const runningBalances = {};
+  const actualBalances = {};
+  const projectedBalances = {};
 
   loans.forEach(loan => {
-    runningBalances[loan.id] = parseMoney(loan.startingAmount);
+    actualBalances[loan.id] = parseMoney(loan.startingAmount);
+    projectedBalances[loan.id] = parseMoney(loan.startingAmount);
   });
 
-  const MAX_MONTHS = 360; // Safety cap (30 yrs)
+  const MAX_MONTHS = 360;
 
   while(monthIdx < MAX_MONTHS){
     const mKey = addMonthsToKey(startKey, monthIdx);
-    const rowLoanData = {};
-    let totalAllBalances = 0;
+    const actualLoanData = {};
+    const projectedLoanData = {};
+    let totalActualBalances = 0;
+    let totalProjectedBalances = 0;
     let hasActualEntry = false;
 
     loans.forEach(loan => {
-      const prevBal = runningBalances[loan.id];
-
-      // Default payment to Auto Pay Amount unless specifically overridden for this month
+      // Actual line
+      const prevActual = actualBalances[loan.id];
       const storedEntry = data.monthlyData[mKey]?.[loan.id];
-      
+
       let payAmt = parseMoney(loan.autoPayAmount);
       let isCustomPayment = false;
-
       if(storedEntry && storedEntry.payment !== undefined && storedEntry.payment !== ""){
         payAmt = parseMoney(storedEntry.payment);
         isCustomPayment = true;
         hasActualEntry = true;
       }
 
-      // Check interest (inputted or calculated average)
       let intAmt = avgInterestMap[loan.id];
       if(storedEntry && storedEntry.interest !== undefined && storedEntry.interest !== ""){
         intAmt = parseMoney(storedEntry.interest);
         hasActualEntry = true;
       }
 
-      // Remaining Balance Calculation = Last Month Balance - Payment + Interest
-      let remBal = prevBal - payAmt + intAmt;
-      if(remBal < 0) remBal = 0;
+      let actualRemaining = prevActual - payAmt + intAmt;
+      if(actualRemaining < 0) actualRemaining = 0;
 
-      const diff = payAmt - intAmt; // Amount to principal
-
-      rowLoanData[loan.id] = {
+      actualLoanData[loan.id] = {
         payment: payAmt,
         interest: intAmt,
-        remaining: remBal,
-        difference: diff,
+        remaining: actualRemaining,
+        difference: payAmt - intAmt,
         isCustomPayment
       };
 
-      runningBalances[loan.id] = remBal;
-      totalAllBalances += remBal;
+      actualBalances[loan.id] = actualRemaining;
+      totalActualBalances += actualRemaining;
+
+      // Projected line
+      // The supplied negative monthly change represents a monthly reduction,
+      // so the projected payment is displayed as its positive magnitude.
+      const projectedPayment = Math.abs(parseMoney(loan.monthlyChange));
+      const projectedInterest = avgInterestMap[loan.id];
+      const prevProjected = projectedBalances[loan.id];
+
+      let projectedRemaining = prevProjected - projectedPayment + projectedInterest;
+      if(projectedRemaining < 0) projectedRemaining = 0;
+
+      projectedLoanData[loan.id] = {
+        payment: projectedPayment,
+        interest: projectedInterest,
+        remaining: projectedRemaining,
+        difference: projectedPayment - projectedInterest
+      };
+
+      projectedBalances[loan.id] = projectedRemaining;
+      totalProjectedBalances += projectedRemaining;
     });
 
     monthlyRows.push({
       monthIndex: monthIdx + 1,
       monthKey: mKey,
-      loansData: rowLoanData,
-      totalRemaining: totalAllBalances,
+      loansData: actualLoanData,
+      projectedData: projectedLoanData,
+      totalRemaining: totalActualBalances,
+      totalProjectedRemaining: totalProjectedBalances,
       hasActualEntry
     });
 
-    // Check stop condition: if all loans zeroed out
-    if(totalAllBalances <= 0) break;
+    if(totalProjectedBalances <= 0) break;
     monthIdx++;
   }
 
@@ -1893,104 +1931,94 @@ function renderLoanTracker(tableId, stateKey){
     return;
   }
 
-  // Sync toolbar input value
   const inputId = stateKey === "privateLoans" ? "privateStartMonthInput" : "federalStartMonthInput";
   const monthInput = document.getElementById(inputId);
-  if(monthInput && data.startMonthYear){
-    monthInput.value = data.startMonthYear;
-  }
+  if(monthInput && data.startMonthYear) monthInput.value = data.startMonthYear;
 
   const loans = data.loans;
   const { monthlyRows } = computeLoanSchedule(stateKey);
 
-  // 3. Build Header HTML
-  let totalPrinciple = loans.reduce((sum, l) => sum + parseMoney(l.principle), 0);
-  let totalStarting = loans.reduce((sum, l) => sum + parseMoney(l.startingAmount), 0);
-  let totalAutoPay = loans.reduce((sum, l) => sum + parseMoney(l.autoPayAmount), 0);
-
-  let headerHtml = `<thead>
+  const headerHtml = `<thead>
     <tr>
-      <th rowspan="6" class="col-end" style="vertical-align:bottom; text-align:center;">Month</th>
-      ${loans.map(l => `<th colspan="3" class="loan-group-header col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="name" value="${escapeHtml(l.name)}" style="background:transparent; border:none; font-weight:800; text-align:center; font-family:inherit; color:var(--navy);"></th>`).join("")}
-      <th class="loan-group-header" style="text-align:right;">Totals</th>
-    </tr>
-    <tr class="info-row">
-      ${loans.map(l => `
-        <td class="info-label">Principle</td>
-        <td colspan="2" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="principle" value="${fmtMoney(l.principle)}"></td>
-      `).join("")}
-      <td style="text-align:right;">${fmtMoney(totalPrinciple)}</td>
-    </tr>
-    <tr class="info-row">
-      ${loans.map(l => `
-        <td class="info-label">Starting Amount</td>
-        <td colspan="2" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="startingAmount" value="${fmtMoney(l.startingAmount)}"></td>
-      `).join("")}
-      <td style="text-align:right;">${fmtMoney(totalStarting)}</td>
-    </tr>
-    <tr class="info-row">
-      ${loans.map(l => `
-        <td class="info-label">Auto Pay Amount</td>
-        <td colspan="2" class="col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="autoPayAmount" value="${fmtMoney(l.autoPayAmount)}"></td>
-      `).join("")}
-      <td style="text-align:right;">${fmtMoney(totalAutoPay)}</td>
-    </tr>
-    <tr>
-      ${loans.map(() => `
-        <th>Payment</th>
-        <th>Interest</th>
-        <th class="col-end">Remaining</th>
-      `).join("")}
-      <th></th>
+      <th>Month</th>
+      <th>Loan</th>
+      <th>Line</th>
+      <th>Payment</th>
+      <th>Interest</th>
+      <th class="col-end">Remaining</th>
     </tr>
   </thead>`;
 
-  // 4. Build Body Rows HTML
   let bodyHtml = "<tbody>";
-
-  // Determine "today" relative to the projected schedule so we can highlight
-  // the current month and dim future months
   const now = new Date();
   const curKey = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
 
-  // Track, per loan, whether it has already hit a zero balance in an earlier
-  // row — once true, every following month for that loan is blacked out
-  const paidOffTracker = {};
-  loans.forEach(l => { paidOffTracker[l.id] = false; });
+  const actualPaidOff = {};
+  const projectedPaidOff = {};
+  loans.forEach(l => {
+    actualPaidOff[l.id] = false;
+    projectedPaidOff[l.id] = false;
+  });
 
   monthlyRows.forEach(row => {
-    let rowClass = "";
-    if(row.monthKey === curKey) rowClass = "current-month";
-    else if(row.monthKey > curKey) rowClass = "future-month";
+    const rowClass = row.monthKey === curKey
+      ? "current-month"
+      : (row.monthKey > curKey ? "future-month" : "");
 
-    bodyHtml += `<tr class="${rowClass}">
-      <td class="col-end label-cell"><span style="color:var(--ink-regular); font-size:14px; font-weight:600;">${monthLabel(row.monthKey)}</span></td>
-      ${loans.map(l => {
-        const d = row.loansData[l.id];
+    loans.forEach(loan => {
+      const actual = row.loansData[loan.id];
+      const projected = row.projectedData[loan.id];
 
-        // Loan already closed out in an earlier row — blacked-out, no values
-        if(paidOffTracker[l.id]){
-          return `<td colspan="3" class="col-end loan-closed-cell"></td>`;
-        }
+      // Actual line
+      if(actualPaidOff[loan.id]){
+        bodyHtml += `<tr class="${rowClass}">
+          <td class="label-cell">${monthLabel(row.monthKey)}</td>
+          <td>${escapeHtml(loan.name)}</td>
+          <td class="loan-line-type">Actual</td>
+          <td colspan="3" class="col-end loan-closed-cell"></td>
+        </tr>`;
+      } else {
+        const actualIsZero = actual.remaining <= 0.005;
+        if(actualIsZero) actualPaidOff[loan.id] = true;
 
-        // This row is the one where the loan reaches a zero balance —
-        // show the final numbers, then close it out for subsequent rows
-        const isZero = d.remaining <= 0.005;
-        if(isZero) paidOffTracker[l.id] = true;
+        bodyHtml += `<tr class="${rowClass} loan-actual-row">
+          <td class="label-cell"><span>${monthLabel(row.monthKey)}</span></td>
+          <td class="loan-name-cell">${escapeHtml(loan.name)}</td>
+          <td class="loan-line-type">Actual</td>
+          <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${loan.id}" data-field="payment" value="${fmtMoney(actual.payment)}"></td>
+          <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${loan.id}" data-field="interest" value="${fmtMoney(actual.interest)}"></td>
+          <td class="col-end col-diff"><input type="text" readonly value="${fmtMoney(actual.remaining)}"></td>
+        </tr>`;
+      }
 
-        return `
-          <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="payment" value="${fmtMoney(d.payment)}"></td>
-          <td><input type="text" data-kind="loan-month-field" data-state="${stateKey}" data-month="${row.monthKey}" data-loan="${l.id}" data-field="interest" value="${fmtMoney(d.interest)}"></td>
-          <td class="col-end col-diff"><input type="text" readonly value="${fmtMoney(d.remaining)}"></td>
-        `;
-      }).join("")}
-      <td style="text-align:right; font-weight:700; color:var(--navy);">${row.monthIndex % 12 === 0 ? "Year " + (row.monthIndex / 12) : ""}</td>
-    </tr>`;
+      // Projected line — payment is hardcoded from this loan's monthlyChange.
+      if(projectedPaidOff[loan.id]){
+        bodyHtml += `<tr class="${rowClass} loan-projected-row">
+          <td></td>
+          <td>${escapeHtml(loan.name)}</td>
+          <td class="loan-line-type">Projected</td>
+          <td colspan="3" class="col-end loan-closed-cell"></td>
+        </tr>`;
+      } else {
+        const projectedIsZero = projected.remaining <= 0.005;
+        if(projectedIsZero) projectedPaidOff[loan.id] = true;
+
+        bodyHtml += `<tr class="${rowClass} loan-projected-row">
+          <td></td>
+          <td>${escapeHtml(loan.name)}</td>
+          <td class="loan-line-type">Projected</td>
+          <td><input type="text" readonly value="${fmtMoney(projected.payment)}" title="Hardcoded projected payment from Monthly Change"></td>
+          <td><input type="text" readonly value="${fmtMoney(projected.interest)}"></td>
+          <td class="col-end col-diff"><input type="text" readonly value="${fmtMoney(projected.remaining)}"></td>
+        </tr>`;
+      }
+    });
   });
 
   bodyHtml += "</tbody>";
   table.innerHTML = headerHtml + bodyHtml;
 }
+
 
 /* ============================================================
    RENDER: GRAPHS
@@ -2106,7 +2134,7 @@ function renderLoanGraph(chartKey, canvasId, stateKey, actualColor, projectedCol
 
   hideChartEmptyState(canvas);
   const labels = monthlyRows.map(r => monthLabel(r.monthKey));
-  const projectedData = monthlyRows.map(r => r.totalRemaining);
+  const projectedData = monthlyRows.map(r => r.totalProjectedRemaining);
   const actualData = monthlyRows.map(r => r.hasActualEntry ? r.totalRemaining : null);
 
   if(charts[chartKey]) charts[chartKey].destroy();
@@ -2126,7 +2154,7 @@ function renderLoanGraph(chartKey, canvasId, stateKey, actualColor, projectedCol
           tension: 0.2
         },
         {
-          label: "Projected Payoff (min. payment + avg. interest)",
+          label: "Projected Payoff (hardcoded monthly change + avg. interest)",
           data: projectedData,
           borderColor: projectedColor,
           backgroundColor: projectedColor,
