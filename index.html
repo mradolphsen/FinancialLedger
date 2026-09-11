@@ -663,6 +663,20 @@ table.loan-grid tr:hover td.loan-closed-cell{
   .chart-container, .chart-empty{ height: 300px; }
 }
 
+/* Per-loan graph stack (Graphs tab > Private/Federal Loans) — one card per loan */
+.loan-chart-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+.loan-chart-item .loan-chart-title {
+  margin: 0 0 12px;
+  font-family: 'Libre Franklin', sans-serif;
+  font-weight: 700;
+  font-size: 14.5px;
+  color: var(--navy);
+}
+
 /* MODALS */
 .modal-overlay{
   position:fixed; inset:0; background:rgba(27,36,34,0.45); display:none;
@@ -956,24 +970,20 @@ footer a{ color:var(--ink-faint); }
       </div>
     </div>
 
-    <!-- Subtab: Private Loan Graph -->
+    <!-- Subtab: Private Loan Graphs (one chart per loan) -->
     <div class="subtab-content" id="subtab-graph-private" role="tabpanel">
       <div class="chart-panel-head">
-        <h2>Private Student Loans<span class="block-sub">Combined remaining balance across all three loans — actual vs. projected payoff</span></h2>
+        <h2>Private Student Loans<span class="block-sub">Each loan's remaining balance — actual vs. projected payoff</span></h2>
       </div>
-      <div class="chart-card">
-        <div class="chart-container"><canvas id="privateLoanChart"></canvas></div>
-      </div>
+      <div id="privateLoanCharts" class="loan-chart-grid"></div>
     </div>
 
-    <!-- Subtab: Federal Loan Graph -->
+    <!-- Subtab: Federal Loan Graphs (one chart per loan) -->
     <div class="subtab-content" id="subtab-graph-federal" role="tabpanel">
       <div class="chart-panel-head">
-        <h2>Federal Student Loans<span class="block-sub">Combined remaining balance across all three loans — actual vs. projected payoff</span></h2>
+        <h2>Federal Student Loans<span class="block-sub">Each loan's remaining balance — actual vs. projected payoff</span></h2>
       </div>
-      <div class="chart-card">
-        <div class="chart-container"><canvas id="federalLoanChart"></canvas></div>
-      </div>
+      <div id="federalLoanCharts" class="loan-chart-grid"></div>
     </div>
 
     <!-- Subtab: Pay Graph -->
@@ -1836,6 +1846,7 @@ function computeLoanSchedule(stateKey){
       
       let payAmt = parseMoney(loan.autoPayAmount);
       let isCustomPayment = false;
+      let isCustomInterest = false;
 
       if(storedEntry && storedEntry.payment !== undefined && storedEntry.payment !== ""){
         payAmt = parseMoney(storedEntry.payment);
@@ -1847,6 +1858,7 @@ function computeLoanSchedule(stateKey){
       let intAmt = avgInterestMap[loan.id];
       if(storedEntry && storedEntry.interest !== undefined && storedEntry.interest !== ""){
         intAmt = parseMoney(storedEntry.interest);
+        isCustomInterest = true;
         hasActualEntry = true;
       }
 
@@ -1861,7 +1873,11 @@ function computeLoanSchedule(stateKey){
         interest: intAmt,
         remaining: remBal,
         difference: diff,
-        isCustomPayment
+        isCustomPayment,
+        // True only for months where THIS loan specifically had a manually
+        // entered payment or interest value — used to plot the "Actual
+        // Remaining Balance" line per loan on the Graphs tab.
+        hasActual: isCustomPayment || isCustomInterest
       };
 
       runningBalances[loan.id] = remBal;
@@ -1997,7 +2013,7 @@ function renderLoanTracker(tableId, stateKey){
    RENDER: GRAPHS
    ============================================================ */
 
-const charts = { monthEnd: null, private: null, federal: null, pay: null };
+const charts = { monthEnd: null, privateLoans: {}, federalLoans: {}, pay: null };
 
 const CHART_COLORS = {
   navy: "#0B3D2E",
@@ -2095,59 +2111,149 @@ function renderMonthEndChart(){
   });
 }
 
-function renderLoanGraph(chartKey, canvasId, stateKey, actualColor, projectedColor){
-  const canvas = document.getElementById(canvasId);
-  if(!canvas || typeof Chart === "undefined") return;
+// Number of whole months between two "YYYY-MM" keys (toKey - fromKey).
+function monthsBetween(fromKey, toKey){
+  const [fy, fm] = fromKey.split("-").map(Number);
+  const [ty, tm] = toKey.split("-").map(Number);
+  return (ty - fy) * 12 + (tm - fm);
+}
 
-  const { monthlyRows } = computeLoanSchedule(stateKey);
-  if(monthlyRows.length === 0){
-    showChartEmptyState(canvas, "No loan data configured.");
+// Resolves a loan's fixed monthly change amount, falling back to the
+// hardcoded defaults for loan data saved before this field existed.
+function loanMonthlyChange(loan){
+  return parseMoney(
+    (loan.monthlyChange !== undefined && loan.monthlyChange !== null && loan.monthlyChange !== "")
+      ? loan.monthlyChange
+      : (LOAN_MONTHLY_CHANGE_DEFAULTS[loan.id] || 0)
+  );
+}
+
+// The hardcoded "Projected Payoff" line for a single loan: the first point
+// is the loan's original starting balance, and every point after that steps
+// down by the loan's fixed Monthly Change amount (floored at $0). This is
+// intentionally independent of the payment/interest schedule used for the
+// "Actual Remaining Balance" line.
+function computeProjectedSeries(loan, numMonths){
+  const start = parseMoney(loan.startingAmount);
+  const change = loanMonthlyChange(loan);
+  const series = [];
+  for(let i = 0; i < numMonths; i++){
+    let val = start + (i * change);
+    if(val < 0) val = 0;
+    series.push(val);
+  }
+  return series;
+}
+
+// How many months of x-axis a loan's chart needs: enough to show the
+// projected line all the way down to $0, and enough to cover any actual
+// data the user has entered for that loan (whichever is longer).
+function loanChartTimeline(loan, data, startKey){
+  const start = parseMoney(loan.startingAmount);
+  const change = loanMonthlyChange(loan);
+
+  let monthsToZero = 359;
+  if(change < 0){
+    monthsToZero = Math.min(359, Math.ceil(start / -change));
+  }
+
+  let lastActualIdx = -1;
+  Object.keys(data.monthlyData || {}).forEach(mKey => {
+    const entry = data.monthlyData[mKey]?.[loan.id];
+    const hasPayment = entry && entry.payment !== undefined && entry.payment !== "";
+    const hasInterest = entry && entry.interest !== undefined && entry.interest !== "";
+    if(hasPayment || hasInterest){
+      const idx = monthsBetween(startKey, mKey);
+      if(idx > lastActualIdx) lastActualIdx = idx;
+    }
+  });
+
+  return Math.max(monthsToZero + 1, lastActualIdx + 1, 12);
+}
+
+// Renders one chart per loan into the given container: "Actual Remaining
+// Balance" (from entered payment/interest data) vs. the hardcoded
+// "Projected Payoff" straight-line series.
+function renderIndividualLoanCharts(containerId, stateKey, actualColor, projectedColor){
+  const container = document.getElementById(containerId);
+  if(!container || typeof Chart === "undefined") return;
+
+  const chartMap = charts[stateKey];
+  Object.values(chartMap).forEach(ch => ch && ch.destroy());
+  charts[stateKey] = {};
+  container.innerHTML = "";
+
+  const data = state[stateKey];
+  const loans = (data && data.loans) || [];
+  if(loans.length === 0){
+    container.innerHTML = `<div class="chart-card"><div class="chart-empty" style="display:flex;">No loan data configured.</div></div>`;
     return;
   }
 
-  hideChartEmptyState(canvas);
-  const labels = monthlyRows.map(r => monthLabel(r.monthKey));
-  const projectedData = monthlyRows.map(r => r.totalRemaining);
-  const actualData = monthlyRows.map(r => r.hasActualEntry ? r.totalRemaining : null);
+  const startKey = data.startMonthYear || "2024-12";
+  const { monthlyRows } = computeLoanSchedule(stateKey);
 
-  if(charts[chartKey]) charts[chartKey].destroy();
-  charts[chartKey] = new Chart(canvas.getContext("2d"), {
-    type: "line",
-    data: {
-      labels,
-      datasets: [
-        {
-          label: "Actual Remaining Balance",
-          data: actualData,
-          borderColor: actualColor,
-          backgroundColor: actualColor,
-          pointRadius: 2,
-          pointHoverRadius: 3,
-          spanGaps: false,
-          tension: 0.2
-        },
-        {
-          label: "Projected Payoff",
-          data: projectedData,
-          borderColor: projectedColor,
-          backgroundColor: projectedColor,
-          borderDash: [4, 4],
-          pointRadius: 0,
-          pointHoverRadius: 2,
-          tension: 0.2
-        }
-      ]
-    },
-    options: baseChartOptions("Remaining Amount")
+  loans.forEach(loan => {
+    const numMonths = loanChartTimeline(loan, data, startKey);
+
+    const labels = [];
+    for(let i = 0; i < numMonths; i++){
+      labels.push(monthLabel(addMonthsToKey(startKey, i)));
+    }
+
+    const projectedData = computeProjectedSeries(loan, numMonths);
+    const actualData = [];
+    for(let i = 0; i < numMonths; i++){
+      const row = monthlyRows[i];
+      const d = row && row.loansData[loan.id];
+      actualData.push(d && d.hasActual ? d.remaining : null);
+    }
+
+    const card = document.createElement("div");
+    card.className = "chart-card loan-chart-item";
+    card.innerHTML = `<h3 class="loan-chart-title"></h3><div class="chart-container"><canvas></canvas></div>`;
+    card.querySelector(".loan-chart-title").textContent = loan.name;
+    container.appendChild(card);
+
+    const canvas = card.querySelector("canvas");
+    charts[stateKey][loan.id] = new Chart(canvas.getContext("2d"), {
+      type: "line",
+      data: {
+        labels,
+        datasets: [
+          {
+            label: "Actual Remaining Balance",
+            data: actualData,
+            borderColor: actualColor,
+            backgroundColor: actualColor,
+            pointRadius: 2,
+            pointHoverRadius: 3,
+            spanGaps: false,
+            tension: 0.2
+          },
+          {
+            label: "Projected Payoff",
+            data: projectedData,
+            borderColor: projectedColor,
+            backgroundColor: projectedColor,
+            borderDash: [4, 4],
+            pointRadius: 0,
+            pointHoverRadius: 2,
+            tension: 0
+          }
+        ]
+      },
+      options: baseChartOptions("Remaining Amount")
+    });
   });
 }
 
 function renderPrivateLoanChart(){
-  renderLoanGraph("private", "privateLoanChart", "privateLoans", CHART_COLORS.blue, CHART_COLORS.amber);
+  renderIndividualLoanCharts("privateLoanCharts", "privateLoans", CHART_COLORS.blue, CHART_COLORS.amber);
 }
 
 function renderFederalLoanChart(){
-  renderLoanGraph("federal", "federalLoanChart", "federalLoans", CHART_COLORS.success, CHART_COLORS.amber);
+  renderIndividualLoanCharts("federalLoanCharts", "federalLoans", CHART_COLORS.success, CHART_COLORS.amber);
 }
 
 function renderPayChart(){
