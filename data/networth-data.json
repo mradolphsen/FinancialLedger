@@ -479,14 +479,14 @@
       },
       {
         "id": "p2",
-        "name": "College Ave - 360021753920\t\t\t",
+        "name": "College Ave - 360021753920",
         "principle": 7200,
         "startingAmount": 8461.19,
         "autoPayAmount": 85
       },
       {
         "id": "p3",
-        "name": "College Ave - 360021898853\t\t\t",
+        "name": "College Ave - 360021898853",
         "principle": 15000,
         "startingAmount": 16537.31,
         "autoPayAmount": 180
@@ -808,106 +808,52 @@
           "interest": 124.98
         }
       },
-      "2049-11": {
-        "p1": {
-          "interest": 0
-        }
-      },
-      "2054-11": {
-        "p1": {
-          "interest": 0
-        }
-      },
       "2026-07": {
         "p1": {
-          "interest": 52.74
+          "payment": 90,
+          "interest": 52.74,
+          "isAutoPayChange": true
         },
         "p2": {
-          "interest": 53.47
+          "payment": 85,
+          "interest": 53.47,
+          "isAutoPayChange": true
+        },
+        "p3": {
+          "payment": 180,
+          "interest": 120.00
         }
       },
       "2026-08": {
         "p1": {
-          "interest": 54.27
+          "payment": 90,
+          "interest": 54.27,
+          "isAutoPayChange": true
         },
         "p2": {
-          "interest": 55.03
+          "payment": 85,
+          "interest": 55.03,
+          "isAutoPayChange": true
+        },
+        "p3": {
+          "payment": 180,
+          "interest": 122.00
         }
       },
       "2026-09": {
         "p1": {
-          "interest": 0
-        }
-      },
-      "2026-10": {
-        "p1": {
-          "interest": 0
-        }
-      },
-      "2026-11": {
-        "p1": {
-          "interest": 0
-        }
-      },
-      "2026-12": {
-        "p1": {
-          "interest": 0
-        }
-      },
-      "2027-01": {
-        "p1": {
-          "interest": 0
-        }
-      },
-      "2027-02": {
-        "p1": {
-          "interest": 0
-        }
-      },
-      "2027-03": {
-        "p1": {
-          "interest": 0
-        }
-      },
-      "2027-04": {
-        "p1": {
-          "interest": 0
-        }
-      },
-      "2027-05": {
-        "p1": {
-          "interest": 0
-        }
-      },
-      "2027-06": {
-        "p1": {
-          "interest": 0
-        }
-      },
-      "2054-10": {
-        "p1": {
-          "interest": 0
-        }
-      },
-      "2027-07": {
-        "p1": {
-          "interest": 0
-        }
-      },
-      "2027-08": {
-        "p1": {
-          "interest": 0,
-          "payment": 0
-        }
-      },
-      "2049-10": {
-        "p1": {
-          "interest": 0
-        }
-      },
-      "2046-04": {
-        "p1": {
-          "interest": 0
+          "payment": 90,
+          "interest": 53.00,
+          "isAutoPayChange": true
+        },
+        "p2": {
+          "payment": 85,
+          "interest": 54.00,
+          "isAutoPayChange": true
+        },
+        "p3": {
+          "payment": 180,
+          "interest": 121.00
         }
       }
     }
