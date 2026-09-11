@@ -2149,9 +2149,13 @@ function computeProjectedSeries(loan, numMonths){
 // stretch the timeline out to the loan's full payoff date (which can be
 // 20+ years for a slow-paying loan) — that squeezes all the real "Actual"
 // data into a tiny sliver of the chart and makes hovering imprecise.
-// Instead we show a window that covers all entered actual data plus a
+// Instead we show a window anchored to TODAY'S real calendar month plus a
 // reasonable buffer of future projection, capped at the loan's real payoff
-// point so the projected line never pads out flat at $0.
+// point so the projected line never pads out flat at $0. We deliberately do
+// NOT anchor this to the furthest entered "actual" data point — a single
+// stray/accidental entry far in the future (e.g. a cell clicked into by
+// mistake many years out in the table) would otherwise drag the entire
+// chart's timeframe out with it.
 function loanChartTimeline(loan, data, startKey){
   const start = parseMoney(loan.startingAmount);
   const change = loanMonthlyChange(loan);
@@ -2161,21 +2165,13 @@ function loanChartTimeline(loan, data, startKey){
     monthsToZero = Math.min(359, Math.ceil(start / -change));
   }
 
-  let lastActualIdx = -1;
-  Object.keys(data.monthlyData || {}).forEach(mKey => {
-    const entry = data.monthlyData[mKey]?.[loan.id];
-    const hasPayment = entry && entry.payment !== undefined && entry.payment !== "";
-    const hasInterest = entry && entry.interest !== undefined && entry.interest !== "";
-    if(hasPayment || hasInterest){
-      const idx = monthsBetween(startKey, mKey);
-      if(idx > lastActualIdx) lastActualIdx = idx;
-    }
-  });
+  let todayIdx = monthsBetween(startKey, currentMonthKey());
+  if(todayIdx < 0) todayIdx = 0;
 
-  const BUFFER_MONTHS_PAST_ACTUAL = 24; // ~2 years of projection past the latest entry
+  const FUTURE_BUFFER_MONTHS = 24; // ~2 years of projection beyond today
   const MIN_MONTHS = 12;
 
-  let numMonths = Math.max(lastActualIdx + 1 + BUFFER_MONTHS_PAST_ACTUAL, MIN_MONTHS);
+  let numMonths = Math.max(todayIdx + 1 + FUTURE_BUFFER_MONTHS, MIN_MONTHS);
   numMonths = Math.min(numMonths, monthsToZero + 1); // never pad past full payoff
   return numMonths;
 }
