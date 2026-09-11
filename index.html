@@ -2145,9 +2145,13 @@ function computeProjectedSeries(loan, numMonths){
   return series;
 }
 
-// How many months of x-axis a loan's chart needs: enough to show the
-// projected line all the way down to $0, and enough to cover any actual
-// data the user has entered for that loan (whichever is longer).
+// How many months of x-axis a loan's chart needs. We deliberately do NOT
+// stretch the timeline out to the loan's full payoff date (which can be
+// 20+ years for a slow-paying loan) — that squeezes all the real "Actual"
+// data into a tiny sliver of the chart and makes hovering imprecise.
+// Instead we show a window that covers all entered actual data plus a
+// reasonable buffer of future projection, capped at the loan's real payoff
+// point so the projected line never pads out flat at $0.
 function loanChartTimeline(loan, data, startKey){
   const start = parseMoney(loan.startingAmount);
   const change = loanMonthlyChange(loan);
@@ -2168,7 +2172,12 @@ function loanChartTimeline(loan, data, startKey){
     }
   });
 
-  return Math.max(monthsToZero + 1, lastActualIdx + 1, 12);
+  const BUFFER_MONTHS_PAST_ACTUAL = 24; // ~2 years of projection past the latest entry
+  const MIN_MONTHS = 12;
+
+  let numMonths = Math.max(lastActualIdx + 1 + BUFFER_MONTHS_PAST_ACTUAL, MIN_MONTHS);
+  numMonths = Math.min(numMonths, monthsToZero + 1); // never pad past full payoff
+  return numMonths;
 }
 
 // Renders one chart per loan into the given container: "Actual Remaining
