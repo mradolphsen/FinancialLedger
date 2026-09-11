@@ -821,7 +821,7 @@
         },
         "p3": {
           "payment": 180,
-          "interest": 120.00
+          "interest": 120
         }
       },
       "2026-08": {
@@ -837,23 +837,23 @@
         },
         "p3": {
           "payment": 180,
-          "interest": 122.00
+          "interest": 122
         }
       },
       "2026-09": {
         "p1": {
           "payment": 90,
-          "interest": 53.00,
+          "interest": 53,
           "isAutoPayChange": true
         },
         "p2": {
           "payment": 85,
-          "interest": 54.00,
+          "interest": 54,
           "isAutoPayChange": true
         },
         "p3": {
           "payment": 180,
-          "interest": 121.00
+          "interest": 121
         }
       }
     }
