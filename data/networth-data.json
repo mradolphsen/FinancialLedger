@@ -963,7 +963,7 @@
         "f1": {
           "payment": 141,
           "isAutoPayChange": true,
-          "interest": 47
+          "interest": 1
         },
         "f2": {
           "payment": 183,
