@@ -1918,14 +1918,41 @@ function renderLoanTracker(tableId, stateKey){
   const loans = data.loans;
   const { monthlyRows } = computeLoanSchedule(stateKey);
 
+  // Determine "today" relative to the projected schedule so we can highlight
+  // the current month, dim future months, and know where to cut off the
+  // "paid to date" totals below
+  const now = new Date();
+  const curKey = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
+
   // 3. Build Header HTML
   let totalPrinciple = loans.reduce((sum, l) => sum + parseMoney(l.principle), 0);
   let totalStarting = loans.reduce((sum, l) => sum + parseMoney(l.startingAmount), 0);
   let totalAutoPay = loans.reduce((sum, l) => sum + parseMoney(l.autoPayAmount), 0);
 
+  // Total Payments / Total Interest Paid to date — sums each loan's payment
+  // and interest across every month up through the current month, stopping
+  // early for a loan once it reaches a zero balance (so payoff doesn't rack
+  // up phantom payments beyond the loan's actual life)
+  const paidToDate = {};
+  loans.forEach(l => { paidToDate[l.id] = { payment: 0, interest: 0 }; });
+  const closedBeforeCur = {};
+  loans.forEach(l => { closedBeforeCur[l.id] = false; });
+  monthlyRows.forEach(row => {
+    if(row.monthKey > curKey) return;
+    loans.forEach(l => {
+      if(closedBeforeCur[l.id]) return;
+      const d = row.loansData[l.id];
+      paidToDate[l.id].payment += d.payment;
+      paidToDate[l.id].interest += d.interest;
+      if(d.remaining <= 0.005) closedBeforeCur[l.id] = true;
+    });
+  });
+  const totalPaymentAll = loans.reduce((sum, l) => sum + paidToDate[l.id].payment, 0);
+  const totalInterestAll = loans.reduce((sum, l) => sum + paidToDate[l.id].interest, 0);
+
   let headerHtml = `<thead>
     <tr>
-      <th rowspan="6" class="col-end" style="vertical-align:bottom; text-align:center;">Month</th>
+      <th rowspan="7" class="col-end" style="vertical-align:bottom; text-align:center;">Month</th>
       ${loans.map(l => `<th colspan="3" class="loan-group-header col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="name" value="${escapeHtml(l.name)}" style="background:transparent; border:none; font-weight:800; text-align:center; font-family:inherit; color:var(--navy);"></th>`).join("")}
       <th class="loan-group-header" style="text-align:right;">Totals</th>
     </tr>
@@ -1950,6 +1977,13 @@ function renderLoanTracker(tableId, stateKey){
       `).join("")}
       <td style="text-align:right;">${fmtMoney(totalAutoPay)}</td>
     </tr>
+    <tr class="info-row">
+      ${loans.map(l => `
+        <td class="info-label">Total Payment / Interest Paid</td>
+        <td colspan="2" class="col-end" style="font-weight:700; color:var(--navy);">${fmtMoney(paidToDate[l.id].payment)} / ${fmtMoney(paidToDate[l.id].interest)}</td>
+      `).join("")}
+      <td style="text-align:right; font-weight:700; color:var(--navy);">${fmtMoney(totalPaymentAll)} / ${fmtMoney(totalInterestAll)}</td>
+    </tr>
     <tr>
       ${loans.map(() => `
         <th>Payment</th>
@@ -1962,11 +1996,6 @@ function renderLoanTracker(tableId, stateKey){
 
   // 4. Build Body Rows HTML
   let bodyHtml = "<tbody>";
-
-  // Determine "today" relative to the projected schedule so we can highlight
-  // the current month and dim future months
-  const now = new Date();
-  const curKey = now.getFullYear() + "-" + String(now.getMonth() + 1).padStart(2, "0");
 
   // Track, per loan, whether it has already hit a zero balance in an earlier
   // row — once true, every following month for that loan is blacked out
