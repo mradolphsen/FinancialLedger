@@ -226,14 +226,12 @@ section.block{
 }
 .block-head{
   display:flex; align-items:center; justify-content:space-between; gap:12px;
-  padding:12px 14px; cursor:pointer; user-select:none;
+  padding:12px 14px;
 }
 .block-head h2{ font-size:16px; margin:0; font-weight:700; font-family:'Libre Franklin',sans-serif; color:var(--navy); }
 .block-head .block-sub{ font-size:12.5px; color:var(--ink-muted); font-weight:400; margin-left:8px; display:block; }
-.block-head .chev{ transition:transform .15s ease; color:var(--ink-faint); flex:none; }
-section.block.open .block-head .chev{ transform:rotate(90deg); }
-.block-body{ padding:0 12px 14px; display:none; }
-section.block.open .block-body{ display:block; }
+.block-head .chev{ display:none; } /* sections are always expanded; toggle affordance removed */
+.block-body{ padding:0 12px 14px; display:block; }
 
 /* YEAR SUBSECTION STYLES */
 .year-block {
@@ -2168,7 +2166,7 @@ function loanChartTimeline(loan, data, startKey){
   let todayIdx = monthsBetween(startKey, currentMonthKey());
   if(todayIdx < 0) todayIdx = 0;
 
-  const FUTURE_BUFFER_MONTHS = 24; // ~2 years of projection beyond today
+  const FUTURE_BUFFER_MONTHS = 60; // 5 years of projection beyond today's month
   const MIN_MONTHS = 12;
 
   let numMonths = Math.max(todayIdx + 1 + FUTURE_BUFFER_MONTHS, MIN_MONTHS);
@@ -2596,13 +2594,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Toggle Section Collapse
-  document.querySelectorAll(".block-head").forEach(head => {
-    head.addEventListener("click", () => {
-      const parent = head.parentElement;
-      parent.classList.toggle("open");
-    });
-  });
+  // Section blocks are always expanded — collapse behavior intentionally removed.
 
   // Loan Starting Month Listeners
   ["privateStartMonthInput", "federalStartMonthInput"].forEach(id => {
@@ -2726,7 +2718,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if(loanObj){
         loanObj[field] = (field === "name") ? target.value : parseMoney(target.value);
         markDirty();
-        renderLoanTracker(stateKey === "privateLoans" ? "privateLoanTable" : "federalLoanTable", stateKey);
+        // NOTE: intentionally not re-rendering the loan table here — see
+        // the focusout handler below. Rebuilding the whole table on every
+        // keystroke reset the input's value/cursor, which made it
+        // impossible to type more than one character at a time. The
+        // dependent totals/remaining-balance columns recompute once the
+        // field is committed (blur).
       }
     } else if(kind === "loan-month-field"){
       const stateKey = target.getAttribute("data-state");
@@ -2740,7 +2737,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       state[stateKey].monthlyData[mKey][loanId][field] = parseMoney(target.value);
       markDirty();
-      renderLoanTracker(stateKey === "privateLoans" ? "privateLoanTable" : "federalLoanTable", stateKey);
+      // Same reasoning as above — defer the full-table rebuild to blur.
     }
   });
 
@@ -2751,6 +2748,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if(kind === "balance" || kind === "recur-amount" || kind === "bill-debit" || kind === "bill-credit" || (kind === "pay-field" && (field === "basePay" || field === "myHourly")) || kind === "loan-header-field" || kind === "loan-month-field"){
       const num = parseMoney(e.target.value);
       e.target.value = e.target.value.trim() !== "" && num !== 0 ? fmtMoney(num) : (kind === "loan-month-field" ? "$0.00" : "");
+    }
+
+    // Loan tracker fields rebuild the whole table here (on commit) rather
+    // than on every keystroke, so typing a full number doesn't get
+    // interrupted. This recomputes remaining balances, totals, and the
+    // year-summary rows now that the edit is finalized.
+    if(kind === "loan-header-field" || kind === "loan-month-field"){
+      const stateKey = e.target.getAttribute("data-state");
+      if(stateKey && state[stateKey]){
+        renderLoanTracker(stateKey === "privateLoans" ? "privateLoanTable" : "federalLoanTable", stateKey);
+      }
     }
   });
 
