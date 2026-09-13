@@ -1979,7 +1979,7 @@ function renderLoanTracker(tableId, stateKey){
     </tr>
     <tr class="info-row">
       ${loans.map(l => `
-        <td class="info-label">Total Payment / Interest Paid</td>
+        <td class="info-label">Total Pay / Interest</td>
         <td colspan="2" class="col-end" style="font-weight:700; color:var(--navy);">${fmtMoney(paidToDate[l.id].payment)} / ${fmtMoney(paidToDate[l.id].interest)}</td>
       `).join("")}
       <td style="text-align:right; font-weight:700; color:var(--navy);">${fmtMoney(totalPaymentAll)} / ${fmtMoney(totalInterestAll)}</td>
