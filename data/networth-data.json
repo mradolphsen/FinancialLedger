@@ -459,6 +459,14 @@
       "myHourly": 30.29,
       "positionInfo": "Cert CRC",
       "compRatio": "86.58"
+    },
+    {
+      "id": "fx9brg3",
+      "startMonth": "",
+      "positionInfo": "",
+      "basePay": 0,
+      "myHourly": 0,
+      "compRatio": ""
     }
   ],
   "privateLoans": {
