@@ -903,6 +903,7 @@ footer a{ color:var(--ink-faint); }
     <nav class="subtab-nav" role="tablist" aria-label="Loan type">
       <button class="subtab active" data-subtab="subtab-private-loans" role="tab" aria-selected="true">Private Loans</button>
       <button class="subtab" data-subtab="subtab-federal-loans" role="tab" aria-selected="false">Federal Loans</button>
+      <button class="btn ghost small" id="addLoanTypeBtn" style="margin-left:auto;" title="Add a new loan category, e.g. Car Loan, Mortgage">+ Add Loan Type</button>
     </nav>
 
     <!-- Subtab: Private Loans -->
@@ -910,12 +911,14 @@ footer a{ color:var(--ink-faint); }
       <section class="block open" id="privateLoansBlock">
         <div class="block-head" data-toggle="privateLoansBlock">
           <h2>Private Student Loans<span class="block-sub">Track payoff schedule and interest across private loans</span></h2>
-          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div class="block-body">
           <div class="loan-toolbar">
             <label for="privateStartMonthInput">Payment Starting Month:</label>
             <input type="month" id="privateStartMonthInput" data-state="privateLoans">
+          </div>
+          <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+            <button class="btn primary" data-action="add-loan" data-state="privateLoans">+ Add loan</button>
           </div>
           <div class="table-scroll">
             <table class="data loan-grid" id="privateLoanTable"></table>
@@ -930,12 +933,14 @@ footer a{ color:var(--ink-faint); }
       <section class="block open" id="federalLoansBlock">
         <div class="block-head" data-toggle="federalLoansBlock">
           <h2>Federal Student Loans<span class="block-sub">Track payoff schedule and interest across federal loans</span></h2>
-          <svg class="chev" width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         </div>
         <div class="block-body">
           <div class="loan-toolbar">
             <label for="federalStartMonthInput">Payment Starting Month:</label>
             <input type="month" id="federalStartMonthInput" data-state="federalLoans">
+          </div>
+          <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+            <button class="btn primary" data-action="add-loan" data-state="federalLoans">+ Add loan</button>
           </div>
           <div class="table-scroll">
             <table class="data loan-grid" id="federalLoanTable"></table>
@@ -944,6 +949,9 @@ footer a{ color:var(--ink-faint); }
         </div>
       </section>
     </div>
+
+    <!-- Custom loan type subtabs (Car Loan, Mortgage, etc.) are inserted
+         here dynamically by createLoanTypeDom() -->
 
   </div>
 
@@ -1148,8 +1156,21 @@ const DEFAULT_STATE = {
     { id: uid(), startMonth: "Oct 2026", positionInfo: "Mayo Clinic / CVRU / Cert CRC", basePay: 27.99, myHourly: 30.29, compRatio: "86.58" }
   ],
   privateLoans: INITIAL_PRIVATE_LOANS,
-  federalLoans: INITIAL_FEDERAL_LOANS
+  federalLoans: INITIAL_FEDERAL_LOANS,
+  // User-added loan categories (Car Loan, Mortgage, etc.) — each entry has
+  // the same shape as INITIAL_PRIVATE_LOANS/INITIAL_FEDERAL_LOANS, plus a
+  // unique "key" and a display "label".
+  loanTypes: []
 };
+
+// Small rotating palette so each custom loan type gets a distinct "Actual
+// Remaining Balance" line color on its graphs (Projected Payoff always
+// stays amber, matching Private/Federal Loans).
+const LOAN_TYPE_CHART_COLORS = ["#6D4AA0", "#B0473A", "#2D6E8E", "#7A8C1F", "#A0527A"];
+function nextLoanTypeColor(){
+  const used = (state.loanTypes || []).length;
+  return LOAN_TYPE_CHART_COLORS[used % LOAN_TYPE_CHART_COLORS.length];
+}
 
 /* ============================================================
    STATE
@@ -1782,8 +1803,38 @@ function addMonthsToKey(key, count){
   return y + "-" + String(m).padStart(2, "0");
 }
 
+// Looks up a loan-type's data object regardless of whether it's one of the
+// two built-in categories (Private/Federal Loans, stored directly on
+// `state`) or a user-added custom type (stored in the state.loanTypes
+// array). Every other loan function below goes through this instead of
+// touching `state[stateKey]` directly, so new loan types work everywhere
+// without special-casing.
+function getLoanTypeData(stateKey){
+  if(stateKey === "privateLoans" || stateKey === "federalLoans") return state[stateKey];
+  return (state.loanTypes || []).find(t => t.key === stateKey);
+}
+
+// DOM id helpers — Private/Federal Loans keep their original hardcoded ids
+// (for backward compatibility with the rest of the page), custom types get
+// ids derived from their generated key.
+function loanTableIdFor(stateKey){
+  if(stateKey === "privateLoans") return "privateLoanTable";
+  if(stateKey === "federalLoans") return "federalLoanTable";
+  return "loanTable_" + stateKey;
+}
+function loanChartsContainerIdFor(stateKey){
+  if(stateKey === "privateLoans") return "privateLoanCharts";
+  if(stateKey === "federalLoans") return "federalLoanCharts";
+  return "loanCharts_" + stateKey;
+}
+function loanStartMonthInputIdFor(stateKey){
+  if(stateKey === "privateLoans") return "privateStartMonthInput";
+  if(stateKey === "federalLoans") return "federalStartMonthInput";
+  return "loanStartMonth_" + stateKey;
+}
+
 function computeLoanSchedule(stateKey){
-  const data = state[stateKey];
+  const data = getLoanTypeData(stateKey);
   if(!data || !data.loans || data.loans.length === 0){
     return { loans: [], monthlyRows: [], avgInterestMap: {} };
   }
@@ -1902,14 +1953,14 @@ function renderLoanTracker(tableId, stateKey){
   const table = document.getElementById(tableId);
   if(!table) return;
 
-  const data = state[stateKey];
+  const data = getLoanTypeData(stateKey);
   if(!data || !data.loans || data.loans.length === 0){
-    table.innerHTML = `<tbody><tr class="empty-row"><td>No loan data configured.</td></tr></tbody>`;
+    table.innerHTML = `<tbody><tr class="empty-row"><td>No loans added yet. Use the "+ Add loan" button above to get started.</td></tr></tbody>`;
     return;
   }
 
   // Sync toolbar input value
-  const inputId = stateKey === "privateLoans" ? "privateStartMonthInput" : "federalStartMonthInput";
+  const inputId = loanStartMonthInputIdFor(stateKey);
   const monthInput = document.getElementById(inputId);
   if(monthInput && data.startMonthYear){
     monthInput.value = data.startMonthYear;
@@ -1953,7 +2004,12 @@ function renderLoanTracker(tableId, stateKey){
   let headerHtml = `<thead>
     <tr>
       <th rowspan="7" class="col-end" style="vertical-align:bottom; text-align:center;">Month</th>
-      ${loans.map(l => `<th colspan="3" class="loan-group-header col-end"><input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="name" value="${escapeHtml(l.name)}" style="background:transparent; border:none; font-weight:800; text-align:center; font-family:inherit; color:var(--navy);"></th>`).join("")}
+      ${loans.map(l => `<th colspan="3" class="loan-group-header col-end">
+        <div style="display:flex; align-items:center; justify-content:center; gap:4px;">
+          <input type="text" data-kind="loan-header-field" data-state="${stateKey}" data-loan="${l.id}" data-field="name" value="${escapeHtml(l.name)}" style="background:transparent; border:none; font-weight:800; text-align:center; font-family:inherit; color:var(--navy); flex:1;">
+          <button class="btn small danger" data-action="delete-loan" data-state="${stateKey}" data-loan="${l.id}" title="Remove loan" style="flex:none;">✕</button>
+        </div>
+      </th>`).join("")}
       <th class="loan-group-header" style="text-align:right;">Totals</th>
     </tr>
     <tr class="info-row">
@@ -1979,7 +2035,7 @@ function renderLoanTracker(tableId, stateKey){
     </tr>
     <tr class="info-row">
       ${loans.map(l => `
-        <td class="info-label">Total Pay / Interest</td>
+        <td class="info-label">Total Payment / Interest Paid</td>
         <td colspan="2" class="col-end" style="font-weight:700; color:var(--navy);">${fmtMoney(paidToDate[l.id].payment)} / ${fmtMoney(paidToDate[l.id].interest)}</td>
       `).join("")}
       <td style="text-align:right; font-weight:700; color:var(--navy);">${fmtMoney(totalPaymentAll)} / ${fmtMoney(totalInterestAll)}</td>
@@ -2034,6 +2090,163 @@ function renderLoanTracker(tableId, stateKey){
 
   bodyHtml += "</tbody>";
   table.innerHTML = headerHtml + bodyHtml;
+}
+
+/* ============================================================
+   LOAN TYPES — add/remove custom categories (Car Loan, Mortgage, etc.)
+   and individual loans within any category
+   ============================================================ */
+
+// Adds a new loan to whichever loan-type table the "+ Add loan" button was
+// clicked from — Private Loans, Federal Loans, or any user-added type.
+function addLoanToType(stateKey){
+  const data = getLoanTypeData(stateKey);
+  if(!data) return;
+
+  const name = prompt("Enter a name for the loan:");
+  if(!name || !name.trim()) return;
+
+  if(!data.loans) data.loans = [];
+  data.loans.push({
+    id: uid(),
+    name: name.trim(),
+    principle: 0,
+    startingAmount: 0,
+    autoPayAmount: 0,
+    monthlyChange: 0
+  });
+  markDirty();
+  renderLoanTracker(loanTableIdFor(stateKey), stateKey);
+}
+
+// Prompts for a name and creates a brand-new loan type (its own subtab in
+// both the Loans tab and the Graphs tab), e.g. "Car Loan" or "Mortgage".
+function addLoanType(){
+  const name = prompt("Enter a name for the new loan type (e.g. Car Loan, Mortgage):");
+  if(!name || !name.trim()) return;
+
+  const key = "loanType_" + uid();
+  const entry = {
+    key,
+    label: name.trim(),
+    startMonthYear: currentMonthKey(),
+    loans: [],
+    monthlyData: {},
+    chartColor: nextLoanTypeColor()
+  };
+
+  if(!state.loanTypes) state.loanTypes = [];
+  state.loanTypes.push(entry);
+  markDirty();
+
+  createLoanTypeDom(entry);
+  renderLoanTracker(loanTableIdFor(key), key);
+  charts[key] = {};
+
+  // Jump straight to the new loan type so the user can start adding loans
+  const newSubtabBtn = document.querySelector(`.subtab[data-subtab="subtab-loan-${key}"]`);
+  if(newSubtabBtn) newSubtabBtn.click();
+}
+
+// Builds the subtab button + panel for a loan type in both the Loans tab
+// and the Graphs tab, and registers its chart renderer. Called both when a
+// type is freshly added, and on page load to recreate the DOM for types
+// that were already saved in state.
+function createLoanTypeDom(entry){
+  const key = entry.key;
+  const label = entry.label;
+  const tableId = loanTableIdFor(key);
+  const inputId = loanStartMonthInputIdFor(key);
+  const chartsContainerId = loanChartsContainerIdFor(key);
+
+  // ---- Loans tab: subtab button + panel ----
+  const loansNav = document.querySelector("#tab-loans .subtab-nav");
+  const addTypeBtn = document.getElementById("addLoanTypeBtn");
+  const loansSubtabBtn = document.createElement("button");
+  loansSubtabBtn.className = "subtab";
+  loansSubtabBtn.setAttribute("data-subtab", `subtab-loan-${key}`);
+  loansSubtabBtn.setAttribute("data-loan-type-key", key);
+  loansSubtabBtn.setAttribute("role", "tab");
+  loansSubtabBtn.setAttribute("aria-selected", "false");
+  loansSubtabBtn.textContent = label;
+  loansNav.insertBefore(loansSubtabBtn, addTypeBtn);
+
+  const loansContent = document.createElement("div");
+  loansContent.className = "subtab-content";
+  loansContent.id = `subtab-loan-${key}`;
+  loansContent.setAttribute("role", "tabpanel");
+  loansContent.setAttribute("data-loan-type-key", key);
+  loansContent.innerHTML = `
+    <section class="block open">
+      <div class="block-head">
+        <h2>${escapeHtml(label)}<span class="block-sub">Track payoff schedule and interest</span></h2>
+        <button class="btn small danger" data-action="delete-loan-type" data-state="${key}" title="Remove this loan type">✕ Remove Type</button>
+      </div>
+      <div class="block-body">
+        <div class="loan-toolbar">
+          <label for="${inputId}">Payment Starting Month:</label>
+          <input type="month" id="${inputId}" data-state="${key}">
+        </div>
+        <div class="btn-row" style="margin-top:0;margin-bottom:12px;">
+          <button class="btn primary" data-action="add-loan" data-state="${key}">+ Add loan</button>
+        </div>
+        <div class="table-scroll">
+          <table class="data loan-grid" id="${tableId}"></table>
+        </div>
+        <p class="hint">Edit Auto Pay Amount or Starting Amount at top to adjust baseline schedule. Edit monthly payments or interest individually for custom adjustments.</p>
+      </div>
+    </section>
+  `;
+  document.getElementById("tab-loans").appendChild(loansContent);
+
+  // ---- Graphs tab: subtab button + panel ----
+  const graphsNav = document.querySelector("#tab-graphs .subtab-nav");
+  const graphSubtabId = `subtab-graph-${key}`;
+  const graphSubtabBtn = document.createElement("button");
+  graphSubtabBtn.className = "subtab";
+  graphSubtabBtn.setAttribute("data-subtab", graphSubtabId);
+  graphSubtabBtn.setAttribute("data-loan-type-key", key);
+  graphSubtabBtn.setAttribute("role", "tab");
+  graphSubtabBtn.setAttribute("aria-selected", "false");
+  graphSubtabBtn.textContent = label;
+  graphsNav.appendChild(graphSubtabBtn);
+
+  const graphsContent = document.createElement("div");
+  graphsContent.className = "subtab-content";
+  graphsContent.id = graphSubtabId;
+  graphsContent.setAttribute("role", "tabpanel");
+  graphsContent.setAttribute("data-loan-type-key", key);
+  graphsContent.innerHTML = `
+    <div class="chart-panel-head">
+      <h2>${escapeHtml(label)}<span class="block-sub">Each loan's remaining balance — actual vs. projected payoff</span></h2>
+    </div>
+    <div id="${chartsContainerId}" class="loan-chart-grid"></div>
+  `;
+  document.getElementById("tab-graphs").appendChild(graphsContent);
+
+  subtabChartRenderers[graphSubtabId] = () => {
+    renderIndividualLoanCharts(chartsContainerId, key, entry.chartColor || CHART_COLORS.navy, CHART_COLORS.amber);
+  };
+}
+
+// Tears down everything created by createLoanTypeDom() for a removed loan
+// type, and — if that type's subtab happened to be the one on screen —
+// falls back to the first remaining subtab in each affected nav so the
+// page doesn't end up showing a blank panel.
+function removeLoanTypeDom(key){
+  document.querySelectorAll(`[data-loan-type-key="${key}"]`).forEach(el => el.remove());
+  delete charts[key];
+  delete subtabChartRenderers[`subtab-graph-${key}`];
+
+  [
+    document.querySelector("#tab-loans .subtab-nav"),
+    document.querySelector("#tab-graphs .subtab-nav")
+  ].forEach(nav => {
+    if(nav && !nav.querySelector(".subtab.active")){
+      const fallback = nav.querySelector(".subtab");
+      if(fallback) fallback.click();
+    }
+  });
 }
 
 /* ============================================================
@@ -2210,15 +2423,15 @@ function renderIndividualLoanCharts(containerId, stateKey, actualColor, projecte
   const container = document.getElementById(containerId);
   if(!container || typeof Chart === "undefined") return;
 
-  const chartMap = charts[stateKey];
+  const chartMap = charts[stateKey] || {};
   Object.values(chartMap).forEach(ch => ch && ch.destroy());
   charts[stateKey] = {};
   container.innerHTML = "";
 
-  const data = state[stateKey];
+  const data = getLoanTypeData(stateKey);
   const loans = (data && data.loans) || [];
   if(loans.length === 0){
-    container.innerHTML = `<div class="chart-card"><div class="chart-empty" style="display:flex;">No loan data configured.</div></div>`;
+    container.innerHTML = `<div class="chart-card"><div class="chart-empty" style="display:flex;">No loans added yet.</div></div>`;
     return;
   }
 
@@ -2332,8 +2545,21 @@ function renderAllCharts(){
   renderMonthEndChart();
   renderPrivateLoanChart();
   renderFederalLoanChart();
+  (state.loanTypes || []).forEach(t => {
+    renderIndividualLoanCharts(loanChartsContainerIdFor(t.key), t.key, t.chartColor || CHART_COLORS.navy, CHART_COLORS.amber);
+  });
   renderPayChart();
 }
+
+// Maps a Graphs-tab subtab id -> the function that (re)draws its chart(s).
+// Built-in tabs are registered up front; a custom loan type adds its own
+// entry when its subtab is created (see createLoanTypeDom).
+const subtabChartRenderers = {
+  "subtab-graph-monthend": renderMonthEndChart,
+  "subtab-graph-private": renderPrivateLoanChart,
+  "subtab-graph-federal": renderFederalLoanChart,
+  "subtab-graph-pay": renderPayChart
+};
 
 /* ============================================================
    RENDER: SETTINGS — ACCOUNT LISTS
@@ -2369,6 +2595,7 @@ function render(){
   initCompCalculator();
   renderLoanTracker("privateLoanTable", "privateLoans");
   renderLoanTracker("federalLoanTable", "federalLoans");
+  (state.loanTypes || []).forEach(t => renderLoanTracker(loanTableIdFor(t.key), t.key));
   renderAccountLists();
   renderAllCharts();
   updateSyncStatus();
@@ -2567,6 +2794,13 @@ async function loadFromGitHub(){
 
 document.addEventListener("DOMContentLoaded", () => {
 
+  // Recreate the subtabs/tables/charts for any custom loan types (Car Loan,
+  // Mortgage, etc.) that were already saved from a previous session —
+  // their data lives in state.loanTypes, but the DOM for them only exists
+  // once we rebuild it here (createLoanTypeDom is otherwise only called
+  // when a type is freshly added via the "+ Add Loan Type" button).
+  (state.loanTypes || []).forEach(t => createLoanTypeDom(t));
+
   render();
 
   if(ghConfigured()){
@@ -2596,47 +2830,58 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   });
 
-  // Subtab Switching (Loans: Private / Federal)
-  document.querySelectorAll(".subtab").forEach(subtab => {
-    subtab.addEventListener("click", () => {
-      const nav = subtab.closest(".subtab-nav");
-      const panel = nav.closest(".tab-content");
+  // Subtab Switching (Loans: Private / Federal / any user-added loan types,
+  // Graphs: Month End / Private / Federal / Pay History / any user-added
+  // loan types). Delegated on document instead of bound per-button, so
+  // subtabs created later by "+ Add Loan Type" work without extra wiring.
+  document.addEventListener("click", e => {
+    const subtab = e.target.closest(".subtab");
+    if(!subtab) return;
 
-      nav.querySelectorAll(".subtab").forEach(t => {
-        t.classList.remove("active");
-        t.setAttribute("aria-selected", "false");
-      });
-      panel.querySelectorAll(".subtab-content").forEach(c => c.classList.remove("active"));
+    const nav = subtab.closest(".subtab-nav");
+    const panel = nav.closest(".tab-content");
 
-      subtab.classList.add("active");
-      subtab.setAttribute("aria-selected", "true");
-      const targetId = subtab.getAttribute("data-subtab");
-      const targetContent = document.getElementById(targetId);
-      if(targetContent) targetContent.classList.add("active");
-
-      // Redraw the newly-visible graph so Chart.js sizes against a
-      // container that's actually on screen
-      if(targetId === "subtab-graph-monthend") renderMonthEndChart();
-      else if(targetId === "subtab-graph-private") renderPrivateLoanChart();
-      else if(targetId === "subtab-graph-federal") renderFederalLoanChart();
-      else if(targetId === "subtab-graph-pay") renderPayChart();
+    nav.querySelectorAll(".subtab").forEach(t => {
+      t.classList.remove("active");
+      t.setAttribute("aria-selected", "false");
     });
+    panel.querySelectorAll(".subtab-content").forEach(c => c.classList.remove("active"));
+
+    subtab.classList.add("active");
+    subtab.setAttribute("aria-selected", "true");
+    const targetId = subtab.getAttribute("data-subtab");
+    const targetContent = document.getElementById(targetId);
+    if(targetContent) targetContent.classList.add("active");
+
+    // Redraw the newly-visible graph so Chart.js sizes against a
+    // container that's actually on screen. Looked up from a registry
+    // (built-in tabs registered up front, custom loan types register
+    // themselves when created) rather than a hardcoded if-chain.
+    const renderer = subtabChartRenderers[targetId];
+    if(renderer) renderer();
   });
 
   // Section blocks are always expanded — collapse behavior intentionally removed.
 
-  // Loan Starting Month Listeners
-  ["privateStartMonthInput", "federalStartMonthInput"].forEach(id => {
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.addEventListener("change", e => {
-      const stateKey = e.target.getAttribute("data-state");
-      if(stateKey && state[stateKey]){
-        state[stateKey].startMonthYear = e.target.value;
-        markDirty();
-        renderLoanTracker(stateKey === "privateLoans" ? "privateLoanTable" : "federalLoanTable", stateKey);
-      }
-    });
+  // Loan Starting Month Listeners — delegated (rather than bound to the two
+  // hardcoded Private/Federal ids) so a user-added loan type's start-month
+  // input works the moment it's created.
+  document.addEventListener("change", e => {
+    const target = e.target;
+    if(target.tagName !== "INPUT" || target.type !== "month") return;
+    const stateKey = target.getAttribute("data-state");
+    if(!stateKey) return;
+    const loanData = getLoanTypeData(stateKey);
+    if(loanData){
+      loanData.startMonthYear = target.value;
+      markDirty();
+      renderLoanTracker(loanTableIdFor(stateKey), stateKey);
+    }
+  });
+
+  // Add Loan Type
+  document.getElementById("addLoanTypeBtn").addEventListener("click", () => {
+    addLoanType();
   });
 
   // Settings Modal
@@ -2743,7 +2988,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const stateKey = target.getAttribute("data-state");
       const loanId = target.getAttribute("data-loan");
       const field = target.getAttribute("data-field");
-      const loanObj = state[stateKey].loans.find(l => l.id === loanId);
+      const loanObj = getLoanTypeData(stateKey).loans.find(l => l.id === loanId);
       if(loanObj){
         loanObj[field] = (field === "name") ? target.value : parseMoney(target.value);
         markDirty();
@@ -2759,12 +3004,13 @@ document.addEventListener("DOMContentLoaded", () => {
       const mKey = target.getAttribute("data-month");
       const loanId = target.getAttribute("data-loan");
       const field = target.getAttribute("data-field");
-      
-      if(!state[stateKey].monthlyData) state[stateKey].monthlyData = {};
-      if(!state[stateKey].monthlyData[mKey]) state[stateKey].monthlyData[mKey] = {};
-      if(!state[stateKey].monthlyData[mKey][loanId]) state[stateKey].monthlyData[mKey][loanId] = {};
+      const loanData = getLoanTypeData(stateKey);
 
-      state[stateKey].monthlyData[mKey][loanId][field] = parseMoney(target.value);
+      if(!loanData.monthlyData) loanData.monthlyData = {};
+      if(!loanData.monthlyData[mKey]) loanData.monthlyData[mKey] = {};
+      if(!loanData.monthlyData[mKey][loanId]) loanData.monthlyData[mKey][loanId] = {};
+
+      loanData.monthlyData[mKey][loanId][field] = parseMoney(target.value);
       markDirty();
       // Same reasoning as above — defer the full-table rebuild to blur.
     }
@@ -2785,8 +3031,8 @@ document.addEventListener("DOMContentLoaded", () => {
     // year-summary rows now that the edit is finalized.
     if(kind === "loan-header-field" || kind === "loan-month-field"){
       const stateKey = e.target.getAttribute("data-state");
-      if(stateKey && state[stateKey]){
-        renderLoanTracker(stateKey === "privateLoans" ? "privateLoanTable" : "federalLoanTable", stateKey);
+      if(stateKey && getLoanTypeData(stateKey)){
+        renderLoanTracker(loanTableIdFor(stateKey), stateKey);
       }
     }
   });
@@ -2821,6 +3067,30 @@ document.addEventListener("DOMContentLoaded", () => {
         });
         markDirty();
         render();
+      }
+    } else if(action === "add-loan"){
+      const stateKey = btn.getAttribute("data-state");
+      addLoanToType(stateKey);
+    } else if(action === "delete-loan"){
+      const stateKey = btn.getAttribute("data-state");
+      const loanId = btn.getAttribute("data-loan");
+      const loanData = getLoanTypeData(stateKey);
+      if(loanData && confirm("Remove this loan? Its entered payment/interest history will be lost.")){
+        loanData.loans = loanData.loans.filter(l => l.id !== loanId);
+        if(loanData.monthlyData){
+          Object.keys(loanData.monthlyData).forEach(mKey => {
+            if(loanData.monthlyData[mKey]) delete loanData.monthlyData[mKey][loanId];
+          });
+        }
+        markDirty();
+        renderLoanTracker(loanTableIdFor(stateKey), stateKey);
+      }
+    } else if(action === "delete-loan-type"){
+      const key = btn.getAttribute("data-state");
+      if(confirm("Remove this loan type and everything in it? This cannot be undone.")){
+        state.loanTypes = (state.loanTypes || []).filter(t => t.key !== key);
+        markDirty();
+        removeLoanTypeDom(key);
       }
     }
   });
