@@ -208,6 +208,21 @@ button.icon-btn:hover{ border-color:var(--line-strong); background:var(--blue-pa
 .stat.down .value{ color:var(--danger); }
 .stat .foot{ font-size:12px; color:var(--ink-faint); margin-top:4px; }
 
+.stat-grid{
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(190px, 1fr)); gap:0;
+  background:var(--surface); border:1px solid var(--line); border-radius:var(--radius-md);
+  overflow:hidden; margin-bottom:12px; box-shadow:var(--shadow);
+}
+.stat-grid .stat{ border-bottom:1px solid var(--line); }
+
+.se-verdict{
+  padding:14px 16px; border-radius:var(--radius-md); margin-bottom:14px;
+  border-left:4px solid var(--line); background:var(--surface); box-shadow:var(--shadow);
+}
+.se-verdict.required{ border-left-color:var(--danger); background:#FBF0F0; }
+.se-verdict.not-required{ border-left-color:var(--success); background:#EFF7F1; }
+.se-verdict .headline{ font-weight:800; font-size:15px; margin-bottom:4px; color:var(--ink); }
+
 /* LAYOUT GRID FOR MODULES */
 .modules-grid {
   display: grid;
@@ -550,6 +565,14 @@ table.pay-grid input[type=text].highlight-hourly { font-weight: 800; }
   background: var(--surface);
   font-weight: 600;
 }
+.loan-toolbar select,
+.loan-toolbar input[type=text] {
+  background: var(--surface);
+  font-weight: 600;
+  padding: 5px 8px;
+  border-radius: 4px;
+  border: 1px solid var(--line-strong);
+}
 
 table.loan-grid th.loan-group-header {
   text-align: center;
@@ -735,6 +758,7 @@ footer a{ color:var(--ink-faint); }
   <nav class="nav-tabs" role="tablist">
     <button class="nav-tab active" data-tab="tab-month-end" role="tab" aria-selected="true">Month End</button>
     <button class="nav-tab" data-tab="tab-pay-tracker" role="tab" aria-selected="false">Pay Tracker</button>
+    <button class="nav-tab" data-tab="tab-1099" role="tab" aria-selected="false">1099 Income</button>
     <button class="nav-tab" data-tab="tab-loans" role="tab" aria-selected="false">Loans</button>
     <button class="nav-tab" data-tab="tab-graphs" role="tab" aria-selected="false">Graphs</button>
   </nav>
@@ -892,6 +916,69 @@ footer a{ color:var(--ink-faint); }
         </div>
 
       </div>
+    </section>
+
+  </div>
+
+  <!-- SUBPAGE CONTENT: 1099 INCOME (self-employment income log + tax estimator) -->
+  <div class="tab-content" id="tab-1099" role="tabpanel">
+
+    <section class="block open">
+      <div class="block-head">
+        <h2>1099 / Self-Employment Tax Settings<span class="block-sub">Used to estimate FICA, federal, and state tax on your 1099 income</span></h2>
+      </div>
+      <div class="block-body">
+        <div class="loan-toolbar">
+          <label for="seFilingStatusInput">Filing Status:</label>
+          <select id="seFilingStatusInput">
+            <option value="single">Single</option>
+            <option value="mfj">Married Filing Jointly</option>
+            <option value="mfs">Married Filing Separately</option>
+            <option value="hoh">Head of Household</option>
+          </select>
+        </div>
+        <div class="loan-toolbar">
+          <label for="seStateTaxInput">State Tax:</label>
+          <select id="seStateTaxInput">
+            <option value="MN">Minnesota (2026 brackets)</option>
+            <option value="none">No state income tax applies</option>
+          </select>
+        </div>
+        <div class="loan-toolbar">
+          <label for="sePriorYearTaxInput">Prior Year Total Tax Liability (optional, for safe-harbor check):</label>
+          <input type="text" id="sePriorYearTaxInput" placeholder="$0.00">
+        </div>
+        <p class="hint">Filing status and state determine which 2026 tax brackets are used. Prior-year tax liability is only used for the optional safe-harbor comparison in the quarterly section below.</p>
+      </div>
+    </section>
+
+    <section class="block open">
+      <div class="block-head">
+        <h2>1099 Income Log<span class="block-sub">Every payment you've received as an independent contractor this year</span></h2>
+      </div>
+      <div class="block-body">
+        <div class="btn-row" style="margin-top:0; margin-bottom:12px;">
+          <button class="btn primary" id="addSEIncomeBtn">+ Add income</button>
+        </div>
+        <div class="table-scroll">
+          <table class="data" id="seIncomeTable"></table>
+        </div>
+        <p class="hint">Tax estimates below are calculated on this gross amount.</p>
+      </div>
+    </section>
+
+    <section class="block open">
+      <div class="block-head">
+        <h2>Estimated Tax Summary<span class="block-sub">FICA (self-employment tax), federal, and state tax attributable to your 1099 work</span></h2>
+      </div>
+      <div class="block-body" id="seTaxSummary"></div>
+    </section>
+
+    <section class="block open">
+      <div class="block-head">
+        <h2>Quarterly Estimated Tax Payments<span class="block-sub">IRS Form 1040-ES due dates for the current tax year</span></h2>
+      </div>
+      <div class="block-body" id="seQuarterlySection"></div>
     </section>
 
   </div>
@@ -1160,7 +1247,17 @@ const DEFAULT_STATE = {
   // User-added loan categories (Car Loan, Mortgage, etc.) — each entry has
   // the same shape as INITIAL_PRIVATE_LOANS/INITIAL_FEDERAL_LOANS, plus a
   // unique "key" and a display "label".
-  loanTypes: []
+  loanTypes: [],
+  // 1099 / self-employment income tracker + tax estimate settings.
+  // entries: [{id, date:"YYYY-MM-DD", client, grossAmount, expenses}]
+  // quarterlyPaid: {"2026-q1": true, ...} — user-checked "I paid this" flags
+  selfEmployment: {
+    filingStatus: "single",   // "single" | "mfj" | "mfs" | "hoh"
+    stateTax: "MN",           // "MN" | "none" | "other"
+    priorYearTaxLiability: 0, // optional, for the safe-harbor comparison
+    entries: [],
+    quarterlyPaid: {}
+  }
 };
 
 // Small rotating palette so each custom loan type gets a distinct "Actual
@@ -1272,6 +1369,178 @@ function fmtMoney(n){
   const num = parseMoney(n);
   const sign = num < 0 ? "-" : "";
   return sign + "$" + Math.abs(num).toLocaleString(undefined,{minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+/* ============================================================
+   1099 / SELF-EMPLOYMENT INCOME & TAX ESTIMATOR
+
+   Everything here is an ESTIMATE built from published 2026 tax
+   tables — it is not a substitute for a tax professional. The
+   core idea: 1099 net income stacks on TOP of the current W2
+   job's pay for bracket purposes, so we compute tax twice (with
+   and without the 1099 income) and the difference is what the
+   1099 work is "costing" in extra tax.
+   ============================================================ */
+
+const SE_TAX_YEAR = 2026;
+
+// 2026 federal brackets: [upperBoundOfBracket, rate], last bound is Infinity.
+// Source: IRS Rev. Proc. 2025-32.
+const FEDERAL_BRACKETS_2026 = {
+  single: [[12400,.10],[50400,.12],[105700,.22],[201775,.24],[256225,.32],[640600,.35],[Infinity,.37]],
+  mfj:    [[24800,.10],[100800,.12],[211400,.22],[403550,.24],[512450,.32],[768700,.35],[Infinity,.37]],
+  mfs:    [[12400,.10],[50400,.12],[105700,.22],[201775,.24],[256225,.32],[384350,.35],[Infinity,.37]],
+  hoh:    [[17700,.10],[67450,.12],[105700,.22],[201750,.24],[256200,.32],[640600,.35],[Infinity,.37]]
+};
+const FEDERAL_STD_DEDUCTION_2026 = { single:16100, mfj:32200, mfs:16100, hoh:24150 };
+
+// 2026 Minnesota brackets. Source: MN Dept. of Revenue.
+const MN_BRACKETS_2026 = {
+  single: [[33310,.0535],[109430,.068],[203150,.0785],[Infinity,.0985]],
+  mfj:    [[48700,.0535],[193480,.068],[337930,.0785],[Infinity,.0985]],
+  mfs:    [[24350,.0535],[96740,.068],[168965,.0785],[Infinity,.0985]],
+  hoh:    [[41010,.0535],[164800,.068],[270060,.0785],[Infinity,.0985]]
+};
+const MN_STD_DEDUCTION_2026 = { single:15300, mfj:30600, mfs:15300, hoh:23000 };
+
+const SE_TAX_PARAMS_2026 = {
+  ssWageBase: 184500,      // 2026 Social Security wage base
+  ssRate: 0.124,           // both halves, since a self-employed person pays both
+  medicareRate: 0.029,     // both halves, uncapped
+  addlMedicareRate: 0.009, // Additional Medicare Tax
+  addlMedicareThreshold: { single:200000, mfj:250000, mfs:125000, hoh:200000 }
+};
+
+const FILING_STATUS_LABELS = { single:"Single", mfj:"Married Filing Jointly", mfs:"Married Filing Separately", hoh:"Head of Household" };
+
+// Standard marginal-bracket tax calculation.
+function bracketTax(taxableIncome, brackets){
+  if(taxableIncome <= 0) return 0;
+  let tax = 0, lastCap = 0;
+  for(const [cap, rate] of brackets){
+    const slice = Math.min(taxableIncome, cap) - lastCap;
+    if(slice > 0) tax += slice * rate;
+    if(taxableIncome <= cap) break;
+    lastCap = cap;
+  }
+  return tax;
+}
+
+function getSelfEmploymentSettings(){
+  if(!state.selfEmployment) state.selfEmployment = structuredClone(DEFAULT_STATE.selfEmployment);
+  return state.selfEmployment;
+}
+
+// "Current W2 position pay" = most recent Pay Tracker row, annualized
+// (hourly rate x 2080 hours), matching the "Yearly Pre-Tax" figure the Pay
+// Tracker table itself already shows for that row.
+function getCurrentW2AnnualPay(){
+  const rows = state.payTracker || [];
+  if(rows.length === 0) return 0;
+  return parseMoney(rows[rows.length - 1].myHourly) * 2080;
+}
+
+function currentTaxYearSEEntries(){
+  const se = getSelfEmploymentSettings();
+  const yr = String(new Date().getFullYear());
+  return (se.entries || []).filter(e => (e.date || "").startsWith(yr));
+}
+
+// The full estimate: SE tax + the marginal federal/state income tax that
+// the 1099 net income adds on top of the current W2 wages.
+function computeSETaxEstimate(){
+  const se = getSelfEmploymentSettings();
+  const filingStatus = FEDERAL_BRACKETS_2026[se.filingStatus] ? se.filingStatus : "single";
+  const w2Wages = getCurrentW2AnnualPay();
+
+  const entries = currentTaxYearSEEntries();
+  const grossYTD = entries.reduce((s,e) => s + parseMoney(e.grossAmount), 0);
+  const expensesYTD = entries.reduce((s,e) => s + parseMoney(e.expenses), 0);
+  const netYTD = Math.max(0, grossYTD - expensesYTD);
+
+  // --- Self-employment tax (Schedule SE) ---
+  const netSEEarnings = netYTD * 0.9235;
+  const remainingSSBase = Math.max(0, SE_TAX_PARAMS_2026.ssWageBase - w2Wages);
+  const ssTaxableSE = Math.min(netSEEarnings, remainingSSBase);
+  const ssTax = ssTaxableSE * SE_TAX_PARAMS_2026.ssRate;
+  const medicareTax = netSEEarnings * SE_TAX_PARAMS_2026.medicareRate;
+
+  const addlThreshold = SE_TAX_PARAMS_2026.addlMedicareThreshold[filingStatus];
+  const combinedEarnings = w2Wages + netSEEarnings;
+  const addlMedicareTaxableSE = Math.max(0, Math.min(netSEEarnings, combinedEarnings - addlThreshold));
+  const addlMedicareTax = addlMedicareTaxableSE * SE_TAX_PARAMS_2026.addlMedicareRate;
+
+  const seTaxTotal = ssTax + medicareTax + addlMedicareTax;
+  // Half of SS + regular Medicare (not the Additional Medicare Tax) is
+  // deductible for income-tax purposes.
+  const seTaxDeduction = (ssTax + medicareTax) / 2;
+
+  // --- Federal income tax attributable to the 1099 income ---
+  const fedStd = FEDERAL_STD_DEDUCTION_2026[filingStatus];
+  const fedBrackets = FEDERAL_BRACKETS_2026[filingStatus];
+  const taxableWithoutSE = Math.max(0, w2Wages - fedStd);
+  const taxableWithSE = Math.max(0, w2Wages + netYTD - seTaxDeduction - fedStd);
+  const fedTaxFromSE = bracketTax(taxableWithSE, fedBrackets) - bracketTax(taxableWithoutSE, fedBrackets);
+
+  // --- Minnesota state income tax attributable to the 1099 income ---
+  let stateTaxFromSE = 0;
+  if(se.stateTax === "MN"){
+    const mnStd = MN_STD_DEDUCTION_2026[filingStatus];
+    const mnBrackets = MN_BRACKETS_2026[filingStatus];
+    const mnTaxableWithoutSE = Math.max(0, w2Wages - mnStd);
+    const mnTaxableWithSE = Math.max(0, w2Wages + netYTD - seTaxDeduction - mnStd);
+    stateTaxFromSE = bracketTax(mnTaxableWithSE, mnBrackets) - bracketTax(mnTaxableWithoutSE, mnBrackets);
+  }
+
+  const totalTaxFromSE = seTaxTotal + fedTaxFromSE + stateTaxFromSE;
+
+  return {
+    filingStatus, w2Wages, grossYTD, expensesYTD, netYTD,
+    ssTax, medicareTax, addlMedicareTax, seTaxTotal, seTaxDeduction,
+    fedTaxFromSE, stateTaxFromSE, totalTaxFromSE,
+    effectiveRate: netYTD > 0 ? totalTaxFromSE / netYTD : 0
+  };
+}
+
+// Standard IRS Form 1040-ES quarterly due dates for a given tax year.
+// Q4's due date falls in January of the FOLLOWING year.
+function getQuarterlyPeriods(year){
+  return [
+    { key:"q1", label:"Q1", periodLabel:"Jan 1 – Mar 31", dueDate: new Date(year,3,15) },
+    { key:"q2", label:"Q2", periodLabel:"Apr 1 – May 31", dueDate: new Date(year,5,15) },
+    { key:"q3", label:"Q3", periodLabel:"Jun 1 – Aug 31", dueDate: new Date(year,8,15) },
+    { key:"q4", label:"Q4", periodLabel:"Sep 1 – Dec 31", dueDate: new Date(year+1,0,15) }
+  ];
+}
+
+function quarterEntryFilter(entry, year, periodLabel){
+  // periodLabel ranges map to month numbers (0-indexed) for filtering entries by date
+  const d = entry.date;
+  if(!d || !d.startsWith(String(year))) return false;
+  const month = parseInt(d.slice(5,7), 10); // 1-12
+  if(periodLabel === "Jan 1 – Mar 31") return month >= 1 && month <= 3;
+  if(periodLabel === "Apr 1 – May 31") return month >= 4 && month <= 5;
+  if(periodLabel === "Jun 1 – Aug 31") return month >= 6 && month <= 8;
+  if(periodLabel === "Sep 1 – Dec 31") return month >= 9 && month <= 12;
+  return false;
+}
+
+// Primary IRS trigger: expect to owe $1,000+ not covered by withholding.
+// (1099 income has no withholding at all, so essentially all of
+// totalTaxFromSE counts as "not covered" for this estimate.) If the user
+// has entered a prior-year total tax liability, we also surface the
+// standard safe-harbor comparison as a secondary note.
+function evaluateQuarterlyRequirement(calc){
+  const se = getSelfEmploymentSettings();
+  const required = calc.totalTaxFromSE >= 1000;
+  let safeHarborNote = "";
+  if(parseMoney(se.priorYearTaxLiability) > 0){
+    const priorYear = parseMoney(se.priorYearTaxLiability);
+    if(calc.totalTaxFromSE < priorYear){
+      safeHarborNote = `Your estimated additional tax (${fmtMoney(calc.totalTaxFromSE)}) is less than 100% of the prior-year tax liability you entered (${fmtMoney(priorYear)}). If your W2 withholding alone covers 100% of last year's total tax (110% if last year's AGI was over $150,000), you may qualify for a safe-harbor exception even though you owe over $1,000 — confirm with a tax professional.`;
+    }
+  }
+  return { required, safeHarborNote };
 }
 
 function sortedMonths(){
@@ -1787,6 +2056,161 @@ function renderPayTable(){
   }
 
   table.innerHTML = head + "<tbody>" + rows + "</tbody>";
+}
+
+/* ============================================================
+   RENDER: 1099 / SELF-EMPLOYMENT TAB
+   ============================================================ */
+
+function renderSelfEmploymentTab(){
+  renderSESettingsInputs();
+  renderSEIncomeTable();
+  renderSETaxSummary();
+  renderSEQuarterlyTable();
+}
+
+// Syncs the settings inputs' displayed values with state (without
+// clobbering focus — only called on full render(), not on every keystroke).
+function renderSESettingsInputs(){
+  const se = getSelfEmploymentSettings();
+  const filingEl = document.getElementById("seFilingStatusInput");
+  const stateEl = document.getElementById("seStateTaxInput");
+  const priorYearEl = document.getElementById("sePriorYearTaxInput");
+  if(filingEl && document.activeElement !== filingEl) filingEl.value = se.filingStatus || "single";
+  if(stateEl && document.activeElement !== stateEl) stateEl.value = se.stateTax || "MN";
+  if(priorYearEl && document.activeElement !== priorYearEl){
+    priorYearEl.value = parseMoney(se.priorYearTaxLiability) > 0 ? fmtMoney(se.priorYearTaxLiability) : "";
+  }
+}
+
+function renderSEIncomeTable(){
+  const se = getSelfEmploymentSettings();
+  const table = document.getElementById("seIncomeTable");
+  if(!table) return;
+
+  const entries = (se.entries || []).slice().sort((a,b) => (b.date||"").localeCompare(a.date||""));
+  const head = `<thead><tr>
+    <th>Date</th><th>Client / Description</th>
+    <th class="col-end">Amount</th><th style="width:30px;"></th>
+  </tr></thead>`;
+
+  if(entries.length === 0){
+    table.innerHTML = head + `<tbody><tr class="empty-row"><td colspan="4">No 1099 income logged yet. Use "+ Add income" above to get started.</td></tr></tbody>`;
+    return;
+  }
+
+  let totalGross = 0;
+  const rows = entries.map(e => {
+    const gross = parseMoney(e.grossAmount);
+    totalGross += gross;
+    return `<tr>
+      <td><input type="date" data-kind="se-entry-field" data-id="${e.id}" data-field="date" value="${e.date || ''}"></td>
+      <td><input type="text" data-kind="se-entry-field" data-id="${e.id}" data-field="client" value="${escapeHtml(e.client || '')}" placeholder="Client / description"></td>
+      <td class="col-end"><input type="text" data-kind="se-entry-field" data-id="${e.id}" data-field="grossAmount" value="${fmtMoney(gross)}"></td>
+      <td class="actions-cell"><button class="btn small danger" data-action="delete-se-entry" data-id="${e.id}" title="Remove entry">✕</button></td>
+    </tr>`;
+  }).join("");
+
+  const totalRow = `<tr class="year-summary-row">
+    <td colspan="2" style="font-weight:800;">Year-to-date total</td>
+    <td class="col-end" style="font-weight:800;">${fmtMoney(totalGross)}</td>
+    <td></td>
+  </tr>`;
+
+  table.innerHTML = head + `<tbody>${rows}${totalRow}</tbody>`;
+}
+
+function renderSETaxSummary(){
+  const container = document.getElementById("seTaxSummary");
+  if(!container) return;
+
+  const se = getSelfEmploymentSettings();
+  const calc = computeSETaxEstimate();
+
+  if((state.payTracker || []).length === 0){
+    container.innerHTML = `<p class="hint">Add at least one Pay Tracker entry so your current W2 pay can be used as the tax-bracket baseline.</p>`;
+    return;
+  }
+
+  const stateLabel = se.stateTax === "MN" ? "Est. Minnesota state tax" : "Est. state tax";
+  const stateValue = se.stateTax === "MN" ? fmtMoney(calc.stateTaxFromSE) : "$0.00 (no state tax)";
+
+  container.innerHTML = `
+    <div class="stat-grid">
+      <div class="stat"><div class="label">Current W2 annual pay (basis)</div><div class="value" style="font-size:20px;">${fmtMoney(calc.w2Wages)}</div></div>
+      <div class="stat"><div class="label">YTD 1099 net income</div><div class="value" style="font-size:20px;">${fmtMoney(calc.netYTD)}</div></div>
+      <div class="stat"><div class="label">Est. self-employment tax</div><div class="value" style="font-size:20px;">${fmtMoney(calc.seTaxTotal)}</div></div>
+      <div class="stat"><div class="label">Est. additional federal tax</div><div class="value" style="font-size:20px;">${fmtMoney(calc.fedTaxFromSE)}</div></div>
+      <div class="stat"><div class="label">${stateLabel}</div><div class="value" style="font-size:20px;">${stateValue}</div></div>
+      <div class="stat"><div class="label">Total est. tax owed on 1099 work</div><div class="value" style="font-size:20px; color:var(--navy);">${fmtMoney(calc.totalTaxFromSE)}</div></div>
+    </div>
+    <p class="hint">Set aside about <strong>${(calc.effectiveRate * 100).toFixed(1)}%</strong> of each 1099 payment to cover this. Estimate based on 2026 tax brackets for ${FILING_STATUS_LABELS[calc.filingStatus]} filing status${se.stateTax === "MN" ? " and Minnesota state tax" : ""}, using your current W2 pay (${fmtMoney(calc.w2Wages)}/yr) as the bracket baseline. This is not tax advice — consult a tax professional for anything beyond a rough estimate.</p>
+  `;
+}
+
+function renderSEQuarterlyTable(){
+  const container = document.getElementById("seQuarterlySection");
+  if(!container) return;
+
+  const se = getSelfEmploymentSettings();
+  const calc = computeSETaxEstimate();
+  const verdict = evaluateQuarterlyRequirement(calc);
+  const year = new Date().getFullYear();
+  const periods = getQuarterlyPeriods(year);
+  const today = new Date();
+
+  const verdictHtml = verdict.required
+    ? `<div class="se-verdict required">
+        <div class="headline">Yes — you likely need to pay quarterly estimated taxes</div>
+        <div>Your estimated additional tax from 1099 work (${fmtMoney(calc.totalTaxFromSE)}) is at or above the IRS's $1,000 threshold, and 1099 income has no tax withheld at the source.</div>
+        ${verdict.safeHarborNote ? `<div style="margin-top:6px;">${verdict.safeHarborNote}</div>` : ""}
+      </div>`
+    : `<div class="se-verdict not-required">
+        <div class="headline">Probably not required — yet</div>
+        <div>Your estimated additional tax from 1099 work (${fmtMoney(calc.totalTaxFromSE)}) is currently under the IRS's $1,000 threshold that generally triggers a quarterly-payment requirement. Keep an eye on this as your 1099 income grows.</div>
+      </div>`;
+
+  const rows = periods.map(p => {
+    const quarterEntries = currentTaxYearSEEntries().filter(e => quarterEntryFilter(e, year, p.periodLabel));
+    const quarterNet = quarterEntries.reduce((s,e) => s + Math.max(0, parseMoney(e.grossAmount) - parseMoney(e.expenses)), 0);
+    const quarterEstTax = calc.netYTD > 0 ? quarterNet * calc.effectiveRate : 0;
+    const dueStr = p.dueDate.toLocaleDateString(undefined, {month:"short", day:"numeric", year:"numeric"});
+    let status, statusColor;
+    const paidKey = `${year}-${p.key}`;
+    const isPaid = !!(se.quarterlyPaid && se.quarterlyPaid[paidKey]);
+    if(isPaid){ status = "Paid"; statusColor = "var(--success)"; }
+    else if(today > p.dueDate){ status = "Due date passed"; statusColor = "var(--danger)"; }
+    else if((p.dueDate - today) / 86400000 <= 30){ status = "Due soon"; statusColor = "var(--amber)"; }
+    else { status = "Upcoming"; statusColor = "var(--ink-muted)"; }
+
+    return `<tr>
+      <td style="font-weight:700;">${p.label}</td>
+      <td>${p.periodLabel}</td>
+      <td>${dueStr}</td>
+      <td class="col-end">${fmtMoney(quarterNet)}</td>
+      <td class="col-end">${fmtMoney(quarterEstTax)}</td>
+      <td style="color:${statusColor}; font-weight:600;">${status}</td>
+      <td style="text-align:center;">
+        <label style="display:inline-flex; align-items:center; gap:4px; font-weight:400; cursor:pointer;">
+          <input type="checkbox" data-kind="se-quarter-paid" data-quarter="${paidKey}" ${isPaid ? "checked" : ""}> Paid
+        </label>
+      </td>
+    </tr>`;
+  }).join("");
+
+  container.innerHTML = `
+    ${verdictHtml}
+    <div class="table-scroll">
+      <table class="data">
+        <thead><tr>
+          <th>Quarter</th><th>Period</th><th>Due Date</th>
+          <th class="col-end">Net Income</th><th class="col-end">Est. Tax</th><th>Status</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <p class="hint">Each quarter's estimated tax is that quarter's logged net income multiplied by your current overall effective rate (${(calc.effectiveRate * 100).toFixed(1)}%). Standard IRS guidance is to pay roughly what you owe on income earned in that period. "Paid" checkboxes are just for your own tracking — this tool doesn't submit payments.</p>
+  `;
 }
 
 /* ============================================================
@@ -2593,6 +3017,7 @@ function render(){
   renderBillTable();
   renderPayTable();
   initCompCalculator();
+  renderSelfEmploymentTab();
   renderLoanTracker("privateLoanTable", "privateLoans");
   renderLoanTracker("federalLoanTable", "federalLoans");
   (state.loanTypes || []).forEach(t => renderLoanTracker(loanTableIdFor(t.key), t.key));
@@ -2879,6 +3304,17 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
+  // Quarterly "Paid" checkboxes on the 1099 tab
+  document.addEventListener("change", e => {
+    const target = e.target;
+    if(target.getAttribute("data-kind") !== "se-quarter-paid") return;
+    const se = getSelfEmploymentSettings();
+    if(!se.quarterlyPaid) se.quarterlyPaid = {};
+    se.quarterlyPaid[target.getAttribute("data-quarter")] = target.checked;
+    markDirty();
+    renderSEQuarterlyTable();
+  });
+
   // Add Loan Type
   document.getElementById("addLoanTypeBtn").addEventListener("click", () => {
     addLoanType();
@@ -2922,6 +3358,41 @@ document.addEventListener("DOMContentLoaded", () => {
     });
     markDirty();
     renderPayTable();
+  });
+
+  // Add 1099 Income entry
+  document.getElementById("addSEIncomeBtn").addEventListener("click", () => {
+    const se = getSelfEmploymentSettings();
+    if(!se.entries) se.entries = [];
+    se.entries.push({
+      id: uid(),
+      date: currentMonthKey() + "-01",
+      client: "",
+      grossAmount: 0,
+      expenses: 0
+    });
+    markDirty();
+    renderSEIncomeTable();
+    renderSETaxSummary();
+    renderSEQuarterlyTable();
+  });
+
+  // 1099 tax settings (filing status / state / prior-year liability)
+  document.getElementById("seFilingStatusInput").addEventListener("change", e => {
+    getSelfEmploymentSettings().filingStatus = e.target.value;
+    markDirty();
+    renderSETaxSummary();
+    renderSEQuarterlyTable();
+  });
+  document.getElementById("seStateTaxInput").addEventListener("change", e => {
+    getSelfEmploymentSettings().stateTax = e.target.value;
+    markDirty();
+    renderSETaxSummary();
+    renderSEQuarterlyTable();
+  });
+  document.getElementById("sePriorYearTaxInput").addEventListener("input", e => {
+    getSelfEmploymentSettings().priorYearTaxLiability = parseMoney(e.target.value);
+    markDirty();
   });
 
   // Add Accounts (Settings)
@@ -3013,6 +3484,18 @@ document.addEventListener("DOMContentLoaded", () => {
       loanData.monthlyData[mKey][loanId][field] = parseMoney(target.value);
       markDirty();
       // Same reasoning as above — defer the full-table rebuild to blur.
+    } else if(kind === "se-entry-field"){
+      const se = getSelfEmploymentSettings();
+      const id = target.getAttribute("data-id");
+      const field = target.getAttribute("data-field");
+      const entry = (se.entries || []).find(x => x.id === id);
+      if(entry){
+        entry[field] = (field === "date" || field === "client") ? target.value : parseMoney(target.value);
+        markDirty();
+        // Same reasoning as the loan fields above — full re-render (which
+        // reformats currency and recomputes totals) happens on blur, not
+        // on every keystroke, so typing isn't interrupted.
+      }
     }
   });
 
@@ -3034,6 +3517,25 @@ document.addEventListener("DOMContentLoaded", () => {
       if(stateKey && getLoanTypeData(stateKey)){
         renderLoanTracker(loanTableIdFor(stateKey), stateKey);
       }
+    }
+
+    // 1099 income entries — same "commit on blur" pattern as the loan
+    // fields, so the income table, tax summary, and quarterly table all
+    // recompute once the edit is finished rather than on every keystroke.
+    if(kind === "se-entry-field"){
+      if(field === "grossAmount"){
+        const num = parseMoney(e.target.value);
+        e.target.value = fmtMoney(num);
+      }
+      renderSEIncomeTable();
+      renderSETaxSummary();
+      renderSEQuarterlyTable();
+    }
+
+    if(e.target.id === "sePriorYearTaxInput"){
+      const num = parseMoney(e.target.value);
+      e.target.value = num > 0 ? fmtMoney(num) : "";
+      renderSEQuarterlyTable();
     }
   });
 
@@ -3057,6 +3559,14 @@ document.addEventListener("DOMContentLoaded", () => {
       state.payTracker = state.payTracker.filter(p => p.id !== id);
       markDirty();
       renderPayTable();
+    } else if(action === "delete-se-entry"){
+      const id = btn.getAttribute("data-id");
+      const se = getSelfEmploymentSettings();
+      se.entries = (se.entries || []).filter(x => x.id !== id);
+      markDirty();
+      renderSEIncomeTable();
+      renderSETaxSummary();
+      renderSEQuarterlyTable();
     } else if(action === "delete-acct"){
       const group = btn.getAttribute("data-group");
       const id = btn.getAttribute("data-id");
