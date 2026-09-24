@@ -1044,6 +1044,14 @@
       }
     }
   },
+  "loanTypes": [],
+  "selfEmployment": {
+    "filingStatus": "single",
+    "stateTax": "MN",
+    "priorYearTaxLiability": 0,
+    "entries": [],
+    "quarterlyPaid": {}
+  },
   "customLoanCategories": [],
   "carLoans": {
     "startMonthYear": "2024-12",
