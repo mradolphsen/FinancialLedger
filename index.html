@@ -1863,8 +1863,8 @@ function renderBillTable(){
       rows += `<tr data-id="${item.id}">
         <td class="drag-cell" title="Drag to reorder">⠿</td>
         <td class="label-cell"><input type="text" data-kind="bill-name" data-id="${item.id}" value="${escapeHtml(item.name || "")}" placeholder="e.g. Paycheck or Rent"></td>
-        <td class="col-money"><input type="text" data-kind="bill-debit" data-id="${item.id}" value="${item.debit !== undefined && item.debit !== "" && item.debit !== 0 ? fmtMoney(item.debit) : ""}"></td>
-        <td class="col-money"><input type="text" data-kind="bill-credit" data-id="${item.id}" value="${item.credit !== undefined && item.credit !== "" && item.credit !== 0 ? fmtMoney(item.credit) : ""}"></td>
+        <td class="col-money"><input type="text" data-kind="bill-debit" data-id="${item.id}" value="${item.debit !== undefined && item.debit !== "" ? fmtMoney(item.debit) : ""}"></td>
+        <td class="col-money"><input type="text" data-kind="bill-credit" data-id="${item.id}" value="${item.credit !== undefined && item.credit !== "" ? fmtMoney(item.credit) : ""}"></td>
         <td><input type="text" readonly value="${fmtMoney(running)}"></td>
         <td class="actions-cell"><button class="btn small danger" data-action="delete-bill" data-id="${item.id}" title="Remove">✕</button></td>
       </tr>`;
@@ -3514,7 +3514,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const field = e.target.getAttribute("data-field");
     if(kind === "balance" || kind === "recur-amount" || kind === "bill-debit" || kind === "bill-credit" || (kind === "pay-field" && (field === "basePay" || field === "myHourly")) || kind === "loan-header-field" || kind === "loan-month-field"){
       const num = parseMoney(e.target.value);
-      e.target.value = e.target.value.trim() !== "" && num !== 0 ? fmtMoney(num) : (kind === "loan-month-field" ? "$0.00" : "");
+      const typedSomething = e.target.value.trim() !== "";
+      e.target.value = typedSomething ? fmtMoney(num) : (kind === "loan-month-field" ? "$0.00" : "");
     }
 
     // Loan tracker fields rebuild the whole table here (on commit) rather
