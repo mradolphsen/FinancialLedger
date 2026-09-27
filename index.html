@@ -467,13 +467,13 @@ table.ledger-grid td.label-cell {
 
 /* Custom Column Widths for Bill Planner */
 table.ledger-grid col.col-drag { width: 30px; }
-table.ledger-grid col.col-trans { width: 45%; }
-table.ledger-grid col.col-money { width: 15%; }
+table.ledger-grid col.col-trans { width: 39%; }
+table.ledger-grid col.col-money { width: 18%; }
 table.ledger-grid col.col-rem { width: 20%; }
 table.ledger-grid col.col-act { width: 36px; }
 
 table.ledger-grid td.col-money input {
-  min-width: 65px;
+  min-width: 78px;
 }
 
 /* PAY TRACKER SPECIFIC STYLES */
@@ -818,10 +818,6 @@ footer a{ color:var(--ink-faint); }
             <div class="bill-header-card">
               <span class="bill-header-title">Starting Balance</span>
               <span class="bill-header-value" id="billStartAmount">$0.00</span>
-            </div>
-            <div class="bill-header-card ending-card">
-              <span class="bill-header-title">Ending Balance</span>
-              <span class="bill-header-value" id="billEndAmount">$0.00</span>
             </div>
           </div>
 
@@ -1864,7 +1860,7 @@ function renderBillTable(){
       
       running = running - debit + credit;
 
-      rows += `<tr data-id="${item.id}" draggable="true">
+      rows += `<tr data-id="${item.id}">
         <td class="drag-cell" title="Drag to reorder">⠿</td>
         <td class="label-cell"><input type="text" data-kind="bill-name" data-id="${item.id}" value="${escapeHtml(item.name || "")}" placeholder="e.g. Paycheck or Rent"></td>
         <td class="col-money"><input type="text" data-kind="bill-debit" data-id="${item.id}" value="${item.debit !== undefined && item.debit !== "" && item.debit !== 0 ? fmtMoney(item.debit) : ""}"></td>
@@ -1876,9 +1872,6 @@ function renderBillTable(){
   }
 
   table.innerHTML = head + "<tbody>" + rows + "</tbody>";
-  
-  const endEl = document.getElementById("billEndAmount");
-  if(endEl) endEl.textContent = fmtMoney(running);
 
   bindBillDragEvents();
 }
@@ -1888,13 +1881,32 @@ function bindBillDragEvents(){
   if(!tbody) return;
   let dragId = null;
 
-  tbody.querySelectorAll("tr[draggable=true]").forEach(row => {
+  // A row should only start dragging when the mousedown began on its drag
+  // handle (the ⠿ dots) — otherwise clicking or selecting text inside the
+  // row's inputs (e.g. copying the Remaining balance) would drag the whole
+  // row instead. So rows are NOT draggable by default; we flip "draggable"
+  // on just for the row the handle belongs to, and flip it back off as
+  // soon as the mouse is released or the drag ends.
+  tbody.addEventListener("mousedown", e => {
+    const handle = e.target.closest(".drag-cell");
+    if(!handle) return;
+    const row = handle.closest("tr[data-id]");
+    if(row) row.setAttribute("draggable", "true");
+  });
+  tbody.addEventListener("mouseup", () => {
+    tbody.querySelectorAll("tr[draggable=true]").forEach(row => row.removeAttribute("draggable"));
+  });
+
+  tbody.querySelectorAll("tr[data-id]").forEach(row => {
     row.addEventListener("dragstart", e => {
       dragId = row.getAttribute("data-id");
       row.classList.add("dragging");
       e.dataTransfer.effectAllowed = "move";
     });
-    row.addEventListener("dragend", () => row.classList.remove("dragging"));
+    row.addEventListener("dragend", () => {
+      row.classList.remove("dragging");
+      row.removeAttribute("draggable");
+    });
     row.addEventListener("dragover", e => e.preventDefault());
     row.addEventListener("drop", e => {
       e.preventDefault();
@@ -3071,9 +3083,6 @@ function recalculateLedger(){
       if(remainingInput) remainingInput.value = fmtMoney(running);
     }
   });
-
-  const endEl = document.getElementById("billEndAmount");
-  if(endEl) endEl.textContent = fmtMoney(running);
 }
 
 function updatePayRecord(id, field, value){
