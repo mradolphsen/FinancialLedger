@@ -337,6 +337,12 @@
       "credit": 0
     },
     {
+      "id": "92rhr4b",
+      "name": "Ed Financial",
+      "debit": 137,
+      "credit": 0
+    },
+    {
       "id": "0aunldx",
       "name": "Target",
       "debit": 119.81,
@@ -346,12 +352,6 @@
       "id": "qemj6lr",
       "name": "Scheels",
       "debit": 1030.44,
-      "credit": 0
-    },
-    {
-      "id": "92rhr4b",
-      "name": "Ed Financial",
-      "debit": 137,
       "credit": 0
     },
     {
