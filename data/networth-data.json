@@ -1031,15 +1031,7 @@
     "filingStatus": "single",
     "stateTax": "MN",
     "priorYearTaxLiability": 0,
-    "entries": [
-      {
-        "id": "e947t5c",
-        "date": "2026-09-01",
-        "client": "",
-        "grossAmount": 2000,
-        "expenses": 0
-      }
-    ],
+    "entries": [],
     "quarterlyPaid": {}
   },
   "customLoanCategories": [],
