@@ -851,7 +851,7 @@ footer a{ color:var(--ink-faint); }
         <div class="table-scroll">
           <table class="data pay-grid" id="payTable"></table>
         </div>
-        <p class="hint">Calculations: Yearly Pre-Tax = Hourly × 2080 hrs | Yearly Post-Tax = 70% of Pre-Tax | Paycheck = Hourly × 80 hrs | Comp-Ratio is manually set.</p>
+        <p class="hint">Calculations: Yearly Pre-Tax = Hourly × 2080 hrs | Yearly Post-Tax = Pre-Tax minus estimated FICA, federal, and state tax (using the filing status &amp; state set in the 1099 Income tab) | Paycheck = Hourly × 80 hrs | Comp-Ratio is manually set.</p>
       </div>
     </section>
 
@@ -1539,6 +1539,46 @@ function evaluateQuarterlyRequirement(calc){
   return { required, safeHarborNote };
 }
 
+// Standard employee-side FICA rates (as opposed to the self-employed rates
+// above, which cover both the employee and employer portions).
+const FICA_EMPLOYEE_SS_RATE = 0.062;
+const FICA_EMPLOYEE_MEDICARE_RATE = 0.0145;
+
+// Estimates take-home (post-tax) annual pay for a W2 salary: employee-side
+// FICA (Social Security up to the wage base, Medicare uncapped, plus the
+// 0.9% Additional Medicare Tax above the threshold) plus federal and state
+// income tax on the standard deduction. Uses the same filing-status/state
+// settings as the 1099 tax estimator above (same person, same brackets),
+// so changing those there also updates the Pay Tracker's Post Tax figures.
+function estimateW2PostTaxAnnual(grossAnnual){
+  const se = getSelfEmploymentSettings();
+  const filingStatus = FEDERAL_BRACKETS_2026[se.filingStatus] ? se.filingStatus : "single";
+
+  // FICA (employee side only)
+  const ssTaxable = Math.min(grossAnnual, SE_TAX_PARAMS_2026.ssWageBase);
+  const ssTax = ssTaxable * FICA_EMPLOYEE_SS_RATE;
+  const medicareTax = grossAnnual * FICA_EMPLOYEE_MEDICARE_RATE;
+  const addlThreshold = SE_TAX_PARAMS_2026.addlMedicareThreshold[filingStatus];
+  const addlMedicareTax = Math.max(0, grossAnnual - addlThreshold) * SE_TAX_PARAMS_2026.addlMedicareRate;
+  const ficaTotal = ssTax + medicareTax + addlMedicareTax;
+
+  // Federal income tax
+  const fedStd = FEDERAL_STD_DEDUCTION_2026[filingStatus];
+  const fedTaxable = Math.max(0, grossAnnual - fedStd);
+  const fedTax = bracketTax(fedTaxable, FEDERAL_BRACKETS_2026[filingStatus]);
+
+  // Minnesota state income tax (skipped if the user set "No state income
+  // tax applies" in the 1099 tab's tax settings)
+  let stateTax = 0;
+  if(se.stateTax === "MN"){
+    const mnStd = MN_STD_DEDUCTION_2026[filingStatus];
+    const mnTaxable = Math.max(0, grossAnnual - mnStd);
+    stateTax = bracketTax(mnTaxable, MN_BRACKETS_2026[filingStatus]);
+  }
+
+  return Math.max(0, grossAnnual - ficaTotal - fedTax - stateTax);
+}
+
 function sortedMonths(){
   return Object.keys(state.months).sort().reverse();
 }
@@ -2042,7 +2082,7 @@ function renderPayTable(){
       const hourlyDiff = idx > 0 ? myHourly - prevHourly : 0;
 
       const yearlyPre = myHourly * 2080;
-      const yearlyPost = yearlyPre * 0.70;
+      const yearlyPost = estimateW2PostTaxAnnual(yearlyPre);
 
       const paycheckTotal = myHourly * 80;
       const prevPaycheckTotal = idx > 0 ? prevHourly * 80 : paycheckTotal;
@@ -3100,7 +3140,7 @@ function updatePayRecord(id, field, value){
 
   const pctAboveBase = basePay > 0 ? ((myHourly - basePay) / basePay) * 100 : 0;
   const yearlyPre = myHourly * 2080;
-  const yearlyPost = yearlyPre * 0.70;
+  const yearlyPost = estimateW2PostTaxAnnual(yearlyPre);
   const paycheckTotal = myHourly * 80;
 
   const idx = state.payTracker.findIndex(p => p.id === id);
