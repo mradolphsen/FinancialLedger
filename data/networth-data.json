@@ -331,15 +331,15 @@
       "credit": 0
     },
     {
-      "id": "0aunldx",
-      "name": "Target",
-      "debit": 119.81,
-      "credit": 0
-    },
-    {
       "id": "xfksgqm",
       "name": "State Farm",
       "debit": 13.26,
+      "credit": 0
+    },
+    {
+      "id": "0aunldx",
+      "name": "Target",
+      "debit": 119.81,
       "credit": 0
     },
     {
