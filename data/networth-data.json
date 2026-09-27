@@ -325,12 +325,6 @@
       "credit": 0
     },
     {
-      "id": "jx98ub7",
-      "name": "Paycheck",
-      "debit": 0,
-      "credit": 1588.26
-    },
-    {
       "id": "0aunldx",
       "name": "Target",
       "debit": 119.81,
@@ -365,6 +359,12 @@
       "name": "Century Link",
       "debit": 49,
       "credit": 0
+    },
+    {
+      "id": "jx98ub7",
+      "name": "Paycheck",
+      "debit": 0,
+      "credit": 1588.26
     },
     {
       "id": "aljai1g",
