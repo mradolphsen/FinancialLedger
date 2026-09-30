@@ -349,12 +349,6 @@
       "credit": 0
     },
     {
-      "id": "qemj6lr",
-      "name": "Scheels",
-      "debit": 1400.56,
-      "credit": 0
-    },
-    {
       "id": "vbroijl",
       "name": "Century Link",
       "debit": 49,
@@ -377,6 +371,12 @@
       "name": "Paycheck",
       "debit": 0,
       "credit": 1417.58
+    },
+    {
+      "id": "qemj6lr",
+      "name": "Scheels",
+      "debit": 1400.56,
+      "credit": 0
     },
     {
       "id": "0hnq7u5",
