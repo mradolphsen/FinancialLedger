@@ -377,6 +377,12 @@
       "name": "Paycheck",
       "debit": 0,
       "credit": 1417.58
+    },
+    {
+      "id": "0hnq7u5",
+      "name": "",
+      "debit": 0,
+      "credit": 0
     }
   ],
   "compCalculator": {
