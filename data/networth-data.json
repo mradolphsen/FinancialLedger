@@ -264,7 +264,8 @@
     "2026-10": {
       "balances": {
         "savings": 2425.97,
-        "checking": 10
+        "checking": 10,
+        "usbank_ef": 11321.53
       },
       "notes": ""
     }
