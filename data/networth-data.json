@@ -265,7 +265,8 @@
       "balances": {
         "savings": 2425.97,
         "checking": 10,
-        "usbank_ef": 11481.34
+        "usbank_ef": 11481.34,
+        "usbank_cc": 500
       },
       "notes": ""
     }
