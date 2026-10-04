@@ -1049,7 +1049,9 @@
         "expenses": 0
       }
     ],
-    "quarterlyPaid": {}
+    "quarterlyPaid": {
+      "2026-q1": false
+    }
   },
   "customLoanCategories": [],
   "carLoans": {
