@@ -354,12 +354,6 @@
       "credit": 0
     },
     {
-      "id": "qemj6lr",
-      "name": "Scheels",
-      "debit": 1373.89,
-      "credit": 0
-    },
-    {
       "id": "92rhr4b",
       "name": "Ed Financial",
       "debit": 137,
@@ -376,6 +370,12 @@
       "name": "Paycheck",
       "debit": 0,
       "credit": 1550
+    },
+    {
+      "id": "qemj6lr",
+      "name": "Scheels",
+      "debit": 1373.89,
+      "credit": 0
     },
     {
       "id": "aljai1g",
