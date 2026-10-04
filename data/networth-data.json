@@ -348,15 +348,15 @@
       "credit": 0
     },
     {
-      "id": "qemj6lr",
-      "name": "Scheels",
-      "debit": 1373.89,
-      "credit": 0
-    },
-    {
       "id": "0hnq7u5",
       "name": "US Bank",
       "debit": 1142.92,
+      "credit": 0
+    },
+    {
+      "id": "qemj6lr",
+      "name": "Scheels",
+      "debit": 1373.89,
       "credit": 0
     },
     {
