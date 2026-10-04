@@ -348,6 +348,12 @@
       "credit": 0
     },
     {
+      "id": "qemj6lr",
+      "name": "Scheels",
+      "debit": 1373.89,
+      "credit": 0
+    },
+    {
       "id": "0hnq7u5",
       "name": "US Bank",
       "debit": 1142.92,
@@ -382,12 +388,6 @@
       "name": "Paycheck",
       "debit": 0,
       "credit": 1550
-    },
-    {
-      "id": "qemj6lr",
-      "name": "Scheels",
-      "debit": 1373.89,
-      "credit": 0
     }
   ],
   "compCalculator": {
