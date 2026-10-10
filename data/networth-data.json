@@ -366,15 +366,15 @@
       "credit": 1442.86
     },
     {
-      "id": "vbroijl",
-      "name": "Century Link",
-      "debit": 49,
-      "credit": 0
-    },
-    {
       "id": "qemj6lr",
       "name": "Scheels",
       "debit": 1373.89,
+      "credit": 0
+    },
+    {
+      "id": "vbroijl",
+      "name": "Century Link",
+      "debit": 49,
       "credit": 0
     },
     {
