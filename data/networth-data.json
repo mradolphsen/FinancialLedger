@@ -1029,7 +1029,16 @@
       }
     }
   },
-  "loanTypes": [],
+  "loanTypes": [
+    {
+      "key": "loanType_90c77ff",
+      "label": "Personal Loans",
+      "startMonthYear": "2026-10",
+      "loans": [],
+      "monthlyData": {},
+      "chartColor": "#6D4AA0"
+    }
+  ],
   "selfEmployment": {
     "filingStatus": "single",
     "stateTax": "MN",
