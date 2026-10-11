@@ -1034,7 +1034,16 @@
       "key": "loanType_90c77ff",
       "label": "Personal Loans",
       "startMonthYear": "2026-10",
-      "loans": [],
+      "loans": [
+        {
+          "id": "3x0f039",
+          "name": "Car Loan",
+          "principle": 0,
+          "startingAmount": 0,
+          "autoPayAmount": 0,
+          "monthlyChange": 0
+        }
+      ],
       "monthlyData": {},
       "chartColor": "#6D4AA0"
     }
