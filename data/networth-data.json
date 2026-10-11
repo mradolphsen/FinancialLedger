@@ -1029,7 +1029,16 @@
       }
     }
   },
-  "loanTypes": [],
+  "loanTypes": [
+    {
+      "key": "loanType_kss1820",
+      "label": "Car Loan",
+      "startMonthYear": "2026-10",
+      "loans": [],
+      "monthlyData": {},
+      "chartColor": "#6D4AA0"
+    }
+  ],
   "selfEmployment": {
     "filingStatus": "single",
     "stateTax": "MN",
