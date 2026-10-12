@@ -321,6 +321,12 @@
       "name": "Subscription",
       "dueEstimate": "Varies",
       "amount": 15
+    },
+    {
+      "id": "z0oswt2",
+      "name": "Car Loan",
+      "dueEstimate": "",
+      "amount": 0
     }
   ],
   "bills": [
