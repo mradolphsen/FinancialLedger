@@ -327,12 +327,6 @@
       "name": "Car Loan",
       "dueEstimate": "15th ",
       "amount": 300
-    },
-    {
-      "id": "eztumnv",
-      "name": "",
-      "dueEstimate": "",
-      "amount": 0
     }
   ],
   "bills": [
