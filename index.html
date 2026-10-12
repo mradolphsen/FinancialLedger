@@ -3091,9 +3091,22 @@ function escapeHtml(value){
    MUTATIONS & HELPERS
    ============================================================ */
 
+function updateRecurTotal(){
+  const totalEl = document.getElementById("recurTotalAmount");
+  if(!totalEl) return;
+  const total = state.recurring.reduce((sum, r) => sum + parseMoney(r.amount), 0);
+  totalEl.textContent = fmtMoney(total);
+}
+
 function updateRecur(id, field, value){
   const item = state.recurring.find(r => r.id === id);
-  if(item){ item[field] = value; markDirty(); }
+  if(item){
+    item[field] = value;
+    markDirty();
+    // Refresh the Total card live as amounts are typed. We update only the
+    // total text (not the whole table) so the input keeps focus/cursor.
+    if(field === "amount") updateRecurTotal();
+  }
 }
 
 function updateBill(id, field, value){
