@@ -3571,6 +3571,14 @@ document.addEventListener("DOMContentLoaded", () => {
       e.target.value = typedSomething ? fmtMoney(num) : (kind === "loan-month-field" ? "$0.00" : "");
     }
 
+    // Safety net: also refresh the Recurring Expenses total on blur, in case
+    // the value was changed in a way that didn't fire a normal input event.
+    if(kind === "recur-amount"){
+      const item = state.recurring.find(r => r.id === e.target.getAttribute("data-id"));
+      if(item){ item.amount = parseMoney(e.target.value); }
+      updateRecurTotal();
+    }
+
     // Loan tracker fields rebuild the whole table here (on commit) rather
     // than on every keystroke, so typing a full number doesn't get
     // interrupted. This recomputes remaining balances, totals, and the
