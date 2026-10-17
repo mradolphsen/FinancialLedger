@@ -1072,7 +1072,7 @@
         {
           "id": "3x0f039",
           "name": "Car Loan",
-          "principle": 0,
+          "principle": 20000,
           "startingAmount": 0,
           "autoPayAmount": 0,
           "monthlyChange": 0
