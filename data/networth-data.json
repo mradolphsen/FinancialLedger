@@ -1074,7 +1074,7 @@
           "name": "Car Loan",
           "principle": 20091.37,
           "startingAmount": 20091.37,
-          "autoPayAmount": 324,
+          "autoPayAmount": 324.78,
           "monthlyChange": 0
         }
       ],
