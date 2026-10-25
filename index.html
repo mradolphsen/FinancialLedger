@@ -690,6 +690,23 @@ table.loan-grid tr:hover td.loan-closed-cell{
   flex-direction: column;
   gap: 20px;
 }
+.loan-chart-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0 0 12px;
+}
+.loan-chart-head .loan-chart-title { margin: 0; }
+.loan-chart-head .btn { white-space: nowrap; }
+.proj-dialog { max-width: 440px; }
+.proj-note { font-size: 12.5px; color: var(--ink-muted); line-height: 1.5; margin: 0 0 14px; }
+.proj-preview {
+  background: var(--bg); border: 1px solid var(--line); border-radius: var(--radius-sm);
+  padding: 10px 12px; font-size: 13px; color: var(--ink); margin-top: 4px;
+}
+.proj-preview strong { color: var(--navy); }
+.proj-preview.warn strong { color: var(--danger); }
 .loan-chart-item .loan-chart-title {
   margin: 0 0 12px;
   font-family: 'Libre Franklin', sans-serif;
@@ -1092,6 +1109,33 @@ footer a{ color:var(--ink-faint); }
     <a href="#" id="scrollTop">Back to top</a>
   </footer>
 
+</div>
+
+<!-- ==================== PROJECTION MODAL (per-loan graph) ==================== -->
+<div class="modal-overlay" id="projOverlay">
+  <div class="modal-dialog proj-dialog" role="dialog" aria-modal="true" aria-labelledby="projModalTitle">
+    <div class="modal-head">
+      <h2 id="projModalTitle">Projected Payoff</h2>
+      <button class="icon-btn" id="closeProjBtn" aria-label="Close">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="proj-note" id="projLoanName"></p>
+      <div class="field" style="margin-bottom:12px;">
+        <label for="projPaymentInput">Minimum monthly payment</label>
+        <input type="text" id="projPaymentInput" inputmode="decimal" placeholder="$0.00">
+      </div>
+      <div class="field" style="margin-bottom:12px;">
+        <label for="projInterestInput">Monthly interest</label>
+        <input type="text" id="projInterestInput" inputmode="decimal" placeholder="$0.00">
+      </div>
+      <div class="proj-preview" id="projPreview"></div>
+      <div class="btn-row">
+        <button class="btn primary" id="saveProjBtn">Save</button>
+        <button class="btn" id="cancelProjBtn">Cancel</button>
+        <button class="btn ghost danger" id="resetProjBtn" style="margin-left:auto;">Reset</button>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- ==================== SETTINGS MODAL ==================== -->
@@ -2849,9 +2893,26 @@ function loanMonthlyChange(loan){
 // down by the loan's fixed Monthly Change amount (floored at $0). This is
 // intentionally independent of the payment/interest schedule used for the
 // "Actual Remaining Balance" line.
-function computeProjectedSeries(loan, numMonths){
+// The change per month actually used for the projected line. Built-in loans
+// (and any loan with a Monthly Change set) use that fixed value. Loans
+// without one — e.g. any newly added loan, which is created with
+// monthlyChange: 0 and has no UI field to edit it — fall back to what the
+// loan's own numbers imply: Auto Pay Amount minus average monthly interest
+// goes to principal, so the balance falls by that much each month.
+function effectiveLoanChange(loan, avgInterest){
+  // Set through the per-graph "Projection" popup: decrease = payment - interest
+  if(loan.projPayment !== undefined && loan.projPayment !== null && loan.projPayment !== ""){
+    return -(parseMoney(loan.projPayment) - parseMoney(loan.projInterest));
+  }
+  const explicit = loanMonthlyChange(loan);
+  if(explicit !== 0) return explicit;
+  const principalPerMonth = parseMoney(loan.autoPayAmount) - (avgInterest || 0);
+  return principalPerMonth > 0 ? -principalPerMonth : 0;
+}
+
+function computeProjectedSeries(loan, numMonths, avgInterest){
   const start = parseMoney(loan.startingAmount);
-  const change = loanMonthlyChange(loan);
+  const change = effectiveLoanChange(loan, avgInterest);
   const series = [];
   for(let i = 0; i < numMonths; i++){
     let val = start + (i * change);
@@ -2872,9 +2933,9 @@ function computeProjectedSeries(loan, numMonths){
 // stray/accidental entry far in the future (e.g. a cell clicked into by
 // mistake many years out in the table) would otherwise drag the entire
 // chart's timeframe out with it.
-function loanChartTimeline(loan, data, startKey){
+function loanChartTimeline(loan, data, startKey, avgInterest){
   const start = parseMoney(loan.startingAmount);
-  const change = loanMonthlyChange(loan);
+  const change = effectiveLoanChange(loan, avgInterest);
 
   let monthsToZero = 359;
   if(change < 0){
@@ -2912,17 +2973,18 @@ function renderIndividualLoanCharts(containerId, stateKey, actualColor, projecte
   }
 
   const startKey = data.startMonthYear || "2024-12";
-  const { monthlyRows } = computeLoanSchedule(stateKey);
+  const { monthlyRows, avgInterestMap } = computeLoanSchedule(stateKey);
 
   loans.forEach(loan => {
-    const numMonths = loanChartTimeline(loan, data, startKey);
+    const avgInt = (avgInterestMap && avgInterestMap[loan.id]) || 0;
+    const numMonths = loanChartTimeline(loan, data, startKey, avgInt);
 
     const labels = [];
     for(let i = 0; i < numMonths; i++){
       labels.push(monthLabel(addMonthsToKey(startKey, i)));
     }
 
-    const projectedData = computeProjectedSeries(loan, numMonths);
+    const projectedData = computeProjectedSeries(loan, numMonths, avgInt);
     const actualData = [];
     for(let i = 0; i < numMonths; i++){
       const row = monthlyRows[i];
@@ -2932,8 +2994,9 @@ function renderIndividualLoanCharts(containerId, stateKey, actualColor, projecte
 
     const card = document.createElement("div");
     card.className = "chart-card loan-chart-item";
-    card.innerHTML = `<h3 class="loan-chart-title"></h3><div class="chart-container"><canvas></canvas></div>`;
+    card.innerHTML = `<div class="loan-chart-head"><h3 class="loan-chart-title"></h3><button type="button" class="btn small" data-action="edit-projection">⚙ Projection</button></div><div class="chart-container"><canvas></canvas></div>`;
     card.querySelector(".loan-chart-title").textContent = loan.name;
+    card.querySelector('[data-action="edit-projection"]').addEventListener("click", () => openProjectionModal(stateKey, loan.id));
     container.appendChild(card);
 
     const canvas = card.querySelector("canvas");
@@ -2968,6 +3031,106 @@ function renderIndividualLoanCharts(containerId, stateKey, actualColor, projecte
     });
   });
 }
+
+// ---- Per-graph "Projection" popup -----------------------------------------
+// Lets the user set the hardcoded monthly decrease of the Projected Payoff
+// line from two inputs: minimum monthly payment and monthly interest.
+// Decrease per month = payment - interest.
+let projEditing = null; // { stateKey, loanId }
+
+function projReadInputs(){
+  return {
+    pay: parseMoney(document.getElementById("projPaymentInput").value),
+    int: parseMoney(document.getElementById("projInterestInput").value)
+  };
+}
+
+function projUpdatePreview(){
+  const el = document.getElementById("projPreview");
+  const { pay, int } = projReadInputs();
+  const dec = pay - int;
+  el.classList.toggle("warn", dec <= 0);
+  if(pay <= 0){
+    el.innerHTML = "Enter a payment to see the projected monthly decrease.";
+  } else if(dec <= 0){
+    el.innerHTML = "Interest is at or above the payment, so the balance <strong>won't decrease</strong>.";
+  } else {
+    el.innerHTML = "Projected monthly decrease: <strong>" + fmtMoney(dec) + "</strong>";
+  }
+}
+
+function openProjectionModal(stateKey, loanId){
+  const data = getLoanTypeData(stateKey);
+  const loan = data && (data.loans || []).find(l => l.id === loanId);
+  if(!loan) return;
+  projEditing = { stateKey, loanId };
+
+  const { avgInterestMap } = computeLoanSchedule(stateKey);
+  const hasSaved = loan.projPayment !== undefined && loan.projPayment !== null && loan.projPayment !== "";
+  const payVal = hasSaved ? parseMoney(loan.projPayment) : parseMoney(loan.autoPayAmount);
+  const intVal = hasSaved ? parseMoney(loan.projInterest) : (avgInterestMap[loanId] || 0);
+
+  document.getElementById("projLoanName").textContent =
+    loan.name + " — the dashed Projected Payoff line drops by (payment − interest) each month.";
+  document.getElementById("projPaymentInput").value = payVal ? fmtMoney(payVal) : "";
+  document.getElementById("projInterestInput").value = intVal ? fmtMoney(intVal) : "";
+  projUpdatePreview();
+  document.getElementById("projOverlay").classList.add("open");
+  document.getElementById("projPaymentInput").focus();
+}
+
+function closeProjectionModal(){
+  document.getElementById("projOverlay").classList.remove("open");
+  projEditing = null;
+}
+
+function saveProjectionModal(){
+  if(!projEditing) return;
+  const data = getLoanTypeData(projEditing.stateKey);
+  const loan = data && (data.loans || []).find(l => l.id === projEditing.loanId);
+  if(!loan){ closeProjectionModal(); return; }
+  const { pay, int } = projReadInputs();
+  loan.projPayment = pay;
+  loan.projInterest = int;
+  loan.monthlyChange = -(pay - int);
+  markDirty();
+  closeProjectionModal();
+  renderAllCharts();
+}
+
+function resetProjectionModal(){
+  if(!projEditing) return;
+  const data = getLoanTypeData(projEditing.stateKey);
+  const loan = data && (data.loans || []).find(l => l.id === projEditing.loanId);
+  if(loan){
+    delete loan.projPayment;
+    delete loan.projInterest;
+    delete loan.monthlyChange; // built-ins fall back to their defaults; others to auto-pay minus avg interest
+    markDirty();
+  }
+  closeProjectionModal();
+  renderAllCharts();
+}
+
+function initProjectionModal(){
+  const overlay = document.getElementById("projOverlay");
+  if(!overlay || overlay.dataset.ready) return;
+  overlay.dataset.ready = "1";
+  document.getElementById("closeProjBtn").addEventListener("click", closeProjectionModal);
+  document.getElementById("cancelProjBtn").addEventListener("click", closeProjectionModal);
+  document.getElementById("saveProjBtn").addEventListener("click", saveProjectionModal);
+  document.getElementById("resetProjBtn").addEventListener("click", resetProjectionModal);
+  overlay.addEventListener("click", e => { if(e.target === overlay) closeProjectionModal(); });
+  ["projPaymentInput","projInterestInput"].forEach(id => {
+    const el = document.getElementById(id);
+    el.addEventListener("input", projUpdatePreview);
+    el.addEventListener("keydown", e => { if(e.key === "Enter") saveProjectionModal(); });
+    el.addEventListener("blur", () => { if(el.value.trim() !== "") el.value = fmtMoney(el.value); projUpdatePreview(); });
+  });
+  document.addEventListener("keydown", e => { if(e.key === "Escape" && overlay.classList.contains("open")) closeProjectionModal(); });
+}
+document.addEventListener("DOMContentLoaded", initProjectionModal);
+if(document.readyState !== "loading") initProjectionModal();
 
 function renderPrivateLoanChart(){
   renderIndividualLoanCharts("privateLoanCharts", "privateLoans", CHART_COLORS.blue, CHART_COLORS.amber);
