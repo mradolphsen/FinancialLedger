@@ -1078,7 +1078,13 @@
           "monthlyChange": 0
         }
       ],
-      "monthlyData": {},
+      "monthlyData": {
+        "2026-12": {
+          "3x0f039": {
+            "interest": 83.55
+          }
+        }
+      },
       "chartColor": "#6D4AA0"
     }
   ],
