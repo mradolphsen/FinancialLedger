@@ -389,6 +389,12 @@
       "credit": 1430.76
     },
     {
+      "id": "aljai1g",
+      "name": "College Ave",
+      "debit": 355,
+      "credit": 0
+    },
+    {
       "id": "vbroijl",
       "name": "Century Link",
       "debit": 49,
@@ -404,12 +410,6 @@
       "id": "qemj6lr",
       "name": "Scheels",
       "debit": 740.55,
-      "credit": 0
-    },
-    {
-      "id": "aljai1g",
-      "name": "College Ave",
-      "debit": 355,
       "credit": 0
     },
     {
