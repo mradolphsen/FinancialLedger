@@ -274,7 +274,8 @@
     },
     "2026-11": {
       "balances": {
-        "savings": 2172.38
+        "savings": 2129.18,
+        "checking": 10
       },
       "notes": ""
     }
