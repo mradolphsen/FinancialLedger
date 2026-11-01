@@ -411,6 +411,12 @@
       "name": "Paycheck",
       "debit": 0,
       "credit": 1430.76
+    },
+    {
+      "id": "pofk155",
+      "name": "",
+      "debit": 0,
+      "credit": 0
     }
   ],
   "compCalculator": {
