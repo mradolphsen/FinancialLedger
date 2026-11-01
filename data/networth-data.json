@@ -273,7 +273,9 @@
       "notes": "New Car (Down payment $8,000)\nCar Insurance (478.80)\nSOCRA Reimbursement ($565.00)\nEye Exam ($134)"
     },
     "2026-11": {
-      "balances": {},
+      "balances": {
+        "savings": 2172.38
+      },
       "notes": ""
     }
   },
