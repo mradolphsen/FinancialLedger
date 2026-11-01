@@ -277,7 +277,8 @@
         "savings": 2129.18,
         "checking": 10,
         "usbank_ef": 3658.71,
-        "usbank_cc": 300
+        "usbank_cc": 300,
+        "target_cc": 70
       },
       "notes": ""
     }
