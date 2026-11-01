@@ -361,8 +361,8 @@
     {
       "id": "pofk155",
       "name": "Target Card",
-      "debit": 0,
-      "credit": 70.47
+      "debit": 70.47,
+      "credit": 0
     },
     {
       "id": "dcekprb",
