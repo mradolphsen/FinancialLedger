@@ -264,13 +264,17 @@
     "2026-10": {
       "balances": {
         "savings": 2542.78,
-        "checking": 10,
+        "checking": 5.47,
         "usbank_ef": 3499.52,
         "usbank_cc": 510.1,
         "target_cc": 70.47,
         "scheels_cc": 600
       },
       "notes": "New Car (Down payment $8,000)\nCar Insurance (478.80)\nSOCRA Reimbursement ($565.00)\nEye Exam ($134)"
+    },
+    "2026-11": {
+      "balances": {},
+      "notes": ""
     }
   },
   "recurring": [
