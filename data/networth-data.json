@@ -365,6 +365,12 @@
       "credit": 0
     },
     {
+      "id": "xfksgqm",
+      "name": "State Farm",
+      "debit": 32.26,
+      "credit": 0
+    },
+    {
       "id": "dcekprb",
       "name": "RPU",
       "debit": 55.25,
@@ -381,12 +387,6 @@
       "name": "Paycheck",
       "debit": 0,
       "credit": 1430.76
-    },
-    {
-      "id": "xfksgqm",
-      "name": "State Farm",
-      "debit": 32.26,
-      "credit": 0
     },
     {
       "id": "0hnq7u5",
