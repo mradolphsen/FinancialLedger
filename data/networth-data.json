@@ -407,16 +407,16 @@
       "credit": 0
     },
     {
-      "id": "qemj6lr",
-      "name": "Scheels",
-      "debit": 740.55,
-      "credit": 0
-    },
-    {
       "id": "t2zr4zc",
       "name": "Paycheck",
       "debit": 0,
       "credit": 2130.76
+    },
+    {
+      "id": "qemj6lr",
+      "name": "Scheels",
+      "debit": 740.55,
+      "credit": 0
     }
   ],
   "compCalculator": {
