@@ -405,6 +405,14 @@ table.data textarea{
   padding:5px 6px; font-family:inherit; font-size:13.5px; background:var(--bg); color:var(--ink); resize:vertical;
 }
 
+/* LOCKED NOTES: read-only, auto-height so every line is visible; font is shrunk by JS for long notes */
+table.data textarea.notes-locked{
+  background:transparent; border-color:transparent; color:var(--ink-muted);
+  cursor:default; resize:none; overflow:hidden; min-height:34px;
+  line-height:1.25; font-size:13px; font-weight:500;
+}
+table.data textarea.notes-locked:focus{ outline:none; }
+
 td.total-cell{ font-weight:700; color:var(--navy); padding-left:10px; padding-right:10px; min-width:110px; }
 td.diff-cell{ padding-left:10px; padding-right:10px; min-width:110px; }
 td.diff-cell.pos{ color:var(--success); font-weight:700; }
@@ -1791,23 +1799,49 @@ function renderMonthTable(){
         ${creditAccts.map((a,i) => `<td class="${i === creditAccts.length-1 ? "col-end" : ""}"><input type="text" data-kind="balance" data-month="${key}" data-account="${a.id}" value="${entry.balances[a.id] !== undefined && entry.balances[a.id] !== "" ? fmtMoney(entry.balances[a.id]) : ""}" ${readonlyAttr}></td>`).join("")}
         <td class="total-cell col-end">${fmtMoney(totals.net)}</td>
         <td class="diff-cell col-end ${diffClass}">${diffText}</td>
-        <td class="notes-col"><textarea data-kind="notes" data-month="${key}" placeholder="Notes…">${escapeHtml(entry.notes || "")}</textarea></td>
+        <td class="notes-col"><textarea data-kind="notes" data-month="${key}" class="${editable ? "" : "notes-locked"}" placeholder="${editable ? "Notes…" : ""}" ${readonlyAttr}>${escapeHtml(entry.notes || "")}</textarea></td>
       </tr>`;
     });
 
     html += `</tbody></table></div></div></div>`;
   });
 
-  html += `<p class="hint" style="margin-top:12px;">Net worth = total bank account balances minus total credit card balances for that month. Balances lock automatically after 4 days into the new month. Notes remain permanently editable.</p>`;
+  html += `<p class="hint" style="margin-top:12px;">Net worth = total bank account balances minus total credit card balances for that month. Balances and notes lock automatically after 4 days into the new month.</p>`;
 
   container.innerHTML = html;
+  fitLockedNotes(container);
 
   // Bind toggle clicks to year accordions
   container.querySelectorAll(".year-head").forEach(head => {
     head.addEventListener("click", () => {
       head.parentElement.classList.toggle("open");
+      // Notes inside a collapsed year can't be measured, so size them once it opens
+      fitLockedNotes(head.parentElement);
     });
   });
+}
+
+/* Size locked (read-only) notes so every line is visible without making rows much taller:
+   shrink the font step by step for longer notes; only grow the row once the smallest size is reached. */
+function fitLockedNotes(root){
+  const sizes = [13, 12, 11, 10];   // px, largest to smallest
+  const maxHeight = 62;             // target max textarea height before shrinking further
+  (root || document).querySelectorAll("textarea.notes-locked").forEach(ta => {
+    if(!ta.offsetParent) return;    // hidden (collapsed year) - measured later when opened
+    for(let i = 0; i < sizes.length; i++){
+      ta.style.fontSize = sizes[i] + "px";
+      ta.style.height = "auto";
+      if(ta.scrollHeight <= maxHeight) break;
+    }
+    ta.style.height = (ta.scrollHeight + (ta.offsetHeight - ta.clientHeight)) + "px";
+  });
+}
+window.addEventListener("resize", () => {
+  clearTimeout(window.__fitNotesT);
+  window.__fitNotesT = setTimeout(() => fitLockedNotes(document), 150);
+});
+if(document.fonts && document.fonts.ready){
+  document.fonts.ready.then(() => fitLockedNotes(document));
 }
 
 function updateMonthRowCalculations(mKey){
@@ -3657,6 +3691,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } else if(kind === "notes"){
       const key = target.getAttribute("data-month");
+      if(!isMonthEditable(key)) return;
       state.months[key].notes = target.value;
       markDirty();
     } else if(kind === "recur-name"){
