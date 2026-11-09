@@ -417,6 +417,12 @@
       "name": "Scheels",
       "debit": 741.52,
       "credit": 0
+    },
+    {
+      "id": "cke6m3x",
+      "name": "",
+      "debit": 0,
+      "credit": 0
     }
   ],
   "compCalculator": {
