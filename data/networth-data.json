@@ -401,6 +401,12 @@
       "credit": 0
     },
     {
+      "id": "qemj6lr",
+      "name": "Scheels",
+      "debit": 741.52,
+      "credit": 0
+    },
+    {
       "id": "aljai1g",
       "name": "College Ave",
       "debit": 355,
@@ -417,12 +423,6 @@
       "name": "Paycheck",
       "debit": 0,
       "credit": 2130.76
-    },
-    {
-      "id": "qemj6lr",
-      "name": "Scheels",
-      "debit": 741.52,
-      "credit": 0
     }
   ],
   "compCalculator": {
